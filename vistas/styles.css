@@ -1,0 +1,158 @@
+/* Vistas Rooftop Bar — Master Stylesheet & Design System
+   24th Floor, NH Collection Colombo
+   Palettes: Midnight Charcoal (#151714), Deep Forest Green (#1E2620), Sunset Amber (#D9A45B), Warm Ivory (#F5F0E7)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --color-charcoal: #151714;
+  --color-charcoal-deep: #0D0E0C;
+  --color-charcoal-light: #1E211D;
+  --color-forest: #202A23;
+  --color-forest-dark: #141C16;
+  --color-amber: #D9A45B;
+  --color-amber-light: #F3CA8A;
+  --color-amber-dark: #9F6E29;
+  --color-ivory: #F5F0E7;
+  --color-muted: #B9B5AC;
+  --color-border: rgba(217, 164, 91, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--color-charcoal);
+  color: var(--color-ivory);
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Typography Helpers */
+.font-serif-luxury {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-editorial {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* Text Gradients */
+.text-amber-gradient {
+  background: linear-gradient(135deg, #FFF0D4 0%, #D9A45B 50%, #9F6E29 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-sunset-gradient {
+  background: linear-gradient(135deg, #FFD180 0%, #FF9E43 50%, #E26D5C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Background Gradients */
+.bg-amber-gradient {
+  background: linear-gradient(135deg, #F3CA8A 0%, #D9A45B 50%, #9F6E29 100%);
+}
+
+.bg-sunset-gradient {
+  background: linear-gradient(135deg, #FF9E43 0%, #E26D5C 50%, #818CF8 100%);
+}
+
+.bg-radial-glow {
+  background: radial-gradient(circle at 50% 20%, rgba(217, 164, 91, 0.12) 0%, transparent 70%);
+}
+
+/* Glassmorphism Cards */
+.vistas-card {
+  background: rgba(30, 33, 29, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(217, 164, 91, 0.18);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vistas-card:hover {
+  border-color: rgba(217, 164, 91, 0.45);
+  box-shadow: 0 12px 36px -10px rgba(0, 0, 0, 0.6), 0 0 20px -5px rgba(217, 164, 91, 0.15);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111310;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #343B33;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D9A45B;
+}
+
+/* Sky Explorer Visual Fade Transition */
+.sky-layer {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.8s ease-in-out, transform 1.2s ease-out;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sky-layer.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1.02);
+}
+
+/* Table Card Selection Glow */
+.seat-selected {
+  border-color: #D9A45B !important;
+  background: rgba(217, 164, 91, 0.08) !important;
+  box-shadow: 0 0 24px -4px rgba(217, 164, 91, 0.25) !important;
+}
+
+/* Modal animation */
+.modal-enter {
+  animation: modalFadeIn 0.25s ease-out forwards;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Live Sunset Badge Pulse */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+  }
+}
+
+.pulse-sunset {
+  animation: pulseGlow 2.5s infinite;
+}

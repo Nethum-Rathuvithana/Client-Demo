@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vistas Rooftop Bar | 24th Floor, NH Collection Colombo — Meet Colombo at Golden Hour</title>
+  <meta name="description" content="Vistas Rooftop Bar at NH Collection Colombo. 24 floors above the Indian Ocean. Unobstructed panoramic sunsets, artisanal Ceylon mixology, tapas, and vibrant nightlife.">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Vistas Rooftop Bar | NH Collection Colombo">
+  <meta property="og:description" content="Meet Colombo at Golden Hour. Unobstructed 360° panoramic ocean and city views, transparent minimum-spend sunset tables, and live entertainment.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            charcoal: {
+              DEFAULT: '#151714',
+              deep: '#0D0E0C',
+              light: '#1E211D'
+            },
+            forest: {
+              DEFAULT: '#202A23',
+              dark: '#141C16'
+            },
+            amber: {
+              DEFAULT: '#D9A45B',
+              light: '#F3CA8A',
+              dark: '#9F6E29'
+            },
+            ivory: '#F5F0E7',
+            muted: '#B9B5AC'
+          },
+          fontFamily: {
+            'serif-luxury': ['Playfair Display', 'serif'],
+            'editorial': ['Cormorant Garamond', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="bg-charcoal text-ivory antialiased selection:bg-amber-500 selection:text-stone-950">
+
+  <!-- ================= TOP NOTIFICATION / PORTAL BAR ================= -->
+  <aside aria-label="Portal Navigation" class="bg-charcoal-deep border-b border-amber-500/15 py-2 px-4 text-xs">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <a href="../index.html" class="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-medium transition-colors">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>Client Demo Showcase Hub</span>
+        </a>
+        <span class="text-stone-600">|</span>
+        <span class="text-stone-400 hidden sm:inline flex items-center gap-1">
+          <i data-lucide="map-pin" class="w-3 h-3 text-amber-500"></i>
+          24th Floor, NH Collection Colombo (formerly Mövenpick)
+        </span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 text-stone-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Today's Golden Hour: <strong class="text-amber-300">5:45 PM – 6:45 PM</strong></span>
+        </div>
+        <button id="open-admin-btn" class="px-2.5 py-1 rounded bg-stone-800 hover:bg-stone-700 text-stone-300 text-[11px] font-medium border border-amber-500/20 flex items-center gap-1.5 transition-colors">
+          <i data-lucide="shield-check" class="w-3 h-3 text-amber-400"></i>
+          <span>Staff Portal</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MASTER NAVBAR ================= -->
+  <header class="sticky top-0 z-40 bg-charcoal/90 backdrop-blur-xl border-b border-amber-500/15 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <!-- Logo / Identity -->
+      <a href="#hero" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-stone-950 font-bold font-serif-luxury text-xl shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+          V
+        </div>
+        <div>
+          <span class="text-xl font-bold font-serif-luxury tracking-wider text-white block leading-none">
+            VISTAS
+          </span>
+          <span class="text-[10px] tracking-widest uppercase text-amber-400/90 font-medium">
+            Rooftop Bar • 24th Floor
+          </span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden lg:flex items-center gap-7 text-xs font-medium tracking-wide uppercase text-stone-300">
+        <a href="#sky-explorer" class="hover:text-amber-400 transition-colors">360° Sky View</a>
+        <a href="#seating-engine" class="hover:text-amber-400 transition-colors">Table Booking</a>
+        <a href="#menu" class="hover:text-amber-400 transition-colors">Mixology & Tapas</a>
+        <a href="#events" class="hover:text-amber-400 transition-colors">What's On</a>
+        <a href="#private-events" class="hover:text-amber-400 transition-colors">Private Buyouts</a>
+        <a href="#location" class="hover:text-amber-400 transition-colors">Location & Hours</a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <!-- Floating Tasting Tray Button -->
+        <button id="open-tray-btn" class="relative p-2.5 rounded-xl bg-stone-900 border border-amber-500/30 text-stone-200 hover:text-amber-300 hover:bg-stone-800 transition-all flex items-center gap-1.5" title="View Tasting Tray & Spend Estimator">
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-amber-400"></i>
+          <span class="hidden sm:inline text-xs font-semibold">Tasting Tray</span>
+          <span id="tray-count-badge" class="hidden absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-amber-500 text-stone-950 text-[10px] font-bold flex items-center justify-center">
+            0
+          </span>
+        </button>
+
+        <!-- Primary CTA: Reserve Table -->
+        <a href="#seating-engine" class="px-5 py-2.5 rounded-xl bg-amber-gradient text-stone-950 font-bold text-xs uppercase tracking-wider hover:opacity-95 shadow-lg shadow-amber-500/25 transition-all flex items-center gap-2">
+          <i data-lucide="calendar" class="w-4 h-4"></i>
+          <span>Reserve Table</span>
+        </a>
+
+        <!-- Mobile menu toggle -->
+        <button id="mobile-menu-btn" class="lg:hidden p-2.5 rounded-xl bg-stone-900 text-stone-300 hover:text-white" aria-label="Toggle navigation menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Menu -->
+    <div id="mobile-menu" class="hidden lg:hidden bg-charcoal-deep border-b border-amber-500/20 px-6 py-5 space-y-4 text-sm font-medium">
+      <a href="#sky-explorer" class="block text-stone-300 hover:text-amber-400">360° Sky Explorer</a>
+      <a href="#seating-engine" class="block text-stone-300 hover:text-amber-400">Sunset Table Reservations</a>
+      <a href="#menu" class="block text-stone-300 hover:text-amber-400">Ceylon Mixology & Tapas Menu</a>
+      <a href="#events" class="block text-stone-300 hover:text-amber-400">What's On & DJ Sundowners</a>
+      <a href="#private-events" class="block text-stone-300 hover:text-amber-400">Private Functions & Corporate Buyouts</a>
+      <a href="#location" class="block text-stone-300 hover:text-amber-400">Location, Dress Code & Valet</a>
+      <div class="pt-3 border-t border-stone-800 flex items-center justify-between">
+        <a href="../index.html" class="text-xs text-amber-400 flex items-center gap-1">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Return to Master Hub
+        </a>
+        <button onclick="document.getElementById('open-admin-btn').click()" class="text-xs text-stone-400">
+          Staff Admin Portal
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= HERO SECTION ================= -->
+  <section id="hero" class="relative min-h-[92vh] flex items-center justify-center overflow-hidden bg-radial-glow px-4 sm:px-6 lg:px-8 py-20">
+    <!-- Ambient Background Image with Dark Vignette -->
+    <div class="absolute inset-0 z-0">
+      <img src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=2000&q=85" 
+           alt="Vistas Rooftop Golden Hour" 
+           class="w-full h-full object-cover opacity-35 scale-105 transition-transform duration-1000">
+      <div class="absolute inset-0 bg-gradient-to-t from-charcoal via-charcoal/80 to-charcoal/60"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-transparent to-charcoal/90"></div>
+    </div>
+
+    <div class="relative z-10 max-w-5xl mx-auto text-center space-y-8">
+      <!-- Venue Badges -->
+      <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-stone-900/90 border border-amber-500/30 backdrop-blur-md text-xs">
+        <span class="w-2 h-2 rounded-full bg-amber-400 pulse-sunset"></span>
+        <span class="text-amber-300 font-semibold tracking-wide uppercase text-[11px]">24th Floor • NH Collection Colombo</span>
+        <span class="text-stone-500">•</span>
+        <span class="text-stone-300 text-[11px]">290° to 360° Panoramic Sunset Deck</span>
+      </div>
+
+      <!-- Headline -->
+      <h1 class="text-4xl sm:text-6xl md:text-7xl font-bold font-serif-luxury text-white tracking-tight leading-[1.1]">
+        Meet Colombo at <br class="hidden sm:inline">
+        <span class="text-sunset-gradient">Golden Hour.</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="max-w-2xl mx-auto text-base sm:text-lg text-stone-300/90 font-light leading-relaxed">
+        Twenty-four floors suspended between the Indian Ocean and the city skyline. Experience transparent perimeter sunset table reservations, artisanal Ceylon mixology, and eclectic evening DJ sessions.
+      </p>
+
+      <!-- Live Sunset & Deck Metrics Pill Bar -->
+      <div class="max-w-2xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-2xl bg-stone-900/80 border border-amber-500/20 backdrop-blur-lg text-xs">
+        <div class="p-2 border-r border-stone-800">
+          <span class="text-stone-400 block text-[10px] uppercase tracking-wider">Sunset Time</span>
+          <span class="font-bold text-amber-300">5:58 PM</span>
+        </div>
+        <div class="p-2 sm:border-r border-stone-800">
+          <span class="text-stone-400 block text-[10px] uppercase tracking-wider">Rooftop Temp</span>
+          <span class="font-bold text-white">28°C • Breezy</span>
+        </div>
+        <div class="p-2 border-r border-stone-800">
+          <span class="text-stone-400 block text-[10px] uppercase tracking-wider">Perimeter Tables</span>
+          <span class="font-bold text-emerald-400">4 Remaining Today</span>
+        </div>
+        <div class="p-2">
+          <span class="text-stone-400 block text-[10px] uppercase tracking-wider">Atmosphere</span>
+          <span class="font-bold text-amber-400">Melodic House</span>
+        </div>
+      </div>
+
+      <!-- Call to Action Buttons -->
+      <div class="pt-2 flex flex-wrap items-center justify-center gap-4">
+        <a href="#seating-engine" class="px-8 py-4 rounded-xl bg-amber-gradient text-stone-950 font-bold text-sm uppercase tracking-wider hover:shadow-xl hover:shadow-amber-500/30 transition-all flex items-center gap-2.5">
+          <i data-lucide="sunset" class="w-5 h-5"></i>
+          <span>Book Sunset Table</span>
+        </a>
+        <a href="#sky-explorer" class="px-8 py-4 rounded-xl bg-stone-900/90 text-stone-200 hover:text-white border border-amber-500/30 hover:bg-stone-800/90 font-semibold text-sm transition-all flex items-center gap-2">
+          <i data-lucide="eye" class="w-5 h-5 text-amber-400"></i>
+          <span>Explore 360° Sky View</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SIGNATURE FEATURE 1: 360° SKY EXPLORER ================= -->
+  <section id="sky-explorer" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-amber-500/15 bg-charcoal-deep relative">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+        <span class="text-xs uppercase tracking-widest font-bold text-amber-400">Interactive Skyline Experience</span>
+        <h2 class="text-3xl sm:text-5xl font-bold font-serif-luxury text-white">
+          Witness the Rooftop Transformation
+        </h2>
+        <p class="text-sm text-stone-400 leading-relaxed">
+          Switch through the three moods of Vistas — from the sun-drenched Indian Ocean horizon to the crimson amber sunset and the illuminated neon skyline after dark.
+        </p>
+
+        <!-- Mode Select Buttons -->
+        <div class="inline-flex p-1.5 rounded-2xl bg-stone-900 border border-amber-500/25 gap-2 mt-4">
+          <button class="sky-btn px-5 py-2.5 rounded-xl text-xs font-semibold transition-all" data-mode="day">
+            1. Daylight Ocean
+          </button>
+          <button class="sky-btn px-5 py-2.5 rounded-xl text-xs font-semibold transition-all bg-amber-500 text-stone-950 font-bold" data-mode="golden">
+            2. Golden Hour Sunset
+          </button>
+          <button class="sky-btn px-5 py-2.5 rounded-xl text-xs font-semibold transition-all" data-mode="night">
+            3. Starlight Skyline
+          </button>
+        </div>
+      </div>
+
+      <!-- Sky View Canvas Box -->
+      <div class="relative h-[520px] rounded-3xl overflow-hidden border border-amber-500/25 shadow-2xl">
+        <!-- 3 Layered Backgrounds -->
+        <div class="sky-layer" data-mode="day" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=85');"></div>
+        <div class="sky-layer active" data-mode="golden" style="background-image: url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1920&q=85');"></div>
+        <div class="sky-layer" data-mode="night" style="background-image: url('https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=1920&q=85');"></div>
+
+        <!-- Overlays -->
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/30 to-transparent"></div>
+        <div class="absolute inset-0 bg-stone-950/20"></div>
+
+        <!-- Real-time Horizon Badge -->
+        <div class="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-950/80 backdrop-blur-md border border-amber-500/30 text-xs">
+          <i data-lucide="compass" class="w-4 h-4 text-amber-400"></i>
+          <span class="font-semibold text-white">24th Floor Vantage: <strong class="text-amber-300">Facing West-Northwest (290°)</strong></span>
+        </div>
+
+        <!-- Interactive Floating Info Panel -->
+        <div class="absolute bottom-6 left-6 right-6 max-w-2xl p-6 rounded-2xl bg-stone-950/85 backdrop-blur-xl border border-amber-500/30">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-3">
+            <div>
+              <span id="sky-time" class="text-xs uppercase font-bold tracking-wider text-amber-400 block">5:45 PM – 6:45 PM</span>
+              <h3 id="sky-title" class="text-2xl font-bold font-serif-luxury text-white">The Iconic Colombo Golden Hour</h3>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-stone-300">
+              <span class="flex items-center gap-1"><i data-lucide="thermometer" class="w-3.5 h-3.5 text-amber-400"></i> <span id="sky-temp">27°C</span></span>
+              <span class="flex items-center gap-1"><i data-lucide="wind" class="w-3.5 h-3.5 text-amber-400"></i> <span id="sky-breeze">Sunset Glow</span></span>
+            </div>
+          </div>
+          
+          <p id="sky-desc" class="text-xs text-stone-300/90 leading-relaxed mb-4">
+            Colombo's most dramatic vantage point. As the sun sinks directly into the ocean in shades of molten amber, crimson, and violet, our mixologists pour signature sundowner cocktails to melodic deep house beats.
+          </p>
+
+          <div class="flex items-center justify-between pt-3 border-t border-stone-800">
+            <span class="text-[11px] text-amber-200/90 italic flex items-center gap-1.5">
+              <i data-lucide="music" class="w-3.5 h-3.5 text-amber-400"></i>
+              Soundtrack: <span id="sky-vibe">Legendary Amber Sunset & Sundowner Beats</span>
+            </span>
+            <a href="#seating-engine" class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-400 text-stone-950 hover:bg-amber-300 transition-colors">
+              Lock in Sunset Seating
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= NATURE SANCTUARY STORY ================= -->
+  <section class="py-20 px-4 sm:px-6 lg:px-8 bg-charcoal border-t border-amber-500/15">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div class="space-y-6">
+        <span class="text-xs uppercase tracking-widest font-bold text-amber-400">Relaunched Architecture & Design</span>
+        <h2 class="text-3xl sm:text-5xl font-bold font-serif-luxury text-white leading-tight">
+          Nature-Infused Luxury <br>
+          <span class="text-amber-gradient">24 Floors High.</span>
+        </h2>
+        <p class="text-sm text-stone-300/90 leading-relaxed">
+          Following its landmark redesign under NH Collection Colombo, Vistas has shed corporate uniformity to embrace a bespoke Sri Lankan nature identity. Hand-carved Ceylon teak panels, hand-painted endemic wildlife murals, and warm ambient canopy lights create an intimate botanical sanctuary in the clouds.
+        </p>
+
+        <div class="grid grid-cols-2 gap-4 pt-2">
+          <div class="p-4 rounded-xl bg-forest/40 border border-amber-500/20">
+            <h4 class="font-serif-luxury text-base font-bold text-amber-300 mb-1">Handcrafted Murals</h4>
+            <p class="text-xs text-stone-400">Local wildlife & flora painted by Sri Lankan artisans adorn the interior dining booths.</p>
+          </div>
+          <div class="p-4 rounded-xl bg-forest/40 border border-amber-500/20">
+            <h4 class="font-serif-luxury text-base font-bold text-amber-300 mb-1">Unobstructed Perimeter</h4>
+            <p class="text-xs text-stone-400">Frameless tempered glass balustrades grant a completely open view across the ocean.</p>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center gap-4 text-xs text-stone-400">
+          <span class="flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i> NH Collection Standards</span>
+          <span class="flex items-center gap-1.5"><i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i> International Mixology</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <img src="https://images.unsplash.com/photo-1543007630-9710e4a00a20?auto=format&fit=crop&w=800&q=80" 
+             alt="Vistas Interior Wood Lounge" 
+             class="w-full h-64 object-cover rounded-2xl border border-amber-500/20 hover:scale-[1.02] transition-transform">
+        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80" 
+             alt="Vistas Perimeter Sunset" 
+             class="w-full h-64 object-cover rounded-2xl border border-amber-500/20 hover:scale-[1.02] transition-transform mt-6">
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SIGNATURE FEATURE 2: TABLE RESERVATION ENGINE ================= -->
+  <section id="seating-engine" class="py-24 px-4 sm:px-6 lg:px-8 bg-charcoal-deep border-t border-amber-500/15">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+        <span class="text-xs uppercase tracking-widest font-bold text-amber-400">Direct Reservation Engine</span>
+        <h2 class="text-3xl sm:text-5xl font-bold font-serif-luxury text-white">
+          Reserve Your Table with Spend Transparency
+        </h2>
+        <p class="text-sm text-stone-400 leading-relaxed">
+          No surprise minimum-spend policies upon arrival. View verified capacities, exact minimum-spend cover credits (100% redeemable on food & beverage), and lock in your perimeter sunset seats instantly.
+        </p>
+      </div>
+
+      <!-- Step 1: Seating Category Explorer Cards -->
+      <div class="mb-14">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-bold font-serif-luxury text-white flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-amber-400 text-stone-950 text-xs font-bold flex items-center justify-center">1</span>
+            Select Seating Category
+          </h3>
+          <span class="text-xs text-amber-300 font-medium">Click a card to choose your table style</span>
+        </div>
+
+        <div id="seating-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Dynamically populated from data.js -->
+        </div>
+      </div>
+
+      <!-- Step 2: Interactive Reservation Form & Breakdown Container -->
+      <div class="vistas-card p-6 sm:p-10 rounded-3xl border-amber-500/30">
+        <div class="flex items-center justify-between mb-8 pb-4 border-b border-stone-800">
+          <h3 class="text-xl font-bold font-serif-luxury text-white flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-amber-400 text-stone-950 text-xs font-bold flex items-center justify-center">2</span>
+            Complete Booking Details & Confirm
+          </h3>
+          <span class="text-xs text-stone-400">Instant confirmation via WhatsApp & Email</span>
+        </div>
+
+        <form id="reservation-form" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <!-- Left Column: Inputs -->
+          <div class="lg:col-span-7 space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-stone-300 mb-1.5" for="booking-date">Date</label>
+                <input type="date" id="booking-date" required
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-stone-300 mb-1.5" for="booking-time">Time Slot</label>
+                <select id="booking-time" required
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+                  <option value="17:00">5:00 PM (Early Daylight)</option>
+                  <option value="17:30" selected>5:30 PM (Golden Hour Prime ⭐)</option>
+                  <option value="18:00">6:00 PM (Sunset Peak ⭐)</option>
+                  <option value="18:30">6:30 PM (Dusk / Twilight ⭐)</option>
+                  <option value="19:30">7:30 PM (Evening Skyline)</option>
+                  <option value="20:30">8:30 PM (Night DJ Session)</option>
+                  <option value="21:30">9:30 PM (Late Night Cocktails)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-stone-300 mb-1.5" for="booking-guests">Party Size</label>
+                <select id="booking-guests" required
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+                  <option value="2">2 Guests</option>
+                  <option value="3">3 Guests</option>
+                  <option value="4" selected>4 Guests</option>
+                  <option value="5">5 Guests</option>
+                  <option value="6">6 Guests</option>
+                  <option value="8">8 Guests (Large Lounge)</option>
+                  <option value="10">10+ Guests (Cabana)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Table Category Dropdown (mirror of cards) -->
+            <div>
+              <label class="block text-xs font-semibold text-stone-300 mb-1.5" for="booking-category">Seating Category</label>
+              <select id="booking-category" required
+                      class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-amber-300 text-xs font-semibold focus:border-amber-400 focus:outline-none">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-stone-300 mb-1.5" for="booking-name">Full Name</label>
+                <input type="text" id="booking-name" required placeholder="e.g. Kasun Fernando"
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-stone-300 mb-1.5" for="booking-phone">Phone / WhatsApp</label>
+                <input type="tel" id="booking-phone" required placeholder="+94 77 123 4567"
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-stone-300 mb-1.5" for="booking-email">Email Address</label>
+                <input type="email" id="booking-email" required placeholder="name@example.com"
+                       class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-stone-300 mb-1.5" for="booking-occasion">Occasion</label>
+                <select id="booking-occasion"
+                        class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+                  <option value="Date Night / Sunset Catchup">Date Night / Sunset Catchup</option>
+                  <option value="Birthday Celebration">Birthday Celebration</option>
+                  <option value="Anniversary">Anniversary</option>
+                  <option value="Business / Client Dinner">Business / Client Dinner</option>
+                  <option value="Tourist First Visit">Tourist First Visit</option>
+                  <option value="Casual Drinks">Casual Drinks</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-stone-300 mb-1.5" for="booking-requests">Special Requests / Dietary Requirements</label>
+              <textarea id="booking-requests" rows="2" placeholder="e.g., anniversary candle, seafood allergies, high-angle sunset photography table"
+                        class="w-full px-3.5 py-2 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none"></textarea>
+            </div>
+          </div>
+
+          <!-- Right Column: Summary Card & Spend Breakdown -->
+          <div class="lg:col-span-5 flex flex-col justify-between p-6 rounded-2xl bg-stone-900/90 border border-amber-500/25">
+            <div>
+              <h4 class="font-serif-luxury font-bold text-base text-white mb-4 pb-2 border-b border-stone-800 flex items-center justify-between">
+                <span>Reservation Summary</span>
+                <span class="text-xs font-sans text-amber-400 font-semibold">100% Bill Credit</span>
+              </h4>
+
+              <!-- Dynamic Summary Box -->
+              <div id="booking-summary-box">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <div class="pt-6 space-y-3">
+              <button type="submit" id="submit-booking-btn"
+                      class="w-full py-4 rounded-xl bg-amber-gradient text-stone-950 font-bold text-xs uppercase tracking-wider hover:opacity-95 shadow-xl shadow-amber-500/25 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>Confirm Reservation & Guarantee Table</span>
+              </button>
+              <p class="text-[11px] text-center text-stone-400">
+                Guaranteed holding policy: Table held for 20 minutes past booking time.
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SIGNATURE FEATURE 3: FOOD & MIXOLOGY MENU ================= -->
+  <section id="menu" class="py-24 px-4 sm:px-6 lg:px-8 bg-charcoal border-t border-amber-500/15">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div class="space-y-3 max-w-2xl">
+          <span class="text-xs uppercase tracking-widest font-bold text-amber-400">Culinary & Mixology Showcase</span>
+          <h2 class="text-3xl sm:text-5xl font-bold font-serif-luxury text-white">
+            Ceylon Cocktails & Rooftop Tapas
+          </h2>
+          <p class="text-sm text-stone-400 leading-relaxed">
+            Crafted with indigenous Sri Lankan botanicals, aged arracks, fresh Mirigama passionfruit, and premium international spirits paired with fire-grilled coastal bites.
+          </p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="w-full md:w-72 relative">
+          <input type="text" id="menu-search" placeholder="Search cocktails, black pork, prawns..."
+                 class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+          <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute left-3 top-3"></i>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div id="menu-category-tabs" class="flex items-center gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Menu Items Grid -->
+      <div id="menu-items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically from data.js -->
+      </div>
+
+      <!-- Minimum Spend Tip Card -->
+      <div class="mt-12 p-6 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-400 text-stone-950 flex items-center justify-center shrink-0">
+            <i data-lucide="calculator" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="font-serif-luxury font-bold text-white text-base">Planning Your Table Cover Spend?</h4>
+            <p class="text-xs text-stone-300">Use our Tasting Tray Estimator to curate your round of cocktails & platters before you arrive.</p>
+          </div>
+        </div>
+        <button onclick="document.getElementById('open-tray-btn').click()" 
+                class="px-5 py-2.5 rounded-xl bg-amber-400 text-stone-950 font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all shrink-0">
+          Open Spend Calculator
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SIGNATURE FEATURE 4: WHAT'S ON & EVENTS HUB ================= -->
+  <section id="events" class="py-24 px-4 sm:px-6 lg:px-8 bg-charcoal-deep border-t border-amber-500/15">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+        <span class="text-xs uppercase tracking-widest font-bold text-amber-400">Weekly Sundowner Schedule</span>
+        <h2 class="text-3xl sm:text-5xl font-bold font-serif-luxury text-white">
+          What's On at 24 Floors
+        </h2>
+        <p class="text-sm text-stone-400 leading-relaxed">
+          From soulful sunset acoustic sessions to high-energy Saturday starlight rhythms with Colombo's leading electronic artists.
+        </p>
+      </div>
+
+      <!-- Events Grid -->
+      <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Rendered dynamically from data.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SIGNATURE FEATURE 5: PRIVATE BUYOUTS & FUNCTIONS ================= -->
+  <section id="private-events" class="py-24 px-4 sm:px-6 lg:px-8 bg-charcoal border-t border-amber-500/15">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+        <span class="text-xs uppercase tracking-widest font-bold text-amber-400">Corporate & Milestone Celebrations</span>
+        <h2 class="text-3xl sm:text-5xl font-bold font-serif-luxury text-white">
+          Host Your Event at the Top of Colombo
+        </h2>
+        <p class="text-sm text-stone-400 leading-relaxed">
+          Elevate your corporate cocktail networking, international product launch, or private anniversary with 360-degree panoramic ocean views and bespoke five-star catering.
+        </p>
+      </div>
+
+      <!-- Private Event Packages Grid -->
+      <div id="private-events-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Corporate Inquiry Form -->
+      <div class="vistas-card p-8 rounded-3xl border-amber-500/25 max-w-4xl mx-auto">
+        <h3 class="text-xl font-bold font-serif-luxury text-white mb-2 text-center">
+          Request a Custom Event Proposal
+        </h3>
+        <p class="text-xs text-stone-400 text-center mb-6">
+          Our specialized events manager will respond with customized banqueting menus and date availability within 4 business hours.
+        </p>
+
+        <form id="corporate-inquiry-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-stone-300 mb-1" for="corp-name">Organizer Name</label>
+            <input type="text" id="corp-name" required placeholder="e.g. Ruwan Silva"
+                   class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-300 mb-1" for="corp-org">Company / Organization</label>
+            <input type="text" id="corp-org" placeholder="e.g. Standard Chartered / Private"
+                   class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-300 mb-1" for="corp-phone">Direct Phone / WhatsApp</label>
+            <input type="tel" id="corp-phone" required placeholder="+94 77 000 0000"
+                   class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-300 mb-1" for="corp-type">Event Type</label>
+            <select id="corp-type"
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+              <option value="Corporate Sundowner / Cocktail Mixer">Corporate Sundowner / Cocktail Mixer</option>
+              <option value="Brand Launch / Press Event">Brand Launch / Press Event</option>
+              <option value="Full Venue Buyout">Full Venue Buyout (200+ guests)</option>
+              <option value="Birthday / Anniversary Soiree">Birthday / Anniversary Soiree</option>
+              <option value="Wedding After-Party">Wedding After-Party</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-300 mb-1" for="corp-guests">Estimated Guests</label>
+            <select id="corp-guests"
+                    class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+              <option value="20-40 Guests">20 - 40 Guests</option>
+              <option value="40-70 Guests">40 - 70 Guests (Terrace Buyout)</option>
+              <option value="70-120 Guests">70 - 120 Guests</option>
+              <option value="150-220 Guests">150 - 220 Guests (Full Buyout)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-300 mb-1" for="corp-date">Target Date</label>
+            <input type="date" id="corp-date" required
+                   class="w-full px-3.5 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-stone-300 mb-1" for="corp-notes">Additional Audio-Visual or Catering Requirements</label>
+            <textarea id="corp-notes" rows="2" placeholder="e.g. Need DJ booth connection, cordless mic for speeches, wine pairing canapés"
+                      class="w-full px-3.5 py-2 rounded-xl bg-stone-900 border border-stone-700 text-white text-xs focus:border-amber-400 focus:outline-none"></textarea>
+          </div>
+          <div class="sm:col-span-2 pt-2">
+            <button type="submit"
+                    class="w-full py-3.5 rounded-xl bg-amber-gradient text-stone-950 font-bold text-xs uppercase tracking-wider hover:opacity-95 shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-2">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>Submit Event Inquiry via WhatsApp</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SIGNATURE FEATURE 6: LOCATION, DRESS CODE & VALET ================= -->
+  <section id="location" class="py-24 px-4 sm:px-6 lg:px-8 bg-charcoal-deep border-t border-amber-500/15">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <!-- Venue Info & Guidelines -->
+      <div class="space-y-6">
+        <span class="text-xs uppercase tracking-widest font-bold text-amber-400">Visitor Guide & Policies</span>
+        <h2 class="text-3xl sm:text-5xl font-bold font-serif-luxury text-white">
+          Finding Your Way to the 24th Floor
+        </h2>
+
+        <div class="space-y-4 text-xs">
+          <div class="p-4 rounded-2xl bg-stone-900 border border-stone-800 flex items-start gap-3">
+            <i data-lucide="map-pin" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
+            <div>
+              <h4 class="font-bold text-white text-sm mb-1">Hotel Location</h4>
+              <p class="text-stone-300">24 Srimath Anagarika Dharmapala Mawatha, Colombo 03, Sri Lanka.</p>
+              <p class="text-stone-500 mt-1">Directly accessible via Kollupitiya main artery, 3 minutes from Galle Face Green.</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-stone-900 border border-stone-800 flex items-start gap-3">
+            <i data-lucide="clock" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
+            <div>
+              <h4 class="font-bold text-white text-sm mb-1">Operating Hours</h4>
+              <p class="text-stone-300">Daily: 5:00 PM – 1:00 AM (Fridays & Saturdays extended to 2:00 AM)</p>
+              <p class="text-amber-300 font-medium mt-1">Golden Hour Sunset window: 5:30 PM – 6:45 PM</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-stone-900 border border-stone-800 flex items-start gap-3">
+            <i data-lucide="shirt" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
+            <div>
+              <h4 class="font-bold text-white text-sm mb-1">Dress Code & Entry Policy</h4>
+              <p class="text-stone-300">Smart Casual / Sunset Chic. No athletic singlets, beachwear, or slippers permitted after 6:00 PM.</p>
+              <p class="text-stone-500 mt-1">Age policy: 21+ after 7:00 PM (families welcome during early 5:00 - 7:00 PM sunset dining).</p>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-stone-900 border border-stone-800 flex items-start gap-3">
+            <i data-lucide="car" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
+            <div>
+              <h4 class="font-bold text-white text-sm mb-1">Complimentary Valet Parking</h4>
+              <p class="text-stone-300">Valet drop-off at the NH Collection Colombo main lobby portico. Inform valet team you are visiting Vistas Rooftop.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 pt-2">
+          <a href="https://maps.google.com/?q=NH+Collection+Colombo" target="_blank"
+             class="px-5 py-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-200 border border-amber-500/30 text-xs font-semibold flex items-center gap-2 transition-all">
+            <i data-lucide="navigation" class="w-4 h-4 text-amber-400"></i>
+            <span>Open in Google Maps</span>
+          </a>
+          <a href="tel:+94117450450"
+             class="px-5 py-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-stone-200 border border-stone-700 text-xs font-semibold flex items-center gap-2 transition-all">
+            <i data-lucide="phone" class="w-4 h-4 text-amber-400"></i>
+            <span>Call Concierge (+94 117 450 450)</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- FAQ Accordion -->
+      <div class="space-y-3">
+        <h3 class="text-xl font-bold font-serif-luxury text-white mb-4">
+          Frequently Asked Questions
+        </h3>
+
+        <details class="vistas-card p-4 rounded-2xl border-stone-800 group">
+          <summary class="font-bold text-sm text-stone-200 cursor-pointer list-none flex items-center justify-between">
+            <span>What happens if it rains during my outdoor sunset booking?</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-amber-400 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-xs text-stone-400 leading-relaxed mt-3 pt-3 border-t border-stone-800">
+            Vistas features both an expansive open-air timber terrace and a weatherproof covered canopy lounge with panoramic floor-to-ceiling glass. If sudden tropical showers occur, perimeter guests are automatically transitioned to our sheltered nature booths without losing their view or deposit credit.
+          </p>
+        </details>
+
+        <details class="vistas-card p-4 rounded-2xl border-stone-800 group">
+          <summary class="font-bold text-sm text-stone-200 cursor-pointer list-none flex items-center justify-between">
+            <span>Is the table minimum spend deductible from food and drinks?</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-amber-400 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-xs text-stone-400 leading-relaxed mt-3 pt-3 border-t border-stone-800">
+            Yes, 100%. The minimum spend is NOT an entry fee. Every rupee of your table minimum spend is credited toward your orders of signature cocktails, wine, champagne, tapas, or dinner platters.
+          </p>
+        </details>
+
+        <details class="vistas-card p-4 rounded-2xl border-stone-800 group">
+          <summary class="font-bold text-sm text-stone-200 cursor-pointer list-none flex items-center justify-between">
+            <span>Do you accept walk-ins without reservations?</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-amber-400 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-xs text-stone-400 leading-relaxed mt-3 pt-3 border-t border-stone-800">
+            Yes! Walk-in guests are welcome on a first-come, first-served basis at our central marble bar and cocktail standing tables (zero minimum spend on weekdays). However, front-row perimeter oceanfront couches routinely book out 24 to 48 hours in advance for sunset.
+          </p>
+        </details>
+
+        <details class="vistas-card p-4 rounded-2xl border-stone-800 group">
+          <summary class="font-bold text-sm text-stone-200 cursor-pointer list-none flex items-center justify-between">
+            <span>Are there non-alcoholic options on Poya and religious holidays?</span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-amber-400 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-xs text-stone-400 leading-relaxed mt-3 pt-3 border-t border-stone-800">
+            On statutory full-moon Poya holidays when alcohol sales are prohibited in Sri Lanka, Vistas hosts our acclaimed "Full Moon Poya Skyline Soirée" featuring award-winning artisanal zero-proof botanicals, fresh king coconut coolers, and oceanfront grilled seafood platters.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TASTING TRAY & SPEND ESTIMATOR MODAL ================= -->
+  <div id="order-tray-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-950/80 backdrop-blur-md p-4">
+    <div class="vistas-card w-full max-w-lg rounded-3xl p-6 sm:p-8 modal-enter border-amber-500/40 relative">
+      <div class="flex items-center justify-between pb-4 border-b border-stone-800 mb-4">
+        <div>
+          <h3 class="font-serif-luxury font-bold text-xl text-white">Tasting Tray & Spend Estimator</h3>
+          <p class="text-[11px] text-amber-300">Compare your planned order against table minimum-spends</p>
+        </div>
+        <button class="close-tray-modal p-2 rounded-xl bg-stone-900 text-stone-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Item container -->
+      <div id="tray-items-container" class="space-y-2.5 max-h-72 overflow-y-auto pr-1 mb-6">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Calculation breakdown -->
+      <div class="p-4 rounded-xl bg-stone-900 border border-stone-800 text-xs space-y-2 mb-6">
+        <div class="flex justify-between text-stone-400">
+          <span>Items Subtotal:</span>
+          <span id="tray-subtotal" class="font-medium text-white">LKR 0</span>
+        </div>
+        <div class="flex justify-between text-stone-400">
+          <span>10% Service Charge:</span>
+          <span id="tray-service" class="font-medium text-white">LKR 0</span>
+        </div>
+        <div class="flex justify-between text-stone-300 font-bold text-sm pt-2 border-t border-stone-800">
+          <span>Estimated Total:</span>
+          <span id="tray-total" class="font-serif-luxury text-amber-400 text-base">LKR 0</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="#seating-engine" onclick="document.querySelector('.close-tray-modal').click()"
+           class="flex-1 py-3 rounded-xl bg-amber-gradient text-stone-950 font-bold text-xs uppercase tracking-wider text-center shadow-lg hover:opacity-95 transition-all">
+          Apply to Table Reservation
+        </a>
+        <button class="close-tray-modal px-4 py-3 rounded-xl bg-stone-800 text-stone-300 text-xs font-semibold hover:bg-stone-700">
+          Add More Items
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= BOOKING SUCCESS MODAL ================= -->
+  <div id="booking-success-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-950/85 backdrop-blur-md p-4">
+    <div class="vistas-card w-full max-w-md rounded-3xl p-6 sm:p-8 modal-enter border-amber-500/50 text-center relative">
+      <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 mx-auto mb-4 flex items-center justify-center shadow-lg shadow-emerald-500/10">
+        <i data-lucide="check-circle" class="w-8 h-8"></i>
+      </div>
+
+      <h3 class="font-serif-luxury text-2xl font-bold text-white mb-1">
+        Reservation Confirmed!
+      </h3>
+      <p class="text-xs text-stone-300 mb-6">
+        Your table at Vistas Rooftop Bar has been placed on hold with our concierge desk.
+      </p>
+
+      <!-- Details container -->
+      <div id="success-booking-details">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="space-y-2.5">
+        <a id="success-wa-btn" href="#" target="_blank"
+           class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <span>Open WhatsApp Booking Pass</span>
+        </a>
+        <button class="close-success-modal w-full py-2.5 rounded-xl bg-stone-800 text-stone-300 text-xs font-semibold hover:bg-stone-700 transition-all">
+          Done & Return to Site
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= STAFF / ADMIN MANAGEMENT PORTAL MODAL ================= -->
+  <div id="admin-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-950/90 backdrop-blur-md p-4">
+    <div class="vistas-card w-full max-w-5xl rounded-3xl p-6 sm:p-8 modal-enter border-amber-500/40 relative max-h-[92vh] flex flex-col justify-between">
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-stone-800 mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-400 text-stone-950 flex items-center justify-center font-bold">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-serif-luxury font-bold text-xl text-white">Vistas Floor Operations & Reservations</h3>
+            <span class="text-[11px] text-amber-300">Staff & Concierge Management Portal (24th Floor)</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="export-csv-btn" class="px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-semibold flex items-center gap-1.5 border border-stone-700">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>Export CSV</span>
+          </button>
+          <button class="close-admin-modal p-2 rounded-xl bg-stone-900 text-stone-400 hover:text-white">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        <div class="p-3.5 rounded-xl bg-stone-900 border border-stone-800">
+          <span class="text-stone-400 text-[10px] uppercase font-bold tracking-wider">Total Bookings</span>
+          <span id="admin-total-count" class="font-bold text-lg text-white font-serif-luxury block mt-0.5">0</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-stone-900 border border-stone-800">
+          <span class="text-stone-400 text-[10px] uppercase font-bold tracking-wider">Expected Today</span>
+          <span id="admin-today-count" class="font-bold text-lg text-amber-300 font-serif-luxury block mt-0.5">18</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-stone-900 border border-stone-800">
+          <span class="text-stone-400 text-[10px] uppercase font-bold tracking-wider">Pre-Allocated Deposits</span>
+          <span id="admin-revenue-est" class="font-bold text-lg text-emerald-400 font-serif-luxury block mt-0.5">LKR 43,000</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-stone-900 border border-stone-800">
+          <span class="text-stone-400 text-[10px] uppercase font-bold tracking-wider">Sunset Capacity</span>
+          <span class="font-bold text-lg text-amber-400 font-serif-luxury block mt-0.5">85% Occupied</span>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex items-center justify-between gap-3 mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-stone-400 font-medium">Filter by Status:</span>
+          <select id="admin-filter-status" class="px-2.5 py-1 rounded bg-stone-900 border border-stone-700 text-xs text-white">
+            <option value="all">All Bookings</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Pending Review">Pending Review</option>
+          </select>
+        </div>
+        <span class="text-[11px] text-stone-500">Live synchronization with client reservation engine</span>
+      </div>
+
+      <!-- Table Container -->
+      <div class="flex-1 overflow-y-auto border border-stone-800 rounded-xl mb-4 max-h-72">
+        <table class="w-full text-left border-collapse">
+          <thead class="bg-stone-900/90 text-stone-400 uppercase text-[10px] tracking-wider border-b border-stone-800 sticky top-0 backdrop-blur-sm">
+            <tr>
+              <th class="py-2.5 px-3">Ref ID</th>
+              <th class="py-2.5 px-3">Guest</th>
+              <th class="py-2.5 px-3">Date / Time</th>
+              <th class="py-2.5 px-3">Table Area</th>
+              <th class="py-2.5 px-3">Deposit</th>
+              <th class="py-2.5 px-3">Status</th>
+              <th class="py-2.5 px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-bookings-tbody">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="pt-3 border-t border-stone-800 flex items-center justify-between text-xs text-stone-400">
+        <span>Demonstration Staff Dashboard for client evaluation.</span>
+        <button class="close-admin-modal px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200">
+          Close Portal
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MASTER FOOTER ================= -->
+  <footer class="bg-charcoal-deep border-t border-amber-500/20 py-16 px-4 sm:px-6 lg:px-8 text-xs text-stone-400">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+      <!-- Col 1: Identity -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-gradient flex items-center justify-center text-stone-950 font-bold font-serif-luxury text-lg">
+            V
+          </div>
+          <div>
+            <span class="text-base font-bold font-serif-luxury text-white block">VISTAS ROOFTOP BAR</span>
+            <span class="text-[10px] tracking-widest uppercase text-amber-400">24th Floor, NH Collection Colombo</span>
+          </div>
+        </div>
+        <p class="text-xs text-stone-400/80 leading-relaxed">
+          Colombo's premier rooftop destination for panoramic golden-hour sunsets, artisanal Ceylon mixology, and eclectic night entertainment.
+        </p>
+      </div>
+
+      <!-- Col 2: Fast Navigation -->
+      <div>
+        <h4 class="font-serif-luxury font-bold text-white text-sm mb-3">Explore Venue</h4>
+        <ul class="space-y-2">
+          <li><a href="#sky-explorer" class="hover:text-amber-400 transition-colors">360° Sky Explorer</a></li>
+          <li><a href="#seating-engine" class="hover:text-amber-400 transition-colors">Sunset Table Booking</a></li>
+          <li><a href="#menu" class="hover:text-amber-400 transition-colors">Food & Mixology Menu</a></li>
+          <li><a href="#events" class="hover:text-amber-400 transition-colors">Weekly Events & DJs</a></li>
+          <li><a href="#private-events" class="hover:text-amber-400 transition-colors">Corporate Buyouts</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Direct Contact -->
+      <div>
+        <h4 class="font-serif-luxury font-bold text-white text-sm mb-3">Direct Contact</h4>
+        <ul class="space-y-2.5">
+          <li class="flex items-center gap-2">
+            <i data-lucide="phone" class="w-3.5 h-3.5 text-amber-400"></i>
+            <a href="tel:+94117450450" class="hover:text-white">+94 117 450 450 (Hotel Desk)</a>
+          </li>
+          <li class="flex items-center gap-2">
+            <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <a href="https://wa.me/94702434288" target="_blank" class="hover:text-white">+94 70 243 4288 (Direct WhatsApp)</a>
+          </li>
+          <li class="flex items-center gap-2">
+            <i data-lucide="mail" class="w-3.5 h-3.5 text-amber-400"></i>
+            <a href="mailto:vistas.colombo@nh-hotels.com" class="hover:text-white">vistas.colombo@nh-hotels.com</a>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i>
+            <span>24 Srimath Anagarika Dharmapala Mw, Colombo 03</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Col 4: Client Demo Portal Info -->
+      <div>
+        <h4 class="font-serif-luxury font-bold text-white text-sm mb-3">Client Showcase</h4>
+        <p class="text-xs text-stone-400/80 leading-relaxed mb-4">
+          Independent digital experience prototype designed to demonstrate direct revenue capture and sunset table booking conversion.
+        </p>
+        <div class="flex flex-col gap-2">
+          <a href="../index.html" class="px-4 py-2.5 rounded-xl bg-stone-900 border border-amber-500/30 text-amber-300 hover:bg-stone-800 text-xs font-semibold flex items-center justify-center gap-2 transition-all">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span>Master Showcase Hub</span>
+          </a>
+          <button id="open-admin-footer-btn" class="px-4 py-2 rounded-xl bg-stone-800 text-stone-300 hover:text-white text-xs flex items-center justify-center gap-1.5 transition-colors">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Open Staff Admin Portal</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto pt-8 border-t border-stone-800/80 flex flex-wrap items-center justify-between gap-4 text-[11px] text-stone-500">
+      <p>© 2026 Vistas Rooftop Bar at NH Collection Colombo. All rights reserved.</p>
+      <div class="flex items-center gap-6">
+        <span>Compliant with NH Collection Brand Standards</span>
+        <span>Smart Casual Dress Code Enforced</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
