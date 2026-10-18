@@ -1,0 +1,176 @@
+/* AQUARIA — Living Botanical Aquatics Design Tokens & Underwater Engine
+   Palettes: Deep Ocean Teal (#051316, #091E23), Aquatic Green (#10453B), Shimmer Cyan (#22D3EE), Ivory (#F8FAFC)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --color-abyss: #051316;
+  --color-deep-teal: #091E23;
+  --color-mid-teal: #0E2A31;
+  --color-surface-teal: #133A43;
+  --color-aquatic-green: #10453B;
+  --color-emerald-light: #34D399;
+  --color-cyan: #22D3EE;
+  --color-cyan-glow: rgba(34, 211, 238, 0.35);
+  --color-sand: #D9A45B;
+  --color-ivory: #F8FAFC;
+  --color-muted: #94A3B8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--color-abyss);
+  color: var(--color-ivory);
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.font-cinzel {
+  font-family: 'Cinzel', serif;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Water Caustics Animation Layer */
+.caustic-overlay {
+  background: radial-gradient(circle at 50% 0%, rgba(34, 211, 238, 0.12) 0%, transparent 75%),
+              linear-gradient(135deg, rgba(6, 182, 212, 0.05) 0%, transparent 50%, rgba(16, 185, 129, 0.05) 100%);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes waterRipples {
+  0% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.25;
+  }
+  50% {
+    transform: scale(1.08) translate(-10px, 15px);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.25;
+  }
+}
+
+.animate-caustics {
+  animation: waterRipples 8s ease-in-out infinite alternate;
+}
+
+/* Glassmorphism Cards */
+.aqua-card {
+  background: rgba(13, 42, 48, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(34, 211, 238, 0.16);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.aqua-card:hover {
+  border-color: rgba(34, 211, 238, 0.4);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7), 0 0 24px -6px rgba(34, 211, 238, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Text Gradients */
+.text-cyan-gradient {
+  background: linear-gradient(135deg, #E0F2FE 0%, #38BDF8 50%, #06B6D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-emerald-gradient {
+  background: linear-gradient(135deg, #DCFCE7 0%, #34D399 50%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Underwater floating interactive card */
+.fish-tooltip-card {
+  position: absolute;
+  z-index: 30;
+  pointer-events: auto;
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #051316;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #133A43;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #22D3EE;
+}
+
+/* Modal Animations */
+.modal-enter {
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Plant Swaying Keyframes */
+@keyframes swaySoft {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(2.5deg); }
+  100% { transform: rotate(-1.5deg); }
+}
+
+@keyframes swayVallisneria {
+  0% { transform: rotate(0deg) skewX(0deg); }
+  35% { transform: rotate(5deg) skewX(3deg); }
+  75% { transform: rotate(-3deg) skewX(-2deg); }
+  100% { transform: rotate(0deg) skewX(0deg); }
+}
+
+.plant-sway-slow {
+  animation: swaySoft 7s ease-in-out infinite alternate;
+  transform-origin: bottom center;
+}
+
+.plant-sway-vallisneria {
+  animation: swayVallisneria 5.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
