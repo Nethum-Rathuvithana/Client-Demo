@@ -44,7 +44,7 @@
   <div class="tank-frame-vignette"></div>
 
   <!-- Green Screen Video Source (Hidden, sampled by canvas chroma-key engine) -->
-  <video id="source-tetra-video" src="neon_tetra_greenscreen.mp4" loop muted playsinline autoplay crossorigin="anonymous" class="hidden"></video>
+  <video id="source-tetra-video" src="neon_tetra_forward_1080p.mp4" loop muted playsinline autoplay crossorigin="anonymous" class="hidden"></video>
 
   <!-- Offscreen Chroma-Key Extraction Canvas (Hidden in DOM, used for rendering) -->
   <canvas id="keyed-fish-canvas" class="hidden"></canvas>
@@ -146,8 +146,33 @@
           <span id="video-status-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">60 FPS Keying</span>
         </div>
         <p class="text-[10px] text-stone-400 leading-relaxed">
-          Source: <strong class="text-stone-300">Neon_tetra_swimming_in_loop.mp4</strong>. Background is keyed out in real-time with green despill to render the actual video fish across the full screen.
+          Source: <strong class="text-cyan-300 font-mono text-[10px]">Neon_tetra_swimming_forward_1080p.mp4</strong> (Ultra-Detailed). Background is keyed out in real-time with green despill to render the actual video fish across the full screen.
         </p>
+      </div>
+
+      
+      <!-- Video Source Switcher -->
+      <div class="space-y-1.5 p-3 rounded-2xl bg-stone-900/90 border border-cyan-500/30">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-stone-300 font-bold uppercase text-[10px] tracking-wider">Video Source Model:</span>
+          <span class="text-[9px] text-cyan-400 font-mono">1080p High-Bitrate</span>
+        </div>
+        <div class="grid grid-cols-1 gap-1.5 text-xs">
+          <button id="btn-source-forward" class="video-source-btn px-3 py-2 rounded-xl border border-cyan-500/40 bg-cyan-500/20 text-cyan-200 font-semibold transition-all hover:bg-cyan-500/30 text-left flex items-center justify-between" data-src="neon_tetra_forward_1080p.mp4">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <span>Detailed Forward Swim (New)</span>
+            </span>
+            <span class="text-[9px] font-mono text-cyan-300 bg-cyan-950/80 px-1.5 py-0.5 rounded">3.9 MB</span>
+          </button>
+          <button id="btn-source-loop" class="video-source-btn px-3 py-2 rounded-xl border border-stone-800 bg-stone-900/80 text-stone-300 font-semibold transition-all hover:bg-stone-800 text-left flex items-center justify-between" data-src="neon_tetra_greenscreen.mp4">
+            <span class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-stone-500"></span>
+              <span>Side In-Place Loop</span>
+            </span>
+            <span class="text-[9px] font-mono text-stone-400 bg-stone-950 px-1.5 py-0.5 rounded">1.7 MB</span>
+          </button>
+        </div>
       </div>
 
       <!-- Scenery Staging Pipeline -->

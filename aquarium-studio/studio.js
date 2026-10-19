@@ -587,4 +587,38 @@ document.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) window.lucide.createIcons();
     });
   }
+
+  // Video Source Switcher Logic
+  const videoSourceBtns = document.querySelectorAll('.video-source-btn');
+  const pipVideo = document.getElementById('pip-video');
+
+  videoSourceBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const src = btn.dataset.src;
+      if (!src) return;
+
+      // Update video source
+      video.src = src;
+      video.load();
+      video.play().catch(() => {});
+
+      if (pipVideo) {
+        pipVideo.src = src;
+        pipVideo.load();
+        pipVideo.play().catch(() => {});
+      }
+
+      // Update button styling
+      videoSourceBtns.forEach(b => {
+        if (b === btn) {
+          b.classList.add('bg-cyan-500/20', 'border-cyan-500/40', 'text-cyan-200');
+          b.classList.remove('bg-stone-900/80', 'border-stone-800', 'text-stone-300');
+        } else {
+          b.classList.remove('bg-cyan-500/20', 'border-cyan-500/40', 'text-cyan-200');
+          b.classList.add('bg-stone-900/80', 'border-stone-800', 'text-stone-300');
+        }
+      });
+    });
+  });
+
 });
