@@ -454,6 +454,22 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.shadowBlur = 12 * this.depthScale;
       ctx.shadowOffsetY = 6 * this.depthScale;
 
+      // When hovered: render luminous individual silhouette outline hugging EACH fish (No circle!)
+      if (this.isHovered) {
+        ctx.save();
+        ctx.filter = 'drop-shadow(1.5px 0px 0.5px #00f5ff) drop-shadow(-1.5px 0px 0.5px #00f5ff) drop-shadow(0px 1.5px 0.5px #00f5ff) drop-shadow(0px -1.5px 0.5px #00f5ff) drop-shadow(0px 0px 3.5px rgba(0, 245, 255, 0.9))';
+        if (cropBox.sw > 20 && cropBox.sh > 10) {
+          ctx.drawImage(
+            keyedCanvas,
+            cropBox.sx, cropBox.sy, cropBox.sw, cropBox.sh,
+            -drawW / 2, -drawH / 2, drawW, drawH
+          );
+        } else {
+          ctx.drawImage(keyedCanvas, 0, 0, keyWidth, keyHeight, -drawW / 2, -drawH / 2, drawW, drawH);
+        }
+        ctx.restore();
+      }
+
       // Render the extracted photorealistic video frame with living fluorescent vibrancy
       ctx.save();
       const vib = config.colorVibrancy || 1.45;
@@ -472,19 +488,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       ctx.restore(); // Restore filter
       ctx.restore(); // Restore shadow
-
-      // Completely removed artificial oval shape behind fish - clean natural water
-
-      // Hover Reticle indicator if targeted
-      if (this.isHovered) {
-        ctx.strokeStyle = 'rgba(0, 229, 255, 0.85)';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.arc(0, 0, drawW * 0.58, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
 
       ctx.restore();
     }
