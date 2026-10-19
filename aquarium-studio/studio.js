@@ -61,7 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const config = {
     baseWidth: 240, // realistic swarm element width in px
     speedMultiplier: 1.0,
-    directionMode: 'reverse', // 'reverse' = completely backwards XY path, 'forward' = normal
+    directionMode: 'forward',
+    baseVideoFacing: 'left', // 'left' = raw video tetras face left, 'right' = raw video tetras face right // 'reverse' = completely backwards XY path, 'forward' = normal
     chromaThreshold: 35,
     chromaSoftness: 18,
     hoverRadius: 120
@@ -240,7 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // =========================================================================
   // =========================================================================
-  // --- SWARM ELEMENT CONTROLLER (Bidirectional XY Path with 2.5D Turnaround) ---
+  // =========================================================================
+  // --- SWARM ELEMENT CONTROLLER (Head-First Forward Swimming Engine) ---
   // =========================================================================
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -252,13 +254,13 @@ document.addEventListener('DOMContentLoaded', () => {
     normY: 0.40,
     currentStage: waypoints[0].stage,
 
-    // 2.5D Simulated Turnaround Kinematics
-    facing: 1, // +1 = Eastbound, -1 = Westbound
+    // Motion & Orientation State (Head-First Forward)
+    motionDir: 1, // +1 = moving East (right), -1 = moving West (left)
     scaleX: 1.0,
     scaleY: 1.0,
     depthScale: 1.0,
     pitchRad: 0.0,
-    turnStateLabel: 'Cruising Eastward →',
+    turnStateLabel: 'Swimming Forward Eastbound →',
 
     // Hover Deceleration State
     isHovered: false,
@@ -283,14 +285,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const targetHover = this.isHovered ? 0.15 : 1.0;
       this.hoverFactor += (targetHover - this.hoverFactor) * 0.1;
 
-      // 2. Advance journey timeline (Forward or Completely Backwards)
+      // 2. Advance journey timeline
       const speedFactor = prefersReducedMotion ? 0.6 : 1.0;
       const advanceSec = dt * config.speedMultiplier * this.hoverFactor * speedFactor;
       this.timelineSec = (this.timelineSec + advanceSec) % totalDuration;
 
-      // Determine path coordinate time based on directionMode ('reverse' or 'forward')
-      const isReverse = config.directionMode === 'reverse';
-      const pathTime = isReverse ? 
+      // Determine path coordinate time based on directionMode
+      const isReversePath = config.directionMode === 'reverse';
+      const pathTime = isReversePath ? 
         ((totalDuration - (this.timelineSec % totalDuration)) % totalDuration) : 
         (this.timelineSec % totalDuration);
 
@@ -299,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.normX = pathPoint.normX;
       this.normY = pathPoint.normY;
       
-      const dirSuffix = isReverse ? ' [Reversed ◀]' : '';
+      const dirSuffix = isReversePath ? ' [Reverse Path]' : '';
       this.currentStage = pathPoint.stage + dirSuffix;
 
       // Map normalized coordinates to usable screen dimensions
@@ -311,91 +313,114 @@ document.addEventListener('DOMContentLoaded', () => {
       this.x = paddingX + this.normX * usableW;
       this.y = paddingY + this.normY * usableH;
 
-      // 4. Compute 2.5D Simulated Turnaround (0.8 - 1.2s window, never zero width)
-      const t = pathTime;
-      const minPositiveWidth = 0.22; // Small positive minimum width (never flat-sheet zero!)
+      // 4. Sample immediate trajectory velocity to determine physical travel direction
+      const dtSample = 0.08;
+      const nextSampleTime = isReversePath ? 
+        ((totalDuration - ((this.timelineSec + dtSample) % totalDuration)) % totalDuration) : 
+        ((this.timelineSec + dtSample) % totalDuration);
+      
+      const nextPt = evaluateJourneyPath(nextSampleTime);
+      const vx = (nextPt.normX - this.normX) / dtSample;
+      const vy = (nextPt.normY - this.normY) / dtSample;
 
-      if (!isReverse) {
-        // FORWARD MODE:
+      // 5. Compute 2.5D Head-First Simulated Turnaround
+      // IMPORTANT: In the raw video, the tetras naturally face LEFT.
+      // Therefore:
+      // - To face EAST (swimming right): video must be horizontally mirrored (baseMultiplier = -1)
+      // - To face WEST (swimming left): video is in natural unmirrored orientation (baseMultiplier = +1)
+      // If config.baseVideoFacing is manually set to 'right', this inverts automatically.
+      const videoInversion = config.baseVideoFacing === 'left' ? -1 : 1;
+      const minPositiveWidth = 0.22; // Small positive minimum width (never flat zero!)
+      const t = pathTime;
+
+      if (!isReversePath) {
+        // FORWARD JOURNEY MODE:
+        // Turn 1 (24.0s - 25.0s): Transitioning from Eastbound to Westbound
         if (t >= 24.0 && t <= 25.0) {
           const p = (t - 24.0) / 1.0;
           const comp = 1.0 - (1.0 - minPositiveWidth) * Math.sin(p * Math.PI);
           this.scaleY = 1.0 + 0.05 * Math.sin(p * Math.PI);
           if (p < 0.5) {
-            this.scaleX = comp;
+            // Still heading East, compressing into depth
+            this.scaleX = videoInversion * comp;
             this.turnStateLabel = `2.5D Turn: Banking into depth (${(comp * 100).toFixed(0)}% W)`;
           } else {
-            this.scaleX = -comp;
+            // Now heading West, expanding out facing West (head points West!)
+            this.scaleX = -videoInversion * comp;
             this.turnStateLabel = `2.5D Turn: Angling Westward (${(comp * 100).toFixed(0)}% W)`;
           }
-          this.facing = -1;
-        } else if (t > 25.0 && t < 54.5) {
-          this.scaleX = -1.0;
+          this.motionDir = -1;
+        } 
+        // Westbound cruise (25.0s -> 54.5s): Head points West (swimming forward!)
+        else if (t > 25.0 && t < 54.5) {
+          this.scaleX = -videoInversion * 1.0;
           this.scaleY = 1.0;
-          this.facing = -1;
-          this.turnStateLabel = 'Cruising Westward ←';
-        } else if (t >= 54.5 && t <= 55.5) {
+          this.motionDir = -1;
+          this.turnStateLabel = 'Swimming Forward Westbound ←';
+        } 
+        // Turn 2 (54.5s - 55.5s): Transitioning from Westbound back to Eastbound
+        else if (t >= 54.5 && t <= 55.5) {
           const p = (t - 54.5) / 1.0;
           const comp = 1.0 - (1.0 - minPositiveWidth) * Math.sin(p * Math.PI);
           this.scaleY = 1.0 + 0.05 * Math.sin(p * Math.PI);
           if (p < 0.5) {
-            this.scaleX = -comp;
+            // Still heading West, compressing
+            this.scaleX = -videoInversion * comp;
             this.turnStateLabel = `2.5D Turn: Banking into depth (${(comp * 100).toFixed(0)}% W)`;
           } else {
-            this.scaleX = comp;
+            // Now heading East, expanding out facing East (head points East!)
+            this.scaleX = videoInversion * comp;
             this.turnStateLabel = `2.5D Turn: Angling Eastward (${(comp * 100).toFixed(0)}% W)`;
           }
-          this.facing = 1;
-        } else {
-          this.scaleX = 1.0;
+          this.motionDir = 1;
+        } 
+        // Eastbound cruise (55.5s -> 24.0s): Head points East (swimming forward!)
+        else {
+          this.scaleX = videoInversion * 1.0;
           this.scaleY = 1.0;
-          this.facing = 1;
-          this.turnStateLabel = 'Cruising Eastward →';
+          this.motionDir = 1;
+          this.turnStateLabel = 'Swimming Forward Eastbound →';
         }
       } else {
-        // REVERSE / BACKWARDS MODE:
-        // As timelineSec advances, pathTime runs 58 -> 0
-        // Lower tank (54.5 -> 25.0) is moving Left to Right (Eastbound).
-        // Upper tank (24.0 -> 0.0) is moving Right to Left (Westbound).
-
+        // REVERSE JOURNEY MODE:
         if (t >= 24.0 && t <= 25.0) {
-          const p = (25.0 - t) / 1.0; // 0 to 1 as pathTime decreases
+          const p = (25.0 - t) / 1.0;
           const comp = 1.0 - (1.0 - minPositiveWidth) * Math.sin(p * Math.PI);
           this.scaleY = 1.0 + 0.05 * Math.sin(p * Math.PI);
           if (p < 0.5) {
-            this.scaleX = comp; // Eastbound compressing
+            this.scaleX = videoInversion * comp;
             this.turnStateLabel = `2.5D Turn (Rev): Banking into depth (${(comp * 100).toFixed(0)}% W)`;
           } else {
-            this.scaleX = -comp; // Westbound expanding
+            this.scaleX = -videoInversion * comp;
             this.turnStateLabel = `2.5D Turn (Rev): Angling Westward (${(comp * 100).toFixed(0)}% W)`;
           }
-          this.facing = -1;
+          this.motionDir = -1;
         } else if (t < 24.0) {
-          this.scaleX = -1.0;
+          this.scaleX = -videoInversion * 1.0;
           this.scaleY = 1.0;
-          this.facing = -1;
-          this.turnStateLabel = 'Cruising Westward (Reverse) ←';
+          this.motionDir = -1;
+          this.turnStateLabel = 'Swimming Forward Westbound (Rev) ←';
         } else if (t >= 54.5 && t <= 55.5) {
-          const p = (55.5 - t) / 1.0; // 0 to 1 as pathTime decreases
+          const p = (55.5 - t) / 1.0;
           const comp = 1.0 - (1.0 - minPositiveWidth) * Math.sin(p * Math.PI);
           this.scaleY = 1.0 + 0.05 * Math.sin(p * Math.PI);
           if (p < 0.5) {
-            this.scaleX = -comp;
+            this.scaleX = -videoInversion * comp;
             this.turnStateLabel = `2.5D Turn (Rev): Banking into depth (${(comp * 100).toFixed(0)}% W)`;
           } else {
-            this.scaleX = comp;
+            this.scaleX = videoInversion * comp;
             this.turnStateLabel = `2.5D Turn (Rev): Angling Eastward (${(comp * 100).toFixed(0)}% W)`;
           }
-          this.facing = 1;
+          this.motionDir = 1;
         } else {
-          this.scaleX = 1.0;
+          this.scaleX = videoInversion * 1.0;
           this.scaleY = 1.0;
-          this.facing = 1;
-          this.turnStateLabel = 'Cruising Eastward (Reverse) →';
+          this.motionDir = 1;
+          this.turnStateLabel = 'Swimming Forward Eastbound (Rev) →';
         }
       }
 
-      // 5. Subtle Depth Pass (8-10% scale reduction during upper background pass: 12s - 34s)
+      // 6. Subtle Depth Pass (8-10% scale reduction during upper background pass: 12s - 34s)
       if (t >= 12.0 && t <= 34.0) {
         const depthP = (t - 12.0) / (34.0 - 12.0);
         this.depthScale = 1.0 - 0.10 * Math.sin(depthP * Math.PI);
@@ -403,23 +428,16 @@ document.addEventListener('DOMContentLoaded', () => {
         this.depthScale = 1.0;
       }
 
-      // 6. Subtle Hydrodynamic Pitch (2-3 degrees: 0.035 to 0.05 rad)
+      // 7. Subtle Hydrodynamic Pitch (2-3 degrees: nose down when descending, nose up when climbing)
       if (!prefersReducedMotion) {
-        const dtSample = 0.1;
-        const nextPathTime = isReverse ? 
-          ((totalDuration - ((this.timelineSec + dtSample) % totalDuration)) % totalDuration) : 
-          ((this.timelineSec + dtSample) % totalDuration);
-        
-        const nextPoint = evaluateJourneyPath(nextPathTime);
-        const vyNorm = (nextPoint.normY - this.normY) / dtSample;
         const maxPitch = 2.5 * (Math.PI / 180);
-        const targetPitch = Math.max(-maxPitch, Math.min(maxPitch, vyNorm * 0.7 * this.facing));
+        const targetPitch = Math.max(-maxPitch, Math.min(maxPitch, vy * 0.7 * this.motionDir));
         this.pitchRad += (targetPitch - this.pitchRad) * 0.1;
       } else {
         this.pitchRad = 0;
       }
 
-      // 7. Update HUD Telemetry
+      // 8. Update HUD Telemetry
       if (hudTimeDisplay) {
         hudTimeDisplay.textContent = `${this.timelineSec.toFixed(1)}s / ${totalDuration.toFixed(1)}s`;
       }
@@ -459,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.rotate(this.pitchRad);
       }
 
-      // 2.5D horizontal scale compression + depth scale
+      // 2.5D horizontal scale compression + depth scale (Head-First Forward)
       ctx.scale(this.scaleX * this.depthScale, this.scaleY * this.depthScale);
 
       const drawW = config.baseWidth;
@@ -616,6 +634,16 @@ document.addEventListener('DOMContentLoaded', () => {
       btnDirReverse.classList.remove('bg-stone-900', 'text-stone-300');
       btnDirForward.classList.remove('bg-cyan-500', 'text-stone-950', 'font-bold');
       btnDirForward.classList.add('bg-stone-900', 'text-stone-300');
+    });
+  }
+
+  
+  // Invert Facing Toggle
+  const btnFacingInvert = document.getElementById('btn-facing-invert');
+  if (btnFacingInvert) {
+    btnFacingInvert.addEventListener('click', () => {
+      config.baseVideoFacing = config.baseVideoFacing === 'left' ? 'right' : 'left';
+      btnFacingInvert.classList.toggle('bg-emerald-500/30');
     });
   }
 
