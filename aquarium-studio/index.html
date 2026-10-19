@@ -44,7 +44,7 @@
   <div class="tank-frame-vignette"></div>
 
   <!-- Green Screen Video Source (Hidden, sampled by canvas chroma-key engine) -->
-  <video id="source-tetra-video" src="neon_tetra_forward_1080p.mp4" loop muted playsinline autoplay crossorigin="anonymous" class="hidden"></video>
+  <video id="source-tetra-video" src="neon_tetra_group.mp4" loop muted playsinline autoplay crossorigin="anonymous" class="hidden"></video>
 
   <!-- Offscreen Chroma-Key Extraction Canvas (Hidden in DOM, used for rendering) -->
   <canvas id="keyed-fish-canvas" class="hidden"></canvas>
@@ -106,13 +106,13 @@
   <div class="absolute top-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none text-center hidden md:block">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[11px] font-semibold tracking-widest uppercase mb-1">
       <i data-lucide="video" class="w-3.5 h-3.5"></i>
-      <span>Coordinated Schooling Engine • 8 Neon Tetras</span>
+      <span>Single Cohesive Swarm Element • Photorealistic Video Group</span>
     </div>
     <h1 class="text-xl font-bold font-cinzel text-white drop-shadow-[0_2px_12px_rgba(0,229,255,0.4)]">
-      Neon Tetra Coordinated School (8 Fish)
+      Neon Tetra Living Swarm Element
     </h1>
     <p class="text-[11px] text-stone-400 font-light">
-      Cohesive 8-fish swarm • 75% horizontal panoramic route • Vertical arcs & depth passes
+      Single cohesive video group • 75% horizontal panoramic route • Seamless schooling
     </p>
   </div>
 
@@ -213,10 +213,10 @@
         <!-- Fish Realistic Scale -->
         <div class="space-y-1">
           <div class="flex items-center justify-between text-xs">
-            <span class="text-stone-300">Realistic Fish Scale:</span>
-            <span id="label-fish-scale" class="font-mono text-cyan-300 font-bold">55px (Natural 1.0x)</span>
+            <span class="text-stone-300">Swarm Element Scale:</span>
+            <span id="label-fish-scale" class="font-mono text-cyan-300 font-bold">240px (Natural 1.0x)</span>
           </div>
-          <input type="range" id="slider-fish-scale" min="25" max="130" value="55" class="w-full">
+          <input type="range" id="slider-fish-scale" min="100" max="420" value="240" class="w-full">
           <span class="text-[9px] text-stone-400 block">Dial to natural 2.5–3cm size or zoom to inspect skin scales & fins.</span>
         </div>
 
@@ -227,7 +227,7 @@
               <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
               Coordinated Swarm Status:
             </span>
-            <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-bold font-mono">8 Tetras Locked</span>
+            <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-bold font-mono">1 Cohesive Swarm Unit</span>
           </div>
           <div class="space-y-1 text-[11px] text-stone-300 font-mono">
             <div class="flex justify-between">
@@ -292,10 +292,10 @@
     <div id="video-pip-container" class="hidden mt-3 p-3 rounded-2xl bg-stone-950/95 border border-cyan-500/30 shadow-2xl backdrop-blur-xl">
       <div class="flex items-center justify-between mb-2 text-xs">
         <span class="font-bold text-cyan-300 font-cinzel text-[11px]">Raw Green-Screen Source</span>
-        <span class="text-[9px] text-stone-400 font-mono">1080p Video</span>
+        <span class="text-[9px] text-stone-400 font-mono">Neon_tetras_swimming_in_place.mp4 (6.5 MB)</span>
       </div>
       <div class="rounded-xl overflow-hidden border border-cyan-500/20 relative aspect-video bg-black">
-        <video id="pip-video" src="neon_tetra_greenscreen.mp4" loop muted playsinline autoplay class="w-full h-full object-cover"></video>
+        <video id="pip-video" src="neon_tetra_group.mp4" loop muted playsinline autoplay class="w-full h-full object-cover"></video>
       </div>
       <p class="text-[9px] text-stone-400 mt-2 leading-relaxed">
         This is your raw green-screen video. Notice how the green background is completely removed on the main screen, and the real video fish is now swimming freely everywhere!

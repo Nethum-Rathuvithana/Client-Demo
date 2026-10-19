@@ -1,12 +1,11 @@
 /* =========================================================================
-   AQUARIUM SCENERY STUDIO — COORDINATED 8-FISH SCHOOLING ENGINE
-   - Cohesive imperfect school of 8 Neon Tetras.
-   - Broad horizontal route spanning 65–85% of aquarium width.
-   - Gentle vertical arcs, brief spacing changes, and coordinated banking turns.
-   - Individual lag behind and surge ahead micro-behaviors.
-   - Midground, background, and foreground passes with depth scaling.
-   - Green-screen video extraction with 60FPS chroma-keying.
-   - Hover deceleration by 85% & live inspection card.
+   AQUARIUM SCENERY STUDIO — SINGLE COHESIVE SWARM ELEMENT
+   - Renders the video fish group as ONE unified photorealistic element.
+   - Moves along a broad horizontal route spanning 65–85% of aquarium width.
+   - Gentle vertical arcs and coordinated banking turns.
+   - Depth strata passes: Midground, Background (Deep), and Foreground (Near Viewer).
+   - Real-time green-screen chroma keying with despill.
+   - Hover deceleration by 85% & live inspection telemetry.
 ========================================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -55,12 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Configuration
   const config = {
-    fishCount: 8, // Exactly 8 Neon Tetras as requested
-    baseLength: 52, // realistic Neon Tetra length in px
+    baseWidth: 240, // natural width of the cohesive swarm element in px
     speedMultiplier: 1.0,
     chromaThreshold: 35,
     chromaSoftness: 18,
-    hoverRadius: 55
+    hoverRadius: 130
   };
 
   // Pellets Array
@@ -70,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mouse = {
     x: -1000,
     y: -1000,
-    hoveredFish: null
+    isHoveringSwarm: false
   };
 
   window.addEventListener('mousemove', (e) => {
@@ -81,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('mouseleave', () => {
     mouse.x = -1000;
     mouse.y = -1000;
-    mouse.hoveredFish = null;
+    mouse.isHoveringSwarm = false;
     hoverCard.classList.remove('visible');
   });
 
@@ -91,8 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const keyedCanvas = document.createElement('canvas');
   const keyedCtx = keyedCanvas.getContext('2d', { willReadFrequently: true });
   
-  const keyWidth = 480;
-  const keyHeight = 270;
+  // High-clarity 640x360 processing buffer
+  const keyWidth = 640;
+  const keyHeight = 360;
   keyedCanvas.width = keyWidth;
   keyedCanvas.height = keyHeight;
 
@@ -130,12 +129,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const diff = g - maxOther;
 
       if (diff > threshold) {
-        data[i + 3] = 0; // Transparent green
+        data[i + 3] = 0; // Transparent green background
       } else if (diff > threshold - softness) {
+        // Soft edge feathering
         const alphaRatio = (threshold - diff) / softness;
         data[i + 3] = Math.round(data[i + 3] * alphaRatio);
         data[i + 1] = maxOther;
       } else {
+        // Fish pixel
         const pixelIdx = i / 4;
         const px = pixelIdx % keyWidth;
         const py = Math.floor(pixelIdx / keyWidth);
@@ -145,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (py > maxY) maxY = py;
         foundFish = true;
 
+        // Despill subtle green bounce reflections
         if (g > maxOther * 1.15) {
           data[i + 1] = Math.round(maxOther * 1.05);
         }
@@ -153,8 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     keyedCtx.putImageData(frame, 0, 0);
 
+    // Auto-tighten crop around the fish group
     if (foundFish && maxX > minX && maxY > minY) {
-      const pad = 8;
+      const pad = 10;
       cropBox.sx = Math.max(0, minX - pad);
       cropBox.sy = Math.max(0, minY - pad);
       cropBox.sw = Math.min(keyWidth - cropBox.sx, (maxX - minX) + pad * 2);
@@ -163,54 +166,75 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
-  // --- SCHOOL MASTER CONTROLLER (CENTROID, ROUTE & DEPTH PASSES) ---
+  // --- SINGLE COHESIVE SWARM ELEMENT ---
   // =========================================================================
-  // Navigates a broad horizontal path spanning 75% of the aquarium width
-  // Follows sinusoidal vertical arcs and alternates between depth strata
-  const schoolMaster = {
+  // Travels across 65-85% of aquarium width along gentle vertical arcs
+  // Executes coordinated turns and cycles through depth passes
+  const swarmElement = {
     x: width * 0.25,
     y: height * 0.5,
-    vx: 1.4,
+    vx: 1.45,
     vy: 0,
     heading: 0,
     direction: 1, // 1 = Eastbound (Right), -1 = Westbound (Left)
-    routeProgress: 0, // 0 to 1 along travel cycle
+    routeProgress: 0,
     
     // Depth Pass cycle: 0 = Midground, 1 = Deep Background, 2 = Near Viewer Foreground
     passIndex: 0,
-    currentZ: 1.0, // Scale multiplier based on depth
+    currentZ: 1.0,
     targetZ: 1.0,
     
-    turnState: 'cruising', // 'cruising' or 'banking'
+    turnState: 'cruising',
     turnTimer: 0,
     
-    // Route limits (65–85% width span)
+    // Hover state
+    isHovered: false,
+    hoverFactor: 1.0,
+
     get minX() { return width * 0.12; },
     get maxX() { return width * 0.88; },
 
     update() {
-      // 1. Horizontal traversal
-      const speed = 1.65 * config.speedMultiplier;
+      // 1. Hover check with mouse cursor
+      const dxMouse = mouse.x - this.x;
+      const dyMouse = mouse.y - this.y;
+      const distMouse = Math.hypot(dxMouse, dyMouse);
+      const effectiveRadius = config.hoverRadius * this.currentZ;
+
+      if (distMouse < effectiveRadius) {
+        this.isHovered = true;
+        mouse.isHoveringSwarm = true;
+      } else if (distMouse > effectiveRadius * 1.5) {
+        this.isHovered = false;
+        mouse.isHoveringSwarm = false;
+      }
+
+      // Smooth deceleration on hover (slow down whole swarm by 85%)
+      const targetHover = this.isHovered ? 0.15 : 1.0;
+      this.hoverFactor += (targetHover - this.hoverFactor) * 0.1;
+
+      // 2. Horizontal traversal (65-85% aquarium width)
+      const speed = 1.6 * config.speedMultiplier * this.hoverFactor;
       this.x += this.vx * speed;
 
-      // 2. Vertical sinusoidal arc (gentle undulating wave through water column)
-      this.routeProgress += 0.0035 * config.speedMultiplier;
+      // 3. Vertical sinusoidal arc (swimming gently through water column)
+      this.routeProgress += 0.0035 * config.speedMultiplier * this.hoverFactor;
       const baseMidY = height * 0.48;
       const verticalWave = Math.sin(this.routeProgress * Math.PI * 2) * (height * 0.18);
-      const microSway = Math.cos(this.routeProgress * 6) * 25;
+      const microSway = Math.cos(this.routeProgress * 5) * 22;
       const targetY = baseMidY + verticalWave + microSway;
-      this.y += (targetY - this.y) * 0.04;
+      this.y += (targetY - this.y) * (0.04 * this.hoverFactor);
 
-      // 3. Turnaround Logic at Eastern (Right) & Western (Left) boundaries
+      // 4. Boundary Turnaround
       if (this.direction === 1 && this.x >= this.maxX) {
         this.beginTurn(-1);
       } else if (this.direction === -1 && this.x <= this.minX) {
         this.beginTurn(1);
       }
 
-      // Smooth banking turn execution
+      // Smooth Banking Turn
       if (this.turnState === 'banking') {
-        this.turnTimer += 0.03;
+        this.turnTimer += 0.03 * this.hoverFactor;
         const targetAngle = this.direction === 1 ? 0 : Math.PI;
         let diff = targetAngle - this.heading;
         while (diff < -Math.PI) diff += Math.PI * 2;
@@ -219,19 +243,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (this.turnTimer >= Math.PI) {
           this.turnState = 'cruising';
-          this.vx = this.direction * 1.4;
+          this.vx = this.direction * 1.45;
         }
       } else {
-        // Cruising heading matches horizontal motion + gentle vertical climb/dive
-        const targetAngle = Math.atan2(targetY - this.y, this.direction * 1.4);
+        const targetAngle = Math.atan2(targetY - this.y, this.direction * 1.45);
         let diff = targetAngle - this.heading;
         while (diff < -Math.PI) diff += Math.PI * 2;
         while (diff > Math.PI) diff -= Math.PI * 2;
         this.heading += diff * 0.06;
       }
 
-      // 4. Depth Pass Transition Cycle
-      // Interpolate master Z smoothly
+      // 5. Depth Pass Transition Cycle
       this.currentZ += (this.targetZ - this.currentZ) * 0.015;
 
       // Update HUD telemetry
@@ -250,125 +272,18 @@ document.addEventListener('DOMContentLoaded', () => {
       this.direction = newDir;
       this.turnState = 'banking';
       this.turnTimer = 0;
-      this.vx = newDir * 0.7; // slight deceleration into turn
+      this.vx = newDir * 0.7;
 
-      // Cycle depth pass on turnaround:
-      // Pass 0: Midground (Z=1.0) -> Pass 1: Background (Z=0.78) -> Pass 2: Foreground (Z=1.28)
+      // Cycle depth pass
       this.passIndex = (this.passIndex + 1) % 3;
       if (this.passIndex === 0) {
         this.targetZ = 1.0; // Midground
       } else if (this.passIndex === 1) {
-        this.targetZ = 0.78; // Deep in the tank (smaller, softer)
+        this.targetZ = 0.78; // Deep background (smaller, softer)
       } else {
-        this.targetZ = 1.28; // Near the viewer (larger, crisp, glowing)
+        this.targetZ = 1.28; // Foreground (larger, crisp, vibrant)
       }
-    }
-  };
-
-  // =========================================================================
-  // --- INDIVIDUAL NEON TETRA MEMBER (8-FISH COHESIVE SCHOOL) ---
-  // =========================================================================
-  class SchoolMember {
-    constructor(slotIndex) {
-      this.slotIndex = slotIndex;
-      
-      // Slot-based formation offset within the cohesive school cluster
-      // Radii are kept tight (within 130px) so the school remains cohesive
-      const formationAngle = (slotIndex / config.fishCount) * Math.PI * 2;
-      const formationDist = 28 + (slotIndex % 3) * 22;
-      this.baseOffsetX = Math.cos(formationAngle) * formationDist;
-      this.baseOffsetY = Math.sin(formationAngle) * (formationDist * 0.65);
-
-      this.x = schoolMaster.x + this.baseOffsetX;
-      this.y = schoolMaster.y + this.baseOffsetY;
-      this.vx = schoolMaster.vx;
-      this.vy = 0;
-      this.heading = 0;
-
-      // Individual lag / surge micro-behaviors
-      this.microLagTimer = Math.random() * 200;
-      this.currentLagX = 0;
-      this.targetLagX = 0;
-      this.personalJitterY = (Math.random() - 0.5) * 15;
-
-      // Depth offset (slight depth variation within the school)
-      this.relativeDepth = 0.95 + (slotIndex % 4) * 0.035;
-
-      // Hover deceleration
-      this.isHovered = false;
-      this.hoverFactor = 1.0;
-    }
-
-    update() {
-      // 1. Hover check with mouse cursor
-      const dxMouse = mouse.x - this.x;
-      const dyMouse = mouse.y - this.y;
-      const distMouse = Math.hypot(dxMouse, dyMouse);
-      const effectiveRadius = config.hoverRadius * (schoolMaster.currentZ * this.relativeDepth);
-
-      if (distMouse < effectiveRadius && !mouse.hoveredFish) {
-        this.isHovered = true;
-        mouse.hoveredFish = this;
-      } else if (mouse.hoveredFish === this && distMouse > effectiveRadius * 1.6) {
-        this.isHovered = false;
-        mouse.hoveredFish = null;
-      }
-
-      // Decelerate by 85% on hover
-      const targetHover = this.isHovered ? 0.15 : 1.0;
-      this.hoverFactor += (targetHover - this.hoverFactor) * 0.12;
-
-      // 2. Micro-Behavior: Individual fish lagging behind or surging ahead
-      this.microLagTimer += 0.02;
-      if (Math.sin(this.microLagTimer) > 0.8) {
-        // Brief surge ahead!
-        this.targetLagX = schoolMaster.direction * 35;
-      } else if (Math.sin(this.microLagTimer) < -0.8) {
-        // Brief lag behind!
-        this.targetLagX = -schoolMaster.direction * 42;
-      } else {
-        // Rejoin normal formation
-        this.targetLagX = 0;
-      }
-      this.currentLagX += (this.targetLagX - this.currentLagX) * 0.03;
-
-      // 3. Target Position relative to School Master Centroid
-      const targetPosX = schoolMaster.x + (this.baseOffsetX * schoolMaster.direction) + this.currentLagX;
-      const targetPosY = schoolMaster.y + this.baseOffsetY + this.personalJitterY;
-
-      // Spring-like pull toward school centroid (keeps school tight & cohesive)
-      const pullForce = 0.055;
-      this.vx += (targetPosX - this.x) * pullForce;
-      this.vy += (targetPosY - this.y) * pullForce;
-
-      // Dampening to avoid endless vibration
-      this.vx *= 0.88;
-      this.vy *= 0.88;
-
-      // 4. Separation between members to maintain natural spacing
-      for (const other of school) {
-        if (other === this) continue;
-        const dist = Math.hypot(this.x - other.x, this.y - other.y);
-        const minDist = 26 * schoolMaster.currentZ;
-        if (dist < minDist && dist > 0) {
-          const push = (minDist - dist) * 0.08;
-          this.x += ((this.x - other.x) / dist) * push;
-          this.y += ((this.y - other.y) / dist) * push;
-        }
-      }
-
-      // 5. Update World Path Coordinates (X, Y)
-      this.x += this.vx * this.hoverFactor;
-      this.y += this.vy * this.hoverFactor;
-
-      // 6. Smooth Heading toward motion
-      const currentDirX = schoolMaster.direction;
-      const targetAngle = schoolMaster.heading;
-      let diff = targetAngle - this.heading;
-      while (diff < -Math.PI) diff += Math.PI * 2;
-      while (diff > Math.PI) diff -= Math.PI * 2;
-      this.heading += diff * 0.08;
-    }
+    },
 
     draw() {
       ctx.save();
@@ -377,34 +292,30 @@ document.addEventListener('DOMContentLoaded', () => {
       // Rotate along motion heading
       ctx.rotate(this.heading);
 
-      // Flip vertically when swimming left so fish remains right-side up
+      // Flip vertically when swimming left so the fish stay right-side up
       const swimmingLeft = Math.cos(this.heading) < 0;
       if (swimmingLeft) {
         ctx.scale(1, -1);
       }
 
-      // Combined Depth Factor (School Depth Pass * Individual Depth)
-      const totalDepth = schoolMaster.currentZ * this.relativeDepth;
-      const len = config.baseLength * totalDepth;
+      // Scale based on depth
+      const drawW = config.baseWidth * this.currentZ;
       const aspect = cropBox.sh / (cropBox.sw || 1);
-      const drawW = len;
-      const drawH = len * (aspect > 0.2 && aspect < 1.0 ? aspect : 0.45);
+      const drawH = drawW * (aspect > 0.2 && aspect < 1.0 ? aspect : 0.52);
 
-      // Depth lighting & atmospheric haze
-      // Foreground = crisp, intense; Background = soft, slightly misty
-      const isForeground = totalDepth > 1.15;
-      const isBackground = totalDepth < 0.85;
+      const isForeground = this.currentZ > 1.15;
+      const isBackground = this.currentZ < 0.88;
 
-      const alpha = isBackground ? 0.72 : (isForeground ? 1.0 : 0.88);
+      const alpha = isBackground ? 0.75 : (isForeground ? 1.0 : 0.9);
       ctx.globalAlpha = alpha;
 
-      // Depth shadow
+      // Ambient underwater shadow
       ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-      ctx.shadowBlur = (isForeground ? 18 : 8) * totalDepth;
-      ctx.shadowOffsetY = 8 * totalDepth;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+      ctx.shadowBlur = (isForeground ? 22 : 10) * this.currentZ;
+      ctx.shadowOffsetY = 10 * this.currentZ;
 
-      // Render the Extracted Real Video Fish!
+      // Draw the Extracted Real Video Swarm Element!
       if (cropBox.sw > 20 && cropBox.sh > 10) {
         ctx.drawImage(
           keyedCanvas,
@@ -416,14 +327,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       ctx.restore();
 
-      // Atmospheric Water Glow (Stronger on foreground pass)
+      // Atmospheric Water Glow
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
       ctx.fillStyle = isForeground ? 'rgba(0, 229, 255, 0.22)' : 'rgba(0, 229, 255, 0.1)';
-      ctx.shadowColor = 'rgba(0, 229, 255, 0.7)';
-      ctx.shadowBlur = this.isHovered ? 28 : (isForeground ? 16 : 8);
+      ctx.shadowColor = 'rgba(0, 229, 255, 0.75)';
+      ctx.shadowBlur = this.isHovered ? 30 : (isForeground ? 18 : 8);
       ctx.beginPath();
-      ctx.ellipse(0, 0, drawW * 0.42, drawH * 0.26, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, drawW * 0.44, drawH * 0.35, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
@@ -433,22 +344,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineWidth = 1.5;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
-        ctx.arc(0, 0, drawW * 0.65, 0, Math.PI * 2);
+        ctx.arc(0, 0, drawW * 0.6, 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
       ctx.restore();
     }
-  }
-
-  // =========================================================================
-  // --- INITIALIZE THE 8 FISH MEMBERS ---
-  // =========================================================================
-  const school = [];
-  for (let i = 0; i < config.fishCount; i++) {
-    school.push(new SchoolMember(i));
-  }
+  };
 
   // =========================================================================
   // --- SINKING FOOD PELLETS SIMULATION ---
@@ -509,26 +412,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 3. Update School Master Centroid along Panoramic Horizontal Route
-    schoolMaster.update();
+    // 3. Update & Draw the Single Cohesive Swarm Element
+    swarmElement.update();
+    swarmElement.draw();
 
-    // 4. Update & Render the 8 School Members (sorted by depth for clean occlusion)
-    school.sort((a, b) => a.relativeDepth - b.relativeDepth);
-    for (const member of school) {
-      member.update();
-      member.draw();
-    }
-
-    // 5. Update Hover Specimen Card
-    if (mouse.hoveredFish) {
-      const hf = mouse.hoveredFish;
-      hoverCard.style.left = hf.x + 'px';
-      hoverCard.style.top = hf.y + 'px';
+    // 4. Update Hover Specimen Card
+    if (swarmElement.isHovered) {
+      hoverCard.style.left = swarmElement.x + 'px';
+      hoverCard.style.top = swarmElement.y + 'px';
       hoverCard.classList.add('visible');
 
       if (cardTelemetry) {
-        const stratumName = schoolMaster.currentZ < 0.9 ? 'Background Pass' : (schoolMaster.currentZ > 1.15 ? 'Foreground Pass' : 'Midground Pass');
-        cardTelemetry.textContent = `Specimen #0${hf.slotIndex + 1} • ${stratumName} • Scale: ${Math.round(config.baseLength * schoolMaster.currentZ * hf.relativeDepth)}px`;
+        const stratumName = swarmElement.currentZ < 0.9 ? 'Background Pass' : (swarmElement.currentZ > 1.15 ? 'Foreground Pass' : 'Midground Pass');
+        cardTelemetry.textContent = `Unified Swarm Unit • ${stratumName} • Scale: ${Math.round(config.baseWidth * swarmElement.currentZ)}px`;
       }
     } else {
       hoverCard.classList.remove('visible');
@@ -548,9 +444,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   if (sliderScale && labelScale) {
     sliderScale.addEventListener('input', (e) => {
-      config.baseLength = parseInt(e.target.value);
-      const ratio = (config.baseLength / 52).toFixed(1);
-      labelScale.textContent = `${config.baseLength}px (${ratio}x Real)`;
+      config.baseWidth = parseInt(e.target.value);
+      const ratio = (config.baseWidth / 240).toFixed(1);
+      labelScale.textContent = `${config.baseWidth}px (${ratio}x Real)`;
     });
   }
 
@@ -570,14 +466,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnFeed) {
     btnFeed.addEventListener('click', () => {
-      spawnPellets(schoolMaster.x, schoolMaster.y - 120, 12);
+      spawnPellets(swarmElement.x, swarmElement.y - 120, 12);
     });
   }
 
   if (btnScatter) {
     btnScatter.addEventListener('click', () => {
-      // Coordinated turn or scattering
-      schoolMaster.beginTurn(schoolMaster.direction === 1 ? -1 : 1);
+      // Coordinated turn
+      swarmElement.beginTurn(swarmElement.direction === 1 ? -1 : 1);
     });
   }
 
