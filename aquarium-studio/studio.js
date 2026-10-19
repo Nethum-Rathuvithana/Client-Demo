@@ -1,7 +1,12 @@
 /* =========================================================================
-   AQUARIUM SCENERY STUDIO — JAVASCRIPT ENGINE
-   Real-Time Green Screen Chroma-Keying & Photorealistic Video Fish Extraction.
-   World Path Translation across (X, Y) coordinates, Boids Flocking, & Hover.
+   AQUARIUM SCENERY STUDIO — COORDINATED 8-FISH SCHOOLING ENGINE
+   - Cohesive imperfect school of 8 Neon Tetras.
+   - Broad horizontal route spanning 65–85% of aquarium width.
+   - Gentle vertical arcs, brief spacing changes, and coordinated banking turns.
+   - Individual lag behind and surge ahead micro-behaviors.
+   - Midground, background, and foreground passes with depth scaling.
+   - Green-screen video extraction with 60FPS chroma-keying.
+   - Hover deceleration by 85% & live inspection card.
 ========================================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,12 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sliders & HUD Controls
   const sliderScale = document.getElementById('slider-fish-scale');
   const labelScale = document.getElementById('label-fish-scale');
-  const sliderCount = document.getElementById('slider-fish-count');
-  const labelCount = document.getElementById('label-fish-count');
   const sliderSpeed = document.getElementById('slider-fish-speed');
   const labelSpeed = document.getElementById('label-fish-speed');
   const sliderThreshold = document.getElementById('slider-chroma-threshold');
   const labelThreshold = document.getElementById('label-chroma-threshold');
+
+  const hudDepthPass = document.getElementById('hud-depth-pass');
+  const hudTurnState = document.getElementById('hud-turn-state');
 
   const btnFeed = document.getElementById('btn-feed');
   const btnScatter = document.getElementById('btn-scatter');
@@ -49,14 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Configuration
   const config = {
-    baseLength: 55, // realistic Neon Tetra length in px
-    targetCount: 12,
+    fishCount: 8, // Exactly 8 Neon Tetras as requested
+    baseLength: 52, // realistic Neon Tetra length in px
     speedMultiplier: 1.0,
-    flockingMultiplier: 1.0,
-    hoverRadius: 60,
-    margin: 90,
-    chromaThreshold: 35, // green distance threshold
-    chromaSoftness: 18    // edge feathering
+    chromaThreshold: 35,
+    chromaSoftness: 18,
+    hoverRadius: 55
   };
 
   // Pellets Array
@@ -84,11 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // --- REAL-TIME GREEN SCREEN CHROMA-KEY EXTRACTION PIPELINE ---
   // =========================================================================
-  // Offscreen canvas for sampling and keying the video
   const keyedCanvas = document.createElement('canvas');
   const keyedCtx = keyedCanvas.getContext('2d', { willReadFrequently: true });
   
-  // Downscaled processing size for 60FPS fluid execution
   const keyWidth = 480;
   const keyHeight = 270;
   keyedCanvas.width = keyWidth;
@@ -105,16 +107,12 @@ document.addEventListener('DOMContentLoaded', () => {
     video.play().catch(() => {});
   }
 
-  // Crop bounding box around the active fish in the video
   let cropBox = { sx: 0, sy: 0, sw: keyWidth, sh: keyHeight };
 
   function processChromaKey() {
     if (!isVideoReady || video.paused || video.ended) return;
 
-    // 1. Draw raw video frame onto offscreen canvas
     keyedCtx.drawImage(video, 0, 0, keyWidth, keyHeight);
-
-    // 2. Extract pixel buffer
     const frame = keyedCtx.getImageData(0, 0, keyWidth, keyHeight);
     const data = frame.data;
     const len = data.length;
@@ -124,27 +122,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let minX = keyWidth, minY = keyHeight, maxX = 0, maxY = 0;
     let foundFish = false;
 
-    // 3. Fast Chroma-Key & Spill Suppression Shader
     for (let i = 0; i < len; i += 4) {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
-
-      // Green dominance calculation
       const maxOther = Math.max(r, b);
       const diff = g - maxOther;
 
-      // Pure green background check
       if (diff > threshold) {
-        data[i + 3] = 0; // Transparent
+        data[i + 3] = 0; // Transparent green
       } else if (diff > threshold - softness) {
-        // Edge feathering
         const alphaRatio = (threshold - diff) / softness;
         data[i + 3] = Math.round(data[i + 3] * alphaRatio);
-        // Despill green fringe
         data[i + 1] = maxOther;
       } else {
-        // Pixel belongs to fish! Track bounding box
         const pixelIdx = i / 4;
         const px = pixelIdx % keyWidth;
         const py = Math.floor(pixelIdx / keyWidth);
@@ -154,17 +145,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (py > maxY) maxY = py;
         foundFish = true;
 
-        // Despill subtle green reflections on body
         if (g > maxOther * 1.15) {
           data[i + 1] = Math.round(maxOther * 1.05);
         }
       }
     }
 
-    // Put keyed pixels back
     keyedCtx.putImageData(frame, 0, 0);
 
-    // Update fish crop coordinates if detected
     if (foundFish && maxX > minX && maxY > minY) {
       const pad = 8;
       cropBox.sx = Math.max(0, minX - pad);
@@ -175,39 +163,148 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
-  // --- FISH CLASS: PHOTOREALISTIC VIDEO-EXTRACTED ENTITY ---
+  // --- SCHOOL MASTER CONTROLLER (CENTROID, ROUTE & DEPTH PASSES) ---
   // =========================================================================
-  class PhotorealisticTetra {
-    constructor(id, x, y) {
-      this.id = id;
-      this.x = x || Math.random() * width;
-      this.y = y || Math.random() * height;
+  // Navigates a broad horizontal path spanning 75% of the aquarium width
+  // Follows sinusoidal vertical arcs and alternates between depth strata
+  const schoolMaster = {
+    x: width * 0.25,
+    y: height * 0.5,
+    vx: 1.4,
+    vy: 0,
+    heading: 0,
+    direction: 1, // 1 = Eastbound (Right), -1 = Westbound (Left)
+    routeProgress: 0, // 0 to 1 along travel cycle
+    
+    // Depth Pass cycle: 0 = Midground, 1 = Deep Background, 2 = Near Viewer Foreground
+    passIndex: 0,
+    currentZ: 1.0, // Scale multiplier based on depth
+    targetZ: 1.0,
+    
+    turnState: 'cruising', // 'cruising' or 'banking'
+    turnTimer: 0,
+    
+    // Route limits (65–85% width span)
+    get minX() { return width * 0.12; },
+    get maxX() { return width * 0.88; },
 
-      // Velocity in world coordinates
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 1.3 + Math.random() * 0.9;
-      this.vx = Math.cos(angle) * speed;
-      this.vy = Math.sin(angle) * speed;
+    update() {
+      // 1. Horizontal traversal
+      const speed = 1.65 * config.speedMultiplier;
+      this.x += this.vx * speed;
 
-      // Smoothed heading & banking angle
-      this.heading = angle;
-      this.targetHeading = angle;
+      // 2. Vertical sinusoidal arc (gentle undulating wave through water column)
+      this.routeProgress += 0.0035 * config.speedMultiplier;
+      const baseMidY = height * 0.48;
+      const verticalWave = Math.sin(this.routeProgress * Math.PI * 2) * (height * 0.18);
+      const microSway = Math.cos(this.routeProgress * 6) * 25;
+      const targetY = baseMidY + verticalWave + microSway;
+      this.y += (targetY - this.y) * 0.04;
 
-      // Z-depth: 0.85 (deep in water) to 1.25 (foreground glass)
-      this.depth = 0.85 + Math.random() * 0.35;
+      // 3. Turnaround Logic at Eastern (Right) & Western (Left) boundaries
+      if (this.direction === 1 && this.x >= this.maxX) {
+        this.beginTurn(-1);
+      } else if (this.direction === -1 && this.x <= this.minX) {
+        this.beginTurn(1);
+      }
 
-      // Fin wag & banking
+      // Smooth banking turn execution
+      if (this.turnState === 'banking') {
+        this.turnTimer += 0.03;
+        const targetAngle = this.direction === 1 ? 0 : Math.PI;
+        let diff = targetAngle - this.heading;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        this.heading += diff * 0.08;
+
+        if (this.turnTimer >= Math.PI) {
+          this.turnState = 'cruising';
+          this.vx = this.direction * 1.4;
+        }
+      } else {
+        // Cruising heading matches horizontal motion + gentle vertical climb/dive
+        const targetAngle = Math.atan2(targetY - this.y, this.direction * 1.4);
+        let diff = targetAngle - this.heading;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        this.heading += diff * 0.06;
+      }
+
+      // 4. Depth Pass Transition Cycle
+      // Interpolate master Z smoothly
+      this.currentZ += (this.targetZ - this.currentZ) * 0.015;
+
+      // Update HUD telemetry
+      if (hudDepthPass) {
+        if (this.targetZ < 0.9) hudDepthPass.textContent = 'Background Pass (Deep)';
+        else if (this.targetZ > 1.15) hudDepthPass.textContent = 'Foreground Pass (Near Viewer)';
+        else hudDepthPass.textContent = 'Midground Pass';
+      }
+      if (hudTurnState) {
+        const dirStr = this.direction === 1 ? 'Cruising Eastbound →' : 'Cruising Westbound ←';
+        hudTurnState.textContent = this.turnState === 'banking' ? 'Coordinated Banking Turn' : dirStr;
+      }
+    },
+
+    beginTurn(newDir) {
+      this.direction = newDir;
+      this.turnState = 'banking';
+      this.turnTimer = 0;
+      this.vx = newDir * 0.7; // slight deceleration into turn
+
+      // Cycle depth pass on turnaround:
+      // Pass 0: Midground (Z=1.0) -> Pass 1: Background (Z=0.78) -> Pass 2: Foreground (Z=1.28)
+      this.passIndex = (this.passIndex + 1) % 3;
+      if (this.passIndex === 0) {
+        this.targetZ = 1.0; // Midground
+      } else if (this.passIndex === 1) {
+        this.targetZ = 0.78; // Deep in the tank (smaller, softer)
+      } else {
+        this.targetZ = 1.28; // Near the viewer (larger, crisp, glowing)
+      }
+    }
+  };
+
+  // =========================================================================
+  // --- INDIVIDUAL NEON TETRA MEMBER (8-FISH COHESIVE SCHOOL) ---
+  // =========================================================================
+  class SchoolMember {
+    constructor(slotIndex) {
+      this.slotIndex = slotIndex;
+      
+      // Slot-based formation offset within the cohesive school cluster
+      // Radii are kept tight (within 130px) so the school remains cohesive
+      const formationAngle = (slotIndex / config.fishCount) * Math.PI * 2;
+      const formationDist = 28 + (slotIndex % 3) * 22;
+      this.baseOffsetX = Math.cos(formationAngle) * formationDist;
+      this.baseOffsetY = Math.sin(formationAngle) * (formationDist * 0.65);
+
+      this.x = schoolMaster.x + this.baseOffsetX;
+      this.y = schoolMaster.y + this.baseOffsetY;
+      this.vx = schoolMaster.vx;
+      this.vy = 0;
+      this.heading = 0;
+
+      // Individual lag / surge micro-behaviors
+      this.microLagTimer = Math.random() * 200;
+      this.currentLagX = 0;
+      this.targetLagX = 0;
+      this.personalJitterY = (Math.random() - 0.5) * 15;
+
+      // Depth offset (slight depth variation within the school)
+      this.relativeDepth = 0.95 + (slotIndex % 4) * 0.035;
+
+      // Hover deceleration
       this.isHovered = false;
       this.hoverFactor = 1.0;
-      this.wanderTimer = Math.random() * 100;
     }
 
     update() {
-      // 1. Hover check with cursor
+      // 1. Hover check with mouse cursor
       const dxMouse = mouse.x - this.x;
       const dyMouse = mouse.y - this.y;
       const distMouse = Math.hypot(dxMouse, dyMouse);
-      const effectiveRadius = config.hoverRadius * this.depth;
+      const effectiveRadius = config.hoverRadius * (schoolMaster.currentZ * this.relativeDepth);
 
       if (distMouse < effectiveRadius && !mouse.hoveredFish) {
         this.isHovered = true;
@@ -217,99 +314,97 @@ document.addEventListener('DOMContentLoaded', () => {
         mouse.hoveredFish = null;
       }
 
-      // Smooth deceleration on hover (slow down by 85%)
+      // Decelerate by 85% on hover
       const targetHover = this.isHovered ? 0.15 : 1.0;
       this.hoverFactor += (targetHover - this.hoverFactor) * 0.12;
 
-      // 2. Wandering & Natural Steering
-      this.wanderTimer += 0.025;
-      const wanderForce = Math.sin(this.wanderTimer) * 0.09;
-      this.vx += -Math.sin(this.heading) * wanderForce;
-      this.vy += Math.cos(this.heading) * wanderForce;
+      // 2. Micro-Behavior: Individual fish lagging behind or surging ahead
+      this.microLagTimer += 0.02;
+      if (Math.sin(this.microLagTimer) > 0.8) {
+        // Brief surge ahead!
+        this.targetLagX = schoolMaster.direction * 35;
+      } else if (Math.sin(this.microLagTimer) < -0.8) {
+        // Brief lag behind!
+        this.targetLagX = -schoolMaster.direction * 42;
+      } else {
+        // Rejoin normal formation
+        this.targetLagX = 0;
+      }
+      this.currentLagX += (this.targetLagX - this.currentLagX) * 0.03;
 
-      // 3. Soft Boundary Steering (Keep inside aquarium)
-      const m = config.margin;
-      const boundaryTurn = 0.2;
-      if (this.x < m) this.vx += boundaryTurn;
-      if (this.x > width - m) this.vx -= boundaryTurn;
-      if (this.y < m) this.vy += boundaryTurn;
-      if (this.y > height - m) this.vy -= boundaryTurn;
+      // 3. Target Position relative to School Master Centroid
+      const targetPosX = schoolMaster.x + (this.baseOffsetX * schoolMaster.direction) + this.currentLagX;
+      const targetPosY = schoolMaster.y + this.baseOffsetY + this.personalJitterY;
 
-      // 4. Food Pellets attraction
-      if (pellets.length > 0) {
-        let nearestPellet = null;
-        let minDist = 380;
-        for (const p of pellets) {
-          const d = Math.hypot(p.x - this.x, p.y - this.y);
-          if (d < minDist) {
-            minDist = d;
-            nearestPellet = p;
-          }
+      // Spring-like pull toward school centroid (keeps school tight & cohesive)
+      const pullForce = 0.055;
+      this.vx += (targetPosX - this.x) * pullForce;
+      this.vy += (targetPosY - this.y) * pullForce;
+
+      // Dampening to avoid endless vibration
+      this.vx *= 0.88;
+      this.vy *= 0.88;
+
+      // 4. Separation between members to maintain natural spacing
+      for (const other of school) {
+        if (other === this) continue;
+        const dist = Math.hypot(this.x - other.x, this.y - other.y);
+        const minDist = 26 * schoolMaster.currentZ;
+        if (dist < minDist && dist > 0) {
+          const push = (minDist - dist) * 0.08;
+          this.x += ((this.x - other.x) / dist) * push;
+          this.y += ((this.y - other.y) / dist) * push;
         }
-        if (nearestPellet) {
-          const attractAngle = Math.atan2(nearestPellet.y - this.y, nearestPellet.x - this.x);
-          this.vx += Math.cos(attractAngle) * 0.18;
-          this.vy += Math.sin(attractAngle) * 0.18;
-          if (minDist < 16) nearestPellet.eaten = true;
-        }
       }
 
-      // 5. Speed limits
-      const rawSpeed = Math.hypot(this.vx, this.vy);
-      const maxSpeed = (2.4 * this.depth * config.speedMultiplier) * this.hoverFactor;
-      const minSpeed = (0.7 * this.depth * config.speedMultiplier) * this.hoverFactor;
+      // 5. Update World Path Coordinates (X, Y)
+      this.x += this.vx * this.hoverFactor;
+      this.y += this.vy * this.hoverFactor;
 
-      if (rawSpeed > maxSpeed) {
-        this.vx = (this.vx / rawSpeed) * maxSpeed;
-        this.vy = (this.vy / rawSpeed) * maxSpeed;
-      } else if (rawSpeed < minSpeed && !this.isHovered) {
-        this.vx = (this.vx / rawSpeed) * minSpeed;
-        this.vy = (this.vy / rawSpeed) * minSpeed;
-      }
-
-      // 6. Update World Path Coordinates (X, Y)
-      this.x += this.vx;
-      this.y += this.vy;
-
-      // 7. Smooth Heading Interpolation
-      if (rawSpeed > 0.05) {
-        this.targetHeading = Math.atan2(this.vy, this.vx);
-        let diff = this.targetHeading - this.heading;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        this.heading += diff * 0.09;
-      }
+      // 6. Smooth Heading toward motion
+      const currentDirX = schoolMaster.direction;
+      const targetAngle = schoolMaster.heading;
+      let diff = targetAngle - this.heading;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      this.heading += diff * 0.08;
     }
 
     draw() {
       ctx.save();
       ctx.translate(this.x, this.y);
 
-      // Rotate along velocity vector
+      // Rotate along motion heading
       ctx.rotate(this.heading);
 
-      // Flip vertically if swimming to the left so fish stays right-side up
+      // Flip vertically when swimming left so fish remains right-side up
       const swimmingLeft = Math.cos(this.heading) < 0;
       if (swimmingLeft) {
         ctx.scale(1, -1);
       }
 
-      // Depth scaling & lighting
-      const len = config.baseLength * this.depth;
+      // Combined Depth Factor (School Depth Pass * Individual Depth)
+      const totalDepth = schoolMaster.currentZ * this.relativeDepth;
+      const len = config.baseLength * totalDepth;
       const aspect = cropBox.sh / (cropBox.sw || 1);
       const drawW = len;
       const drawH = len * (aspect > 0.2 && aspect < 1.0 ? aspect : 0.45);
 
-      const alpha = Math.min(1.0, 0.8 + this.depth * 0.2);
+      // Depth lighting & atmospheric haze
+      // Foreground = crisp, intense; Background = soft, slightly misty
+      const isForeground = totalDepth > 1.15;
+      const isBackground = totalDepth < 0.85;
+
+      const alpha = isBackground ? 0.72 : (isForeground ? 1.0 : 0.88);
       ctx.globalAlpha = alpha;
 
-      // Depth shadow under fish
+      // Depth shadow
       ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
-      ctx.shadowBlur = 12 * this.depth;
-      ctx.shadowOffsetY = 8 * this.depth;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+      ctx.shadowBlur = (isForeground ? 18 : 8) * totalDepth;
+      ctx.shadowOffsetY = 8 * totalDepth;
 
-      // Draw Keyed Video Fish directly!
+      // Render the Extracted Real Video Fish!
       if (cropBox.sw > 20 && cropBox.sh > 10) {
         ctx.drawImage(
           keyedCanvas,
@@ -317,25 +412,24 @@ document.addEventListener('DOMContentLoaded', () => {
           -drawW / 2, -drawH / 2, drawW, drawH
         );
       } else {
-        // Fallback to full keyed canvas
         ctx.drawImage(keyedCanvas, 0, 0, keyWidth, keyHeight, -drawW / 2, -drawH / 2, drawW, drawH);
       }
       ctx.restore();
 
-      // Subtle water shimmer & electric blue accent glow
+      // Atmospheric Water Glow (Stronger on foreground pass)
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = 'rgba(0, 229, 255, 0.12)';
-      ctx.shadowColor = 'rgba(0, 229, 255, 0.6)';
-      ctx.shadowBlur = this.isHovered ? 25 : 10;
+      ctx.fillStyle = isForeground ? 'rgba(0, 229, 255, 0.22)' : 'rgba(0, 229, 255, 0.1)';
+      ctx.shadowColor = 'rgba(0, 229, 255, 0.7)';
+      ctx.shadowBlur = this.isHovered ? 28 : (isForeground ? 16 : 8);
       ctx.beginPath();
-      ctx.ellipse(0, 0, drawW * 0.4, drawH * 0.25, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, drawW * 0.42, drawH * 0.26, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
       // Hover Reticle indicator if targeted
       if (this.isHovered) {
-        ctx.strokeStyle = 'rgba(0, 229, 255, 0.8)';
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.85)';
         ctx.lineWidth = 1.5;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
@@ -349,70 +443,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
-  // --- BOIDS FLOCKING ENGINE (COHESION, SEPARATION, ALIGNMENT) ---
+  // --- INITIALIZE THE 8 FISH MEMBERS ---
   // =========================================================================
   const school = [];
-
-  function initSchool(count) {
-    school.length = 0;
-    for (let i = 0; i < count; i++) {
-      const x = width * 0.2 + Math.random() * (width * 0.6);
-      const y = height * 0.2 + Math.random() * (height * 0.6);
-      school.push(new PhotorealisticTetra(i + 1, x, y));
-    }
-  }
-  initSchool(config.targetCount);
-
-  function applyBoidsFlocking() {
-    const visualDist = 140 * config.flockingMultiplier;
-    const separateDist = 48;
-
-    for (let i = 0; i < school.length; i++) {
-      const f1 = school[i];
-      if (f1.isHovered) continue;
-
-      let alignX = 0, alignY = 0, alignCount = 0;
-      let cohX = 0, cohY = 0, cohCount = 0;
-      let sepX = 0, sepY = 0;
-
-      for (let j = 0; j < school.length; j++) {
-        if (i === j) continue;
-        const f2 = school[j];
-        const dist = Math.hypot(f2.x - f1.x, f2.y - f1.y);
-
-        if (dist < visualDist) {
-          alignX += f2.vx;
-          alignY += f2.vy;
-          alignCount++;
-
-          cohX += f2.x;
-          cohY += f2.y;
-          cohCount++;
-
-          if (dist < separateDist && dist > 0) {
-            sepX += (f1.x - f2.x) / dist;
-            sepY += (f1.y - f2.y) / dist;
-          }
-        }
-      }
-
-      if (alignCount > 0) {
-        alignX /= alignCount;
-        alignY /= alignCount;
-        f1.vx += (alignX - f1.vx) * 0.035;
-        f1.vy += (alignY - f1.vy) * 0.035;
-      }
-
-      if (cohCount > 0) {
-        cohX /= cohCount;
-        cohY /= cohCount;
-        f1.vx += ((cohX - f1.x) / visualDist) * 0.025;
-        f1.vy += ((cohY - f1.y) / visualDist) * 0.025;
-      }
-
-      f1.vx += sepX * 0.06;
-      f1.vy += sepY * 0.06;
-    }
+  for (let i = 0; i < config.fishCount; i++) {
+    school.push(new SchoolMember(i));
   }
 
   // =========================================================================
@@ -429,14 +464,12 @@ document.addEventListener('DOMContentLoaded', () => {
       this.eaten = false;
       this.age = 0;
     }
-
     update() {
       this.x += this.vx;
       this.y += this.vy;
       this.vx *= 0.98;
       this.age++;
     }
-
     draw() {
       ctx.save();
       ctx.beginPath();
@@ -476,15 +509,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 3. Flocking & Physics
-    applyBoidsFlocking();
+    // 3. Update School Master Centroid along Panoramic Horizontal Route
+    schoolMaster.update();
 
-    // 4. Update & Render Photorealistic Video Fish sorted by Z-depth
-    school.sort((a, b) => a.depth - b.depth);
-
-    for (const fish of school) {
-      fish.update();
-      fish.draw();
+    // 4. Update & Render the 8 School Members (sorted by depth for clean occlusion)
+    school.sort((a, b) => a.relativeDepth - b.relativeDepth);
+    for (const member of school) {
+      member.update();
+      member.draw();
     }
 
     // 5. Update Hover Specimen Card
@@ -495,7 +527,8 @@ document.addEventListener('DOMContentLoaded', () => {
       hoverCard.classList.add('visible');
 
       if (cardTelemetry) {
-        cardTelemetry.textContent = `X: ${Math.round(hf.x)}px • Y: ${Math.round(hf.y)}px • Speed: ${(Math.hypot(hf.vx, hf.vy)).toFixed(2)}px/s`;
+        const stratumName = schoolMaster.currentZ < 0.9 ? 'Background Pass' : (schoolMaster.currentZ > 1.15 ? 'Foreground Pass' : 'Midground Pass');
+        cardTelemetry.textContent = `Specimen #0${hf.slotIndex + 1} • ${stratumName} • Scale: ${Math.round(config.baseLength * schoolMaster.currentZ * hf.relativeDepth)}px`;
       }
     } else {
       hoverCard.classList.remove('visible');
@@ -516,23 +549,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sliderScale && labelScale) {
     sliderScale.addEventListener('input', (e) => {
       config.baseLength = parseInt(e.target.value);
-      const ratio = (config.baseLength / 55).toFixed(1);
+      const ratio = (config.baseLength / 52).toFixed(1);
       labelScale.textContent = `${config.baseLength}px (${ratio}x Real)`;
-    });
-  }
-
-  if (sliderCount && labelCount) {
-    sliderCount.addEventListener('input', (e) => {
-      const target = parseInt(e.target.value);
-      labelCount.textContent = `${target} Tetras`;
-      config.targetCount = target;
-
-      while (school.length < target) {
-        school.push(new PhotorealisticTetra(school.length + 1, width * 0.5, height * 0.5));
-      }
-      while (school.length > target) {
-        school.pop();
-      }
     });
   }
 
@@ -552,18 +570,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnFeed) {
     btnFeed.addEventListener('click', () => {
-      spawnPellets(width * 0.5, height * 0.15, 12);
+      spawnPellets(schoolMaster.x, schoolMaster.y - 120, 12);
     });
   }
 
   if (btnScatter) {
     btnScatter.addEventListener('click', () => {
-      school.forEach(f => {
-        const scatterAngle = Math.random() * Math.PI * 2;
-        const scatterBurst = 4 + Math.random() * 4;
-        f.vx = Math.cos(scatterAngle) * scatterBurst;
-        f.vy = Math.sin(scatterAngle) * scatterBurst;
-      });
+      // Coordinated turn or scattering
+      schoolMaster.beginTurn(schoolMaster.direction === 1 ? -1 : 1);
     });
   }
 
@@ -597,7 +611,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const src = btn.dataset.src;
       if (!src) return;
 
-      // Update video source
       video.src = src;
       video.load();
       video.play().catch(() => {});
@@ -608,7 +621,6 @@ document.addEventListener('DOMContentLoaded', () => {
         pipVideo.play().catch(() => {});
       }
 
-      // Update button styling
       videoSourceBtns.forEach(b => {
         if (b === btn) {
           b.classList.add('bg-cyan-500/20', 'border-cyan-500/40', 'text-cyan-200');
@@ -620,5 +632,4 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   });
-
 });
