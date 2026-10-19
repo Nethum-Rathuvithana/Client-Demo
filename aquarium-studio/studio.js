@@ -1,11 +1,13 @@
 /* =========================================================================
-   AQUARIUM SCENERY STUDIO — SINGLE COHESIVE SWARM ELEMENT
-   - Renders the video fish group as ONE unified photorealistic element.
-   - Moves along a broad horizontal route spanning 65–85% of aquarium width.
-   - Gentle vertical arcs and coordinated banking turns.
-   - Depth strata passes: Midground, Background (Deep), and Foreground (Near Viewer).
-   - Real-time green-screen chroma keying with despill.
-   - Hover deceleration by 85% & live inspection telemetry.
+   AQUARIUM SCENERY STUDIO — FULL-SCREEN CHOREOGRAPHED MOVEMENT PATH
+   - Moves entire neon tetra school as one unified, photorealistic video element.
+   - PRESERVES ORIGINAL ORIENTATION: Zero rotation, zero flipping, zero mirroring.
+   - Smooth Catmull-Rom spline with Hermite acceleration/deceleration.
+   - 58-second full aquarium cycle spanning 8% to 86% width and 25% to 72% height.
+   - 2-second upper-right hover pause with micro-drift.
+   - Smooth closed loop with 0.000 discontinuity.
+   - Real-time green screen chroma-keying with despill.
+   - Hover deceleration by 85% & live inspection card.
 ========================================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -25,8 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const sliderThreshold = document.getElementById('slider-chroma-threshold');
   const labelThreshold = document.getElementById('label-chroma-threshold');
 
-  const hudDepthPass = document.getElementById('hud-depth-pass');
-  const hudTurnState = document.getElementById('hud-turn-state');
+  const hudTimeDisplay = document.getElementById('hud-time-display');
+  const hudProgressBar = document.getElementById('hud-progress-bar');
+  const hudStageName = document.getElementById('hud-stage-name');
+  const hudCoords = document.getElementById('hud-coords');
 
   const btnFeed = document.getElementById('btn-feed');
   const btnScatter = document.getElementById('btn-scatter');
@@ -35,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnToggleHud = document.getElementById('btn-toggle-hud');
   const studioHudPanel = document.getElementById('studio-hud-panel');
   const hudToggleIcon = document.getElementById('hud-toggle-icon');
+  const stageJumpBtns = document.querySelectorAll('.stage-jump-btn');
 
   // Sizing
   let width = window.innerWidth;
@@ -54,11 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Configuration
   const config = {
-    baseWidth: 240, // natural width of the cohesive swarm element in px
+    baseWidth: 240, // realistic swarm element width in px
     speedMultiplier: 1.0,
     chromaThreshold: 35,
     chromaSoftness: 18,
-    hoverRadius: 130
+    hoverRadius: 120
   };
 
   // Pellets Array
@@ -89,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const keyedCanvas = document.createElement('canvas');
   const keyedCtx = keyedCanvas.getContext('2d', { willReadFrequently: true });
   
-  // High-clarity 640x360 processing buffer
   const keyWidth = 640;
   const keyHeight = 360;
   keyedCanvas.width = keyWidth;
@@ -129,14 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const diff = g - maxOther;
 
       if (diff > threshold) {
-        data[i + 3] = 0; // Transparent green background
+        data[i + 3] = 0; // Transparent green
       } else if (diff > threshold - softness) {
-        // Soft edge feathering
         const alphaRatio = (threshold - diff) / softness;
         data[i + 3] = Math.round(data[i + 3] * alphaRatio);
         data[i + 1] = maxOther;
       } else {
-        // Fish pixel
         const pixelIdx = i / 4;
         const px = pixelIdx % keyWidth;
         const py = Math.floor(pixelIdx / keyWidth);
@@ -146,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (py > maxY) maxY = py;
         foundFish = true;
 
-        // Despill subtle green bounce reflections
         if (g > maxOther * 1.15) {
           data[i + 1] = Math.round(maxOther * 1.05);
         }
@@ -155,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     keyedCtx.putImageData(frame, 0, 0);
 
-    // Auto-tighten crop around the fish group
     if (foundFish && maxX > minX && maxY > minY) {
       const pad = 10;
       cropBox.sx = Math.max(0, minX - pad);
@@ -166,40 +166,98 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
-  // --- SINGLE COHESIVE SWARM ELEMENT ---
+  // --- 58-SECOND CHOREOGRAPHED WAYPOINTS TABLE ---
   // =========================================================================
-  // Travels across 65-85% of aquarium width along gentle vertical arcs
-  // Executes coordinated turns and cycles through depth passes
-  const swarmElement = {
-    x: width * 0.25,
-    y: height * 0.5,
-    vx: 1.45,
-    vy: 0,
-    heading: 0,
-    direction: 1, // 1 = Eastbound (Right), -1 = Westbound (Left)
-    routeProgress: 0,
-    
-    // Depth Pass cycle: 0 = Midground, 1 = Deep Background, 2 = Near Viewer Foreground
-    passIndex: 0,
-    currentZ: 1.0,
-    targetZ: 1.0,
-    
-    turnState: 'cruising',
-    turnTimer: 0,
-    
-    // Hover state
+  const waypoints = [
+    { t: 0,  x: 0.08, y: 0.40, stage: '1. Begin — Left-middle (Start)' },
+    { t: 10, x: 0.35, y: 0.27, stage: '2. Cross upper-middle (Glide right)' },
+    { t: 20, x: 0.82, y: 0.25, stage: '3. Pause & drift (Slow down near upper-right)' },
+    { t: 23, x: 0.86, y: 0.35, stage: '3. Gentle hover drift (Upper-right)' },
+    { t: 31, x: 0.82, y: 0.72, stage: '4. Descend through right side (Wide lazy arc)' },
+    { t: 40, x: 0.53, y: 0.72, stage: '5. Cruise along lower area (Glide left)' },
+    { t: 50, x: 0.19, y: 0.60, stage: '6. Cross middle leftward (Broad curve)' },
+    { t: 58, x: 0.08, y: 0.40, stage: '7. Return & ease into loop' }
+  ];
+
+  const totalDuration = 58.0; // 58 seconds
+  const N = waypoints.length - 1; // 7 spline segments
+
+  function catmullRom(p0, p1, p2, p3, t) {
+    const v0 = (p2 - p0) * 0.5;
+    const v1 = (p3 - p1) * 0.5;
+    const t2 = t * t;
+    const t3 = t2 * t;
+    return (2 * p1 - 2 * p2 + v0 + v1) * t3 +
+           (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 +
+           v0 * t + p1;
+  }
+
+  // Calculate exact continuous (X, Y) on the spline at time t
+  function evaluateJourneyPath(time) {
+    const loopTime = ((time % totalDuration) + totalDuration) % totalDuration;
+
+    let segIdx = 0;
+    for (let i = 0; i < waypoints.length - 1; i++) {
+      if (loopTime >= waypoints[i].t && loopTime < waypoints[i + 1].t) {
+        segIdx = i;
+        break;
+      }
+    }
+
+    const w1 = waypoints[segIdx];
+    const w2 = waypoints[segIdx + 1];
+    const segDuration = w2.t - w1.t;
+    const rawT = (loopTime - w1.t) / segDuration;
+
+    // Hermite smoothstep for natural acceleration/deceleration between anchor points
+    const easedT = rawT * rawT * (3 - 2 * rawT);
+
+    // Closed loop neighbors
+    const idx0 = (segIdx - 1 + N) % N;
+    const idx1 = segIdx;
+    const idx2 = (segIdx + 1) % N;
+    const idx3 = (segIdx + 2) % N;
+
+    const normX = catmullRom(waypoints[idx0].x, waypoints[idx1].x, waypoints[idx2].x, waypoints[idx3].x, easedT);
+    const normY = catmullRom(waypoints[idx0].y, waypoints[idx1].y, waypoints[idx2].y, waypoints[idx3].y, easedT);
+
+    // Micro-sway during hover phase (20s - 23s)
+    let microX = 0;
+    let microY = 0;
+    if (loopTime >= 20 && loopTime <= 23) {
+      microX = Math.sin((loopTime - 20) * Math.PI) * 0.008;
+      microY = Math.cos((loopTime - 20) * Math.PI * 2) * 0.005;
+    }
+
+    return {
+      normX: normX + microX,
+      normY: normY + microY,
+      stage: w1.stage,
+      loopTime: loopTime
+    };
+  }
+
+  // =========================================================================
+  // --- SWARM ELEMENT CONTROLLER ---
+  // =========================================================================
+  const swarm = {
+    timelineSec: 0,
+    x: width * 0.08,
+    y: height * 0.40,
+    normX: 0.08,
+    normY: 0.40,
+    currentStage: waypoints[0].stage,
+
+    // Hover Deceleration State
     isHovered: false,
     hoverFactor: 1.0,
 
-    get minX() { return width * 0.12; },
-    get maxX() { return width * 0.88; },
-
-    update() {
+    update(dt) {
       // 1. Hover check with mouse cursor
       const dxMouse = mouse.x - this.x;
       const dyMouse = mouse.y - this.y;
       const distMouse = Math.hypot(dxMouse, dyMouse);
-      const effectiveRadius = config.hoverRadius * this.currentZ;
+      const effectiveRadius = config.hoverRadius;
 
       if (distMouse < effectiveRadius) {
         this.isHovered = true;
@@ -209,79 +267,43 @@ document.addEventListener('DOMContentLoaded', () => {
         mouse.isHoveringSwarm = false;
       }
 
-      // Smooth deceleration on hover (slow down whole swarm by 85%)
+      // Smooth deceleration on hover (slows journey progression by 85%)
       const targetHover = this.isHovered ? 0.15 : 1.0;
       this.hoverFactor += (targetHover - this.hoverFactor) * 0.1;
 
-      // 2. Horizontal traversal (65-85% aquarium width)
-      const speed = 1.6 * config.speedMultiplier * this.hoverFactor;
-      this.x += this.vx * speed;
+      // 2. Advance journey timeline
+      const advanceSec = dt * config.speedMultiplier * this.hoverFactor;
+      this.timelineSec = (this.timelineSec + advanceSec) % totalDuration;
 
-      // 3. Vertical sinusoidal arc (swimming gently through water column)
-      this.routeProgress += 0.0035 * config.speedMultiplier * this.hoverFactor;
-      const baseMidY = height * 0.48;
-      const verticalWave = Math.sin(this.routeProgress * Math.PI * 2) * (height * 0.18);
-      const microSway = Math.cos(this.routeProgress * 5) * 22;
-      const targetY = baseMidY + verticalWave + microSway;
-      this.y += (targetY - this.y) * (0.04 * this.hoverFactor);
+      // 3. Evaluate position on Catmull-Rom spline
+      const pathPoint = evaluateJourneyPath(this.timelineSec);
+      this.normX = pathPoint.normX;
+      this.normY = pathPoint.normY;
+      this.currentStage = pathPoint.stage;
 
-      // 4. Boundary Turnaround
-      if (this.direction === 1 && this.x >= this.maxX) {
-        this.beginTurn(-1);
-      } else if (this.direction === -1 && this.x <= this.minX) {
-        this.beginTurn(1);
+      // Map normalized coordinates to usable screen dimensions
+      // Keeps full swarm inside visible aquarium with boundary padding
+      const paddingX = config.baseWidth * 0.55;
+      const paddingY = config.baseWidth * 0.35;
+      const usableW = width - paddingX * 2;
+      const usableH = height - paddingY * 2;
+
+      this.x = paddingX + this.normX * usableW;
+      this.y = paddingY + this.normY * usableH;
+
+      // 4. Update HUD Telemetry
+      if (hudTimeDisplay) {
+        hudTimeDisplay.textContent = `${this.timelineSec.toFixed(1)}s / ${totalDuration.toFixed(1)}s`;
       }
-
-      // Smooth Banking Turn
-      if (this.turnState === 'banking') {
-        this.turnTimer += 0.03 * this.hoverFactor;
-        const targetAngle = this.direction === 1 ? 0 : Math.PI;
-        let diff = targetAngle - this.heading;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        this.heading += diff * 0.08;
-
-        if (this.turnTimer >= Math.PI) {
-          this.turnState = 'cruising';
-          this.vx = this.direction * 1.45;
-        }
-      } else {
-        const targetAngle = Math.atan2(targetY - this.y, this.direction * 1.45);
-        let diff = targetAngle - this.heading;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        this.heading += diff * 0.06;
+      if (hudProgressBar) {
+        const pct = (this.timelineSec / totalDuration) * 100;
+        hudProgressBar.style.width = `${pct.toFixed(1)}%`;
       }
-
-      // 5. Depth Pass Transition Cycle
-      this.currentZ += (this.targetZ - this.currentZ) * 0.015;
-
-      // Update HUD telemetry
-      if (hudDepthPass) {
-        if (this.targetZ < 0.9) hudDepthPass.textContent = 'Background Pass (Deep)';
-        else if (this.targetZ > 1.15) hudDepthPass.textContent = 'Foreground Pass (Near Viewer)';
-        else hudDepthPass.textContent = 'Midground Pass';
+      if (hudStageName) {
+        hudStageName.textContent = this.currentStage;
       }
-      if (hudTurnState) {
-        const dirStr = this.direction === 1 ? 'Cruising Eastbound →' : 'Cruising Westbound ←';
-        hudTurnState.textContent = this.turnState === 'banking' ? 'Coordinated Banking Turn' : dirStr;
-      }
-    },
-
-    beginTurn(newDir) {
-      this.direction = newDir;
-      this.turnState = 'banking';
-      this.turnTimer = 0;
-      this.vx = newDir * 0.7;
-
-      // Cycle depth pass
-      this.passIndex = (this.passIndex + 1) % 3;
-      if (this.passIndex === 0) {
-        this.targetZ = 1.0; // Midground
-      } else if (this.passIndex === 1) {
-        this.targetZ = 0.78; // Deep background (smaller, softer)
-      } else {
-        this.targetZ = 1.28; // Foreground (larger, crisp, vibrant)
+      if (hudCoords) {
+        hudCoords.textContent = `${(this.normX * 100).toFixed(1)}% X, ${(this.normY * 100).toFixed(1)}% Y`;
       }
     },
 
@@ -289,33 +311,23 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.save();
       ctx.translate(this.x, this.y);
 
-      // Rotate along motion heading
-      ctx.rotate(this.heading);
+      // =======================================================================
+      // MANDATORY RULE: PRESERVE ORIGINAL VIDEO ORIENTATION
+      // Never rotate, flip, mirror, or reverse the video frame!
+      // ctx.rotate is strictly 0! ctx.scale is strictly 1, 1!
+      // =======================================================================
 
-      // Flip vertically when swimming left so the fish stay right-side up
-      const swimmingLeft = Math.cos(this.heading) < 0;
-      if (swimmingLeft) {
-        ctx.scale(1, -1);
-      }
-
-      // Scale based on depth
-      const drawW = config.baseWidth * this.currentZ;
+      const drawW = config.baseWidth;
       const aspect = cropBox.sh / (cropBox.sw || 1);
       const drawH = drawW * (aspect > 0.2 && aspect < 1.0 ? aspect : 0.52);
 
-      const isForeground = this.currentZ > 1.15;
-      const isBackground = this.currentZ < 0.88;
-
-      const alpha = isBackground ? 0.75 : (isForeground ? 1.0 : 0.9);
-      ctx.globalAlpha = alpha;
-
-      // Ambient underwater shadow
+      // Subtle atmospheric water shadow
       ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-      ctx.shadowBlur = (isForeground ? 22 : 10) * this.currentZ;
-      ctx.shadowOffsetY = 10 * this.currentZ;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 8;
 
-      // Draw the Extracted Real Video Swarm Element!
+      // Render the extracted photorealistic video frame upright & unrotated
       if (cropBox.sw > 20 && cropBox.sh > 10) {
         ctx.drawImage(
           keyedCanvas,
@@ -327,14 +339,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       ctx.restore();
 
-      // Atmospheric Water Glow
+      // Soft water depth shimmer
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = isForeground ? 'rgba(0, 229, 255, 0.22)' : 'rgba(0, 229, 255, 0.1)';
-      ctx.shadowColor = 'rgba(0, 229, 255, 0.75)';
-      ctx.shadowBlur = this.isHovered ? 30 : (isForeground ? 18 : 8);
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.12)';
+      ctx.shadowColor = 'rgba(0, 229, 255, 0.65)';
+      ctx.shadowBlur = this.isHovered ? 26 : 12;
       ctx.beginPath();
-      ctx.ellipse(0, 0, drawW * 0.44, drawH * 0.35, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, drawW * 0.45, drawH * 0.32, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
@@ -344,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineWidth = 1.5;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
-        ctx.arc(0, 0, drawW * 0.6, 0, Math.PI * 2);
+        ctx.arc(0, 0, drawW * 0.58, 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
       }
@@ -396,7 +408,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // --- MAIN 60FPS SIMULATION LOOP ---
   // =========================================================================
-  function loop() {
+  let lastTimestamp = performance.now();
+
+  function loop(now) {
+    const dt = Math.min(0.1, (now - lastTimestamp) / 1000); // delta in seconds
+    lastTimestamp = now;
+
     ctx.clearRect(0, 0, width, height);
 
     // 1. Process Green Screen Chroma-Key on the Video Frame
@@ -412,19 +429,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 3. Update & Draw the Single Cohesive Swarm Element
-    swarmElement.update();
-    swarmElement.draw();
+    // 3. Update & Draw the Un-Rotated Video Swarm Element along the 58s Path
+    swarm.update(dt);
+    swarm.draw();
 
     // 4. Update Hover Specimen Card
-    if (swarmElement.isHovered) {
-      hoverCard.style.left = swarmElement.x + 'px';
-      hoverCard.style.top = swarmElement.y + 'px';
+    if (swarm.isHovered) {
+      hoverCard.style.left = swarm.x + 'px';
+      hoverCard.style.top = swarm.y + 'px';
       hoverCard.classList.add('visible');
 
       if (cardTelemetry) {
-        const stratumName = swarmElement.currentZ < 0.9 ? 'Background Pass' : (swarmElement.currentZ > 1.15 ? 'Foreground Pass' : 'Midground Pass');
-        cardTelemetry.textContent = `Unified Swarm Unit • ${stratumName} • Scale: ${Math.round(config.baseWidth * swarmElement.currentZ)}px`;
+        cardTelemetry.textContent = `Timeline: ${swarm.timelineSec.toFixed(1)}s / 58s • Coords: ${(swarm.normX * 100).toFixed(0)}% X, ${(swarm.normY * 100).toFixed(0)}% Y`;
       }
     } else {
       hoverCard.classList.remove('visible');
@@ -466,16 +482,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnFeed) {
     btnFeed.addEventListener('click', () => {
-      spawnPellets(swarmElement.x, swarmElement.y - 120, 12);
+      spawnPellets(swarm.x, swarm.y - 120, 12);
     });
   }
 
   if (btnScatter) {
     btnScatter.addEventListener('click', () => {
-      // Coordinated turn
-      swarmElement.beginTurn(swarmElement.direction === 1 ? -1 : 1);
+      // Jump forward by 10 seconds along journey
+      swarm.timelineSec = (swarm.timelineSec + 10) % totalDuration;
     });
   }
+
+  // Waypoint Jump Buttons
+  stageJumpBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetSec = parseFloat(btn.dataset.time);
+      if (!isNaN(targetSec)) {
+        swarm.timelineSec = targetSec;
+      }
+    });
+  });
 
   if (btnToggleVideoPip && videoPipContainer) {
     btnToggleVideoPip.addEventListener('click', () => {
