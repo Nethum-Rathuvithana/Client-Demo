@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Segment 1 (0.0s -> 24.0s): Gliding RIGHT TO LEFT across upper tank.
       // Moving West: Head points WEST (Left)
       if (t < 24.0) {
-        this.scaleX = -1.0 * flipSign;
+        this.scaleX = 1.0 * flipSign;
         this.scaleY = 1.0;
         this.facingDirection = -1;
         this.turnStateLabel = flipSign > 0 ? 'Swimming Right-to-Left (Westbound) ←' : 'Swimming Eastbound →';
@@ -338,11 +338,11 @@ document.addEventListener('DOMContentLoaded', () => {
         this.scaleY = 1.0 + 0.05 * Math.sin(p * Math.PI);
         if (p < 0.5) {
           // Compressing while still Westbound
-          this.scaleX = -comp * flipSign;
+          this.scaleX = comp * flipSign;
           this.turnStateLabel = `2.5D Turn: Banking into depth (${(comp * 100).toFixed(0)}% W)`;
         } else {
           // Expanding facing Eastbound (Head points East/Right -> swims forward!)
-          this.scaleX = comp * flipSign;
+          this.scaleX = -comp * flipSign;
           this.turnStateLabel = `2.5D Turn: Angling Eastward (${(comp * 100).toFixed(0)}% W)`;
         }
         this.facingDirection = 1;
@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Segment 2 (25.0s -> 54.5s): Cruising LEFT TO RIGHT along lower area & middle.
       // Moving East: Head points EAST (Right)
       else if (t > 25.0 && t < 54.5) {
-        this.scaleX = 1.0 * flipSign;
+        this.scaleX = -1.0 * flipSign;
         this.scaleY = 1.0;
         this.facingDirection = 1;
         this.turnStateLabel = flipSign > 0 ? 'Swimming Left-to-Right (Eastbound) →' : 'Swimming Westbound ←';
@@ -362,18 +362,18 @@ document.addEventListener('DOMContentLoaded', () => {
         this.scaleY = 1.0 + 0.05 * Math.sin(p * Math.PI);
         if (p < 0.5) {
           // Compressing while Eastbound
-          this.scaleX = comp * flipSign;
+          this.scaleX = -comp * flipSign;
           this.turnStateLabel = `2.5D Turn: Banking into depth (${(comp * 100).toFixed(0)}% W)`;
         } else {
           // Expanding facing Westbound (Head points West/Left -> swims forward!)
-          this.scaleX = -comp * flipSign;
+          this.scaleX = comp * flipSign;
           this.turnStateLabel = `2.5D Turn: Angling Westward (${(comp * 100).toFixed(0)}% W)`;
         }
         this.facingDirection = -1;
       }
       // Segment 3 (55.5s -> 58.0s / 0.0s): Easing into loop Westbound
       else {
-        this.scaleX = -1.0 * flipSign;
+        this.scaleX = 1.0 * flipSign;
         this.scaleY = 1.0;
         this.facingDirection = -1;
         this.turnStateLabel = flipSign > 0 ? 'Swimming Right-to-Left (Westbound) ←' : 'Swimming Eastbound →';
