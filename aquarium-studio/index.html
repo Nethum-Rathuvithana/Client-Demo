@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AQUARIA • Scenery Studio & Realistic Fish Workbench</title>
+  <meta name="description" content="Dedicated scenery studio for composing realistic schooling fish, full-screen global translation paths, and interactive specimen hover.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            abyss: '#030D10',
+            'deep-teal': '#06191E',
+            'mid-teal': '#0A252C',
+            'neon-blue': '#00E5FF',
+            'neon-red': '#FF2A5F'
+          },
+          fontFamily: {
+            cinzel: ['Cinzel', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-abyss text-stone-100 overflow-hidden relative">
+
+  <!-- ================= CANVAS LIVING AQUARIUM VIEWPORT ================= -->
+  <canvas id="studio-canvas"></canvas>
+
+  <!-- Atmospheric Lighting & Caustic Shimmer -->
+  <div class="caustic-overlay"></div>
+  <div class="tank-frame-vignette"></div>
+
+  <!-- Hidden Source Video (loaded for frame comparison and telemetry) -->
+  <video id="source-tetra-video" src="neon_tetra_video.mp4" loop muted playsinline autoplay class="hidden"></video>
+
+  <!-- ================= HOVER SPECIMEN DETAILS CARD ================= -->
+  <div id="fish-hover-card">
+    <div class="specimen-card-inner space-y-2.5">
+      <div class="flex items-center justify-between gap-3 border-b border-cyan-500/25 pb-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span class="text-[10px] uppercase font-bold tracking-widest text-cyan-400 font-cinzel">Target Locked</span>
+        </div>
+        <span id="card-price" class="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-mono text-xs font-bold border border-cyan-500/40">
+          $3.49
+        </span>
+      </div>
+
+      <div>
+        <h4 id="card-name" class="text-base font-bold font-cinzel text-white leading-tight">Neon Tetra</h4>
+        <p id="card-latin" class="text-xs text-stone-400 italic">Paracheirodon innesi</p>
+      </div>
+
+      <div class="space-y-1 text-[11px] text-stone-300">
+        <div class="flex items-center justify-between">
+          <span class="text-stone-400">Natural Scale:</span>
+          <span class="font-semibold text-emerald-300">2.5 - 3.0 cm (1.0 in)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-stone-400">Zone / Water Column:</span>
+          <span class="font-semibold text-cyan-300">Midground Shoaler</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-stone-400">Telemetry:</span>
+          <span id="card-telemetry" class="font-mono text-[10px] text-stone-400">Speed: 0.2x • Hover Active</span>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-cyan-500/20 flex items-center justify-between text-[10px] text-stone-400">
+        <span>Curious behavior: Decelerating</span>
+        <span class="text-cyan-400 font-bold">● Live Track</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOP NAVIGATION & HUD BAR ================= -->
+  <div class="absolute top-6 left-6 z-30 flex items-center gap-4">
+    <a href="../index.html" class="px-3.5 py-2 rounded-xl bg-stone-950/80 hover:bg-stone-900 border border-cyan-500/30 text-stone-300 hover:text-white text-xs font-semibold flex items-center gap-2 backdrop-blur-md transition-all shadow-lg hover:border-cyan-400">
+      <i data-lucide="arrow-left" class="w-3.5 h-3.5 text-cyan-400"></i>
+      <span>Master Showcase Hub</span>
+    </a>
+
+    <a href="../aquarium/index.html" class="px-3.5 py-2 rounded-xl bg-stone-950/80 hover:bg-stone-900 border border-emerald-500/30 text-emerald-300 hover:text-emerald-200 text-xs font-semibold flex items-center gap-2 backdrop-blur-md transition-all shadow-lg hover:border-emerald-400">
+      <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-emerald-400"></i>
+      <span>AQUARIA E-Commerce Store</span>
+    </a>
+  </div>
+
+  <!-- Title Badge (Top Center) -->
+  <div class="absolute top-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none text-center hidden md:block">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[11px] font-semibold tracking-widest uppercase mb-1">
+      <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+      <span>World Path Simulation Workbench</span>
+    </div>
+    <h1 class="text-xl font-bold font-cinzel text-white drop-shadow-[0_2px_12px_rgba(0,229,255,0.4)]">
+      Aquarium Scenery Studio
+    </h1>
+    <p class="text-[11px] text-stone-400 font-light">
+      Hover over any swimming fish to slow it down & inspect telemetry • Move mouse to interact
+    </p>
+  </div>
+
+  <!-- ================= SCENERY STUDIO WORKBENCH HUD ================= -->
+  <div class="studio-hud">
+    
+    <!-- Expanded Workbench Controls -->
+    <div id="studio-hud-panel" class="studio-hud-panel space-y-4 max-h-[85vh] overflow-y-auto custom-scrollbar">
+      
+      <!-- Studio Header -->
+      <div class="flex items-center justify-between border-b border-cyan-500/25 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></div>
+          <div>
+            <h3 class="font-bold font-cinzel text-sm text-white">Scenery Workbench</h3>
+            <span class="text-[10px] text-stone-400 font-mono">Autonomous World Paths</span>
+          </div>
+        </div>
+        <button id="btn-toggle-hud" class="w-7 h-7 rounded-lg bg-stone-900/80 hover:bg-stone-800 text-stone-300 hover:text-white flex items-center justify-center transition-colors">
+          <i data-lucide="chevron-up" class="w-4 h-4" id="hud-toggle-icon"></i>
+        </button>
+      </div>
+
+      <!-- Scenery Layers Pipeline -->
+      <div class="space-y-2">
+        <label class="text-[10px] uppercase font-bold tracking-wider text-stone-300 block">
+          Scenery Staging Pipeline:
+        </label>
+        <div class="space-y-1.5 text-xs">
+          <!-- Active Fish Slot -->
+          <div class="p-2.5 rounded-xl bg-cyan-500/15 border border-cyan-500/40 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+              <div>
+                <strong class="text-cyan-200 block text-xs">Specimen #1: Neon Tetra</strong>
+                <span class="text-[10px] text-stone-400 font-mono">Video Loop + Fullscreen Path</span>
+              </div>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">Active</span>
+          </div>
+
+          <!-- Open Fish Slot #2 -->
+          <div class="p-2 rounded-xl bg-stone-900/60 border border-dashed border-stone-700/80 flex items-center justify-between text-stone-400">
+            <span class="text-[11px]">+ Specimen #2 (Ready for next video)</span>
+            <span class="text-[10px] text-stone-500">Slot Open</span>
+          </div>
+
+          <!-- Open Plant Layers Slot -->
+          <div class="p-2 rounded-xl bg-stone-900/60 border border-dashed border-emerald-500/30 flex items-center justify-between text-stone-400">
+            <span class="text-[11px] text-emerald-400/80">+ Plant Layers (Midground & Carpet)</span>
+            <span class="text-[10px] text-stone-500">Layer Slot</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Global World Path Translation Controls -->
+      <div class="space-y-3 pt-2 border-t border-cyan-500/20">
+        
+        <!-- Fish Scale (Realistic Size) -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-stone-300">Fish Realistic Scale:</span>
+            <span id="label-fish-scale" class="font-mono text-cyan-300 font-bold">45px (1.0x Real)</span>
+          </div>
+          <input type="range" id="slider-fish-scale" min="20" max="110" value="45" class="w-full">
+          <span class="text-[9px] text-stone-400 block">Dial to natural 2.5-3cm size or zoom for inspecting details.</span>
+        </div>
+
+        <!-- School Population Count -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-stone-300">Schooling Population:</span>
+            <span id="label-fish-count" class="font-mono text-cyan-300 font-bold">14 Tetras</span>
+          </div>
+          <input type="range" id="slider-fish-count" min="1" max="30" value="14" class="w-full">
+        </div>
+
+        <!-- Cruising Speed -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-stone-300">Cruising Speed:</span>
+            <span id="label-fish-speed" class="font-mono text-cyan-300 font-bold">1.0x Natural</span>
+          </div>
+          <input type="range" id="slider-fish-speed" min="3" max="25" value="10" class="w-full">
+        </div>
+
+        <!-- Flocking Cohesion -->
+        <div class="space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-stone-300">Flocking Tightness:</span>
+            <span id="label-flocking" class="font-mono text-cyan-300 font-bold">Balanced</span>
+          </div>
+          <input type="range" id="slider-flocking" min="1" max="5" value="3" class="w-full">
+        </div>
+
+      </div>
+
+      <!-- Interactive Playground Actions -->
+      <div class="pt-2 border-t border-cyan-500/20 space-y-2">
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button id="btn-feed" class="py-2.5 rounded-xl font-bold bg-cyan-500 hover:bg-cyan-400 text-stone-950 transition-all flex items-center justify-center gap-1.5 shadow-md shadow-cyan-500/20">
+            <i data-lucide="cookie" class="w-3.5 h-3.5"></i>
+            <span>Feed Pellets</span>
+          </button>
+          <button id="btn-scatter" class="py-2.5 rounded-xl font-semibold bg-stone-900 hover:bg-stone-800 text-stone-200 border border-stone-700/80 transition-all flex items-center justify-center gap-1.5">
+            <i data-lucide="wind" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span>Scatter School</span>
+          </button>
+        </div>
+
+        <!-- Toggle Source Video PiP -->
+        <button id="btn-toggle-video-pip" class="w-full py-2 rounded-xl bg-stone-900/80 hover:bg-stone-800 text-[11px] font-semibold text-stone-300 border border-stone-800 flex items-center justify-center gap-1.5 transition-all">
+          <i data-lucide="video" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Toggle Raw Video Comparison PiP</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Raw Video Mini PiP Inspector (Collapsible) -->
+    <div id="video-pip-container" class="hidden mt-3 p-3 rounded-2xl bg-stone-950/95 border border-cyan-500/30 shadow-2xl backdrop-blur-xl">
+      <div class="flex items-center justify-between mb-2 text-xs">
+        <span class="font-bold text-cyan-300 font-cinzel text-[11px]">Source Reference Video</span>
+        <span class="text-[9px] text-stone-400 font-mono">gemini_generated_video_de1a403a.mp4</span>
+      </div>
+      <div class="rounded-xl overflow-hidden border border-cyan-500/20 relative aspect-video bg-black">
+        <video id="pip-video" src="neon_tetra_video.mp4" loop muted playsinline autoplay class="w-full h-full object-cover"></video>
+      </div>
+      <p class="text-[9px] text-stone-400 mt-2 leading-relaxed">
+        Notice in raw video fish stay in place. Our world-path engine takes this organic motion and animates it seamlessly across the entire 100vw × 100vh canvas!
+      </p>
+    </div>
+
+  </div>
+
+  <script src="studio.js"></script>
+</body>
+</html>
