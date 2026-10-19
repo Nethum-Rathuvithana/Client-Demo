@@ -658,6 +658,54 @@ window.AQUARIA_DATA = {
         "Fine Amazon Silica Sand & Botanical Pod Pack"
       ],
       idealStock: "Pair of Silver Angelfish, 25 Neon Tetras, 8 Panda Corydoras, 10 Harlequin Rasboras"
+    },
+    {
+      id: "paludarium-90h",
+      slug: "mountain-mist-paludarium",
+      name: "Mountain Mist 90H High-Clad Paludarium",
+      category: "aquariums",
+      style: "Riparium & Emergent Moss Forest",
+      volume: "140 Liters (37 Gallons Submerged)",
+      dimensions: "90 x 45 x 60 cm (36 x 18 x 24 in)",
+      glass: "10mm Low-Iron Optiwhite Glass with Mist Portals",
+      price: 1150,
+      priceFormatted: "$1,150.00",
+      inStock: true,
+      badge: "Emergent Masterpiece",
+      image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+      description: "A seamless transition from underwater riverbed to living mossy rock face. Features integrated silent water cascade, automated ultra-fine cool mist generator, and emergent epiphytic fern pockets.",
+      includedEquipment: [
+        "90H High-Clad Paludarium Rimless Tank",
+        "Dual-Stage Submerged Canister & Waterfall Pump",
+        "Ultrasonic Cool Mist Generating Cell",
+        "High-PAR Dual Spectrum Riparium Light Bar",
+        "Living Moss Wall Module & Lava Stone Hardscape"
+      ],
+      idealStock: "15 Cardinal Tetras, 6 Splash Tetras, Vampire Crabs, 10 Caridina Shrimp"
+    },
+    {
+      id: "shallow-bonsai-45f",
+      slug: "kyoto-stream-shallow-bonsai",
+      name: "Kyoto Stream 45F Shallow Bonsai Pond",
+      category: "aquariums",
+      style: "Japanese Shallow Stream Garden",
+      volume: "22 Liters (5.8 Gallons)",
+      dimensions: "45 x 24 x 16 cm (18 x 9.5 x 6.3 in)",
+      glass: "8mm Crystal Low-Iron Rimless Glass",
+      price: 295,
+      priceFormatted: "$295.00",
+      inStock: true,
+      badge: "Top-Down Panorama",
+      image: "https://images.unsplash.com/photo-1535083783855-76ae62b2914e?auto=format&fit=crop&w=800&q=80",
+      description: "Ultra-shallow architectural water garden optimized for panoramic top-down viewing. Emphasizes emergent driftwood branches, floating Amazon Frogbit rosettes, and gliding dwarf shrimp.",
+      includedEquipment: [
+        "45F Ultra-Shallow Rimless Low-Iron Glass Tank",
+        "Surface Flow Skimmer & Micro Filter",
+        "Slim Profile Cree LED Pendant Light",
+        "Selected Dwarf Bonsai Driftwood Piece",
+        "Cosmetic White Stream River Sand"
+      ],
+      idealStock: "Colony of 12 Orange Sunkist Shrimp, 6 Chili Rasboras, 2 Nerite Snails"
     }
   ],
 

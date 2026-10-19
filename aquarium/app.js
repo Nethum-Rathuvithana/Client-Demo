@@ -1233,66 +1233,222 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPlantPerspectiveStack();
 
   
-  // --- 6. Horizontal Architectural Glass Aquascapes ---
-  const tanksContainer = document.getElementById('tanks-horizontal-container');
+  // --- 6. Horizontal Architectural Glass Aquascapes (3D Perspective Stack) ---
+  // "add the same to horizontal scrollong part"
+  // "we can see the next 2 ones to come each smaller than the one closer tothe middle and the middle main one the biggest"
+  const horizontalTankStage = document.getElementById('horizontal-tank-stage');
+  const horizontalTankStack = document.getElementById('horizontal-tank-stack');
   const tanksLeftBtn = document.getElementById('tanks-scroll-left');
   const tanksRightBtn = document.getElementById('tanks-scroll-right');
+  const activeTankBadge = document.getElementById('active-tank-badge');
+  const activeTankStyle = document.getElementById('active-tank-style');
+  const activeTankName = document.getElementById('active-tank-name');
+  const activeTankGlass = document.getElementById('active-tank-glass');
+  const activeTankPrice = document.getElementById('active-tank-price');
+  const btnActiveTankCart = document.getElementById('btn-active-tank-cart');
+  const tankPaginationPills = document.getElementById('tank-pagination-pills');
 
-  function renderHorizontalTanks() {
-    if (!tanksContainer) return;
-    tanksContainer.innerHTML = data.aquariums.map(t => `
-      <div class="horizontal-aquarium-card p-6 flex flex-col justify-between group cursor-pointer" onclick="window.AQUARIA_APP.openProductModalById('${t.id}')">
-        <div class="relative h-64 rounded-2xl overflow-hidden mb-5 border border-cyan-500/20">
-          <img src="${t.image}" alt="${t.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
-          <div class="absolute inset-0 bg-gradient-to-t from-abyss via-transparent to-transparent"></div>
-          <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500 text-stone-950 font-cinzel">
-            ${t.badge} • ${t.volume}
-          </span>
-          <div class="absolute bottom-3 left-3 right-3 text-xs text-stone-300 font-mono">
-            ${t.dimensions}
-          </div>
-        </div>
+  let activeTankIndex = 0;
+  const tankList = data.aquariums || [];
+  const totalTanks = tankList.length;
 
-        <div>
-          <span class="text-[10px] uppercase font-bold tracking-widest text-cyan-400 block mb-1">${t.style}</span>
-          <h4 class="text-xl font-bold font-cinzel text-white group-hover:text-cyan-200 transition-colors mb-2">
-            ${t.name}
-          </h4>
-          <p class="text-xs text-stone-300/80 leading-relaxed mb-4 line-clamp-3">
-            ${t.description}
-          </p>
-          <div class="p-3 rounded-xl bg-stone-900 border border-stone-800 text-[11px] text-stone-300 mb-4">
-            <strong class="text-cyan-300 block mb-0.5">Glass Standard:</strong>
-            ${t.glass}
-          </div>
-        </div>
+  function renderTankPerspectiveStack() {
+    if (!horizontalTankStack || totalTanks === 0) return;
 
-        <div class="pt-4 border-t border-cyan-500/20 flex items-center justify-between">
-          <div>
-            <span class="text-[10px] uppercase text-stone-400 block">Complete Setup</span>
-            <span class="text-2xl font-bold text-cyan-300 font-cinzel">${t.priceFormatted}</span>
+    // 1. Build cards HTML if not initialized
+    if (!horizontalTankStack.hasChildNodes() || horizontalTankStack.children.length !== totalTanks) {
+      horizontalTankStack.innerHTML = tankList.map((t, idx) => {
+        return `
+          <div class="tank-stack-card" id="tank-card-${idx}" data-idx="${idx}" onclick="window.AQUARIA_APP.onTankCardClick(${idx})">
+            <div class="flex flex-col gap-3">
+              <!-- Tank Viewport Image -->
+              <div class="relative h-48 sm:h-56 rounded-2xl overflow-hidden border border-cyan-500/25 bg-abyss">
+                <img src="${t.image}" alt="${t.name}" class="w-full h-full object-cover" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-abyss/85 via-transparent to-transparent"></div>
+                <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500 text-stone-950 font-cinzel">
+                  ${t.badge} • ${t.volume}
+                </span>
+                <span class="absolute bottom-2.5 right-2.5 px-2.5 py-0.5 rounded-lg bg-stone-950/85 backdrop-blur-md text-xs font-bold text-cyan-300 font-cinzel border border-cyan-500/30">
+                  ${t.priceFormatted}
+                </span>
+                <span class="absolute bottom-2.5 left-2.5 text-[10px] font-mono text-stone-300/90">
+                  ${t.dimensions}
+                </span>
+              </div>
+
+              <!-- Tank Description & Glass Standards -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[10px] uppercase font-bold tracking-widest text-cyan-400 truncate">${t.style}</span>
+                  <span class="text-[10px] text-stone-400 font-mono">System 0${idx + 1}</span>
+                </div>
+                <h4 class="text-base sm:text-lg font-bold font-cinzel text-white truncate">
+                  ${t.name}
+                </h4>
+                <p class="text-xs text-stone-300/80 line-clamp-2 leading-relaxed">
+                  ${t.description}
+                </p>
+
+                <div class="p-2 rounded-xl bg-stone-900/80 border border-stone-800 text-[10px] text-stone-300 truncate">
+                  <span class="text-cyan-300 font-semibold">Glass Standard:</span> ${t.glass}
+                </div>
+
+                <!-- Center Active Controls -->
+                <div class="pt-2 flex items-center gap-2">
+                  <button class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-stone-950 transition-all flex items-center gap-1 shadow-md shadow-cyan-500/20"
+                          onclick="event.stopPropagation(); window.AQUARIA_APP.addToCartById('${t.id}')">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Add to Cart</span>
+                  </button>
+                  <button class="px-3 py-1.5 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 text-xs font-semibold border border-stone-700/60"
+                          onclick="event.stopPropagation(); window.AQUARIA_APP.openProductModalById('${t.id}')">
+                    <span>Explore System</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <button class="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-stone-950 font-bold text-xs uppercase tracking-wider transition-all"
-                  onclick="event.stopPropagation(); window.AQUARIA_APP.openProductModalById('${t.id}')">
-            Explore System
+        `;
+      }).join('');
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    // 2. Position each card horizontally in 3D:
+    // MIDDLE: BIGGEST (pos-h-center)
+    // NEXT 1 TO COME (RIGHT): SMALLER (pos-h-near-next)
+    // NEXT 2 TO COME (RIGHT): EVEN SMALLER (pos-h-far-next)
+    // PREV 1 (LEFT): SMALLER (pos-h-near-prev)
+    // PREV 2 (LEFT): EVEN SMALLER (pos-h-far-prev)
+    tankList.forEach((_, idx) => {
+      const card = document.getElementById(`tank-card-${idx}`);
+      if (!card) return;
+
+      // Circular diff in [-total/2, total/2]
+      let diff = (idx - activeTankIndex) % totalTanks;
+      if (diff > totalTanks / 2) diff -= totalTanks;
+      if (diff < -totalTanks / 2) diff += totalTanks;
+
+      card.classList.remove(
+        'pos-h-center',
+        'pos-h-near-next',
+        'pos-h-near-prev',
+        'pos-h-far-next',
+        'pos-h-far-prev',
+        'pos-h-hidden-next',
+        'pos-h-hidden-prev'
+      );
+
+      if (diff === 0) {
+        card.classList.add('pos-h-center');
+      } else if (diff === 1) {
+        card.classList.add('pos-h-near-next');
+      } else if (diff === 2) {
+        card.classList.add('pos-h-far-next');
+      } else if (diff === -1) {
+        card.classList.add('pos-h-near-prev');
+      } else if (diff === -2) {
+        card.classList.add('pos-h-far-prev');
+      } else if (diff > 2) {
+        card.classList.add('pos-h-hidden-next');
+      } else {
+        card.classList.add('pos-h-hidden-prev');
+      }
+    });
+
+    // 3. Update Bottom Telemetry Panel for Active Tank
+    const cur = tankList[activeTankIndex];
+    if (cur) {
+      if (activeTankBadge) activeTankBadge.textContent = `${cur.badge} • ${cur.volume}`;
+      if (activeTankStyle) activeTankStyle.textContent = cur.style;
+      if (activeTankName) activeTankName.textContent = cur.name;
+      if (activeTankGlass) activeTankGlass.textContent = cur.glass;
+      if (activeTankPrice) activeTankPrice.textContent = cur.priceFormatted;
+
+      if (btnActiveTankCart) {
+        btnActiveTankCart.onclick = () => window.AQUARIA_APP.addToCartById(cur.id);
+      }
+    }
+
+    // 4. Update Navigation Pills
+    if (tankPaginationPills) {
+      tankPaginationPills.innerHTML = tankList.map((t, idx) => {
+        const isActive = idx === activeTankIndex;
+        const activeClass = isActive 
+          ? 'bg-cyan-500 text-stone-950 font-bold border-cyan-400 shadow-md shadow-cyan-500/30' 
+          : 'bg-stone-900/80 text-stone-400 hover:text-stone-200 border-stone-800';
+        const shortName = t.name.split(' ')[0] + ' ' + (t.name.split(' ')[1] || '');
+        return `
+          <button onclick="window.AQUARIA_APP.setTankIndex(${idx})" 
+                  class="px-3 py-1.5 rounded-xl border text-[11px] tracking-wide transition-all ${activeClass}">
+            0${idx + 1} ${shortName}
           </button>
-        </div>
-      </div>
-    `).join('');
-
-    if (window.lucide) window.lucide.createIcons();
-  }
-  renderHorizontalTanks();
-
-  if (tanksLeftBtn && tanksRightBtn && tanksContainer) {
-    tanksLeftBtn.addEventListener('click', () => {
-      tanksContainer.scrollBy({ left: -450, behavior: 'smooth' });
-    });
-    tanksRightBtn.addEventListener('click', () => {
-      tanksContainer.scrollBy({ left: 450, behavior: 'smooth' });
-    });
+        `;
+      }).join('');
+    }
   }
 
+  function setTankIndex(newIdx) {
+    if (newIdx < 0) newIdx = totalTanks - 1;
+    if (newIdx >= totalTanks) newIdx = 0;
+    activeTankIndex = newIdx;
+    renderTankPerspectiveStack();
+  }
+
+  function nextTank() {
+    setTankIndex(activeTankIndex + 1);
+  }
+
+  function prevTank() {
+    setTankIndex(activeTankIndex - 1);
+  }
+
+  // Bind Left / Right Buttons
+  if (tanksLeftBtn) tanksLeftBtn.addEventListener('click', prevTank);
+  if (tanksRightBtn) tanksRightBtn.addEventListener('click', nextTank);
+
+  // Wheel Scroll over Horizontal Tank Stage:
+  // Glides left/right seamlessly
+  if (horizontalTankStage) {
+    let lastWheelTime = 0;
+    horizontalTankStage.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const now = Date.now();
+      if (now - lastWheelTime < 240) return; // throttle for smooth step
+      lastWheelTime = now;
+
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (delta > 0) {
+        nextTank();
+      } else if (delta < 0) {
+        prevTank();
+      }
+    }, { passive: false });
+
+    // Touch Swipe over Stage
+    let touchStartX = 0;
+    horizontalTankStage.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+
+    horizontalTankStage.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const diffX = touchStartX - touchEndX;
+      if (Math.abs(diffX) > 40) {
+        if (diffX > 0) nextTank();
+        else prevTank();
+      }
+    }, { passive: true });
+  }
+
+  // Expose to window.AQUARIA_APP
+  window.AQUARIA_APP.setTankIndex = setTankIndex;
+  window.AQUARIA_APP.onTankCardClick = (idx) => {
+    setTankIndex(idx);
+  };
+
+  renderTankPerspectiveStack();
+
+  
   // --- 7. Master Catalog Grid & Search ---
   const catalogGrid = document.getElementById('catalog-products-grid');
   const categoryTabs = document.querySelectorAll('.catalog-cat-tab');

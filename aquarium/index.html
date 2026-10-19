@@ -404,40 +404,119 @@
   </section>
 
   <!-- ================= 4. AQUASCAPES: HORIZONTAL ARCHITECTURAL GLASS GLIDE ================= -->
-  <!-- Complete tanks displayed with horizontal sliding viewports like viewing glass panes in a studio -->
-  <section id="aquarium-setups" class="relative z-10 py-24 px-4 sm:px-6 lg:px-8 border-t border-cyan-500/20 bg-abyss/90 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto space-y-10">
+  <!-- "add the same to horizontal scrollong part" -->
+  <!-- "we can see the next 2 ones to come each smaller than the one closer tothe middle and the middle main one the biggest" -->
+  <section id="aquarium-setups" class="relative z-10 py-24 px-4 sm:px-6 lg:px-8 border-t border-cyan-500/20 bg-abyss/90 backdrop-blur-md overflow-hidden">
+    <!-- Ambient Caustic Water Glow Effect -->
+    <div class="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-400 via-transparent to-transparent"></div>
+
+    <div class="max-w-7xl mx-auto space-y-10 relative z-10">
       
       <!-- Section Header with Horizontal Glide Controls -->
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold tracking-widest uppercase mb-2">
+        <div class="space-y-2 max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold tracking-widest uppercase">
             <i data-lucide="layers" class="w-3.5 h-3.5"></i>
             <span>Depth: 5.0m • Studio Viewports</span>
           </div>
           <h2 class="text-3xl sm:text-5xl font-bold font-cinzel text-white">
             Architectural Aquascapes
           </h2>
-          <p class="text-xs sm:text-sm text-stone-400 mt-1 max-w-xl">
-            Swipe or glide horizontally through turnkey living ecosystems. Built with diamond-cut ultra-clear low-iron glass, silent canister filtration, and curated hardscape.
+          <p class="text-xs sm:text-sm text-stone-300/80 font-light leading-relaxed">
+            Turnkey living ecosystems. Scroll or drag horizontally through the studio — viewing upcoming aquascapes in perspective with the active system centered and enlarged.
           </p>
         </div>
 
-        <!-- Glide buttons -->
-        <div class="flex items-center gap-2">
-          <button id="tanks-scroll-left" class="p-3 rounded-xl bg-stone-900 border border-stone-800 text-cyan-400 hover:bg-stone-800 transition-colors" title="Scroll Left">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-          </button>
-          <button id="tanks-scroll-right" class="p-3 rounded-xl bg-stone-900 border border-stone-800 text-cyan-400 hover:bg-stone-800 transition-colors" title="Scroll Right">
-            <i data-lucide="arrow-right" class="w-4 h-4"></i>
-          </button>
+        <!-- Glide buttons & Navigation Hints -->
+        <div class="flex items-center gap-3 shrink-0">
+          <div class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-900/60 border border-cyan-500/20 text-[11px] text-stone-300">
+            <i data-lucide="mouse" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span>Scroll Wheel / Drag on Stage</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="tanks-scroll-left" class="w-10 h-10 rounded-xl bg-stone-900/80 hover:bg-cyan-500/20 text-stone-300 hover:text-cyan-300 border border-cyan-500/25 flex items-center justify-center transition-all shadow-lg hover:border-cyan-400" title="Previous Aquascape (Left)">
+              <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </button>
+            <button id="tanks-scroll-right" class="w-10 h-10 rounded-xl bg-stone-900/80 hover:bg-cyan-500/20 text-stone-300 hover:text-cyan-300 border border-cyan-500/25 flex items-center justify-center transition-all shadow-lg hover:border-cyan-400" title="Next Aquascape (Right)">
+              <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Horizontal Scrolling Glass Gallery -->
-      <div class="horizontal-aquarium-scroll" id="tanks-horizontal-container">
-        <!-- Rendered dynamically -->
+      <!-- Horizontal 3D Perspective Stage -->
+      <div id="horizontal-tank-stage" class="horizontal-tank-stage relative group cursor-grab active:cursor-grabbing">
+        
+        <!-- Left Shadow Vignette -->
+        <div class="absolute left-0 inset-y-0 w-28 bg-gradient-to-r from-abyss via-abyss/60 to-transparent pointer-events-none z-20"></div>
+        
+        <!-- Right Shadow Vignette -->
+        <div class="absolute right-0 inset-y-0 w-28 bg-gradient-to-l from-abyss via-abyss/60 to-transparent pointer-events-none z-20"></div>
+
+        <!-- Center Focus Reticle Indicator -->
+        <div class="absolute inset-x-0 bottom-3 h-1.5 flex items-center justify-center pointer-events-none z-20">
+          <div class="w-20 h-1.5 rounded-full bg-cyan-400/80 shadow-[0_0_12px_#22d3ee]"></div>
+        </div>
+
+        <!-- Stack Container: Houses all tank cards dynamically positioned horizontally in 3D -->
+        <div id="horizontal-tank-stack" class="horizontal-tank-stack">
+          <!-- Rendered via renderTankPerspectiveStack() in app.js -->
+        </div>
+
+        <!-- Floating Perspective Guide Pill -->
+        <div class="absolute bottom-4 left-6 z-30 pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-full bg-stone-950/80 backdrop-blur-md border border-cyan-500/20 text-[11px] text-stone-300">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span>Middle = Focused • Next 2 to come = Scaled to the Right</span>
+        </div>
+
       </div>
+
+      <!-- Active Aquascape Telemetry & Stratum Selector Pills -->
+      <div class="aqua-card p-6 rounded-3xl border-cyan-500/30 bg-stone-950/70 backdrop-blur-xl space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-cyan-500/20">
+          
+          <!-- Active Tank Specs Summary -->
+          <div class="space-y-2">
+            <div class="flex items-center gap-3">
+              <span id="active-tank-badge" class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500 text-stone-950 font-cinzel">
+                Best Seller
+              </span>
+              <span id="active-tank-style" class="text-xs uppercase font-bold tracking-widest text-cyan-400">
+                Nature Style (Takashi Amano Inspired)
+              </span>
+            </div>
+            <h3 id="active-tank-name" class="text-2xl sm:text-3xl font-bold font-cinzel text-white">
+              Nature Aquascape 60P Complete System
+            </h3>
+            <p id="active-tank-glass" class="text-xs text-stone-300 font-mono">
+              10mm Ultra-Clear Low-Iron Diamond Polish Glass (91% Light Transmission)
+            </p>
+          </div>
+
+          <!-- Active Price & Cart Action -->
+          <div class="flex items-center gap-4 shrink-0">
+            <div>
+              <span class="text-[10px] uppercase text-stone-400 block font-mono">Turnkey Ecosystem</span>
+              <span id="active-tank-price" class="text-2xl sm:text-3xl font-bold text-cyan-300 font-cinzel">$485.00</span>
+            </div>
+            <button id="btn-active-tank-cart" class="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-stone-950 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-2 shadow-lg shadow-cyan-500/25">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Add System to Cart</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Quick Selector Pills for all Aquascapes -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <span class="text-[10px] uppercase font-bold tracking-wider text-stone-400 shrink-0">Select Viewport System:</span>
+          <div id="tank-pagination-pills" class="flex flex-wrap gap-2">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </section>
 
