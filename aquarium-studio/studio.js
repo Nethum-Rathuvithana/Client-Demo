@@ -130,10 +130,16 @@ document.addEventListener('DOMContentLoaded', () => {
     video.play().catch(() => {});
   }
 
-  let cropBox = { sx: 0, sy: 0, sw: keyWidth, sh: keyHeight };
+  // Stable cropbox to prevent micro-jitter of the sprite bounding box
+  let cropBox = { sx: 50, sy: 50, sw: 540, sh: 260 };
+  let lastVideoTime = -1;
 
   function processChromaKey() {
     if (!isVideoReady || video.paused || video.ended) return;
+
+    // Only process when video actually presents a new frame (avoids redundant CPU bus stalls)
+    if (Math.abs(video.currentTime - lastVideoTime) < 0.005) return;
+    lastVideoTime = video.currentTime;
 
     keyedCtx.drawImage(video, 0, 0, keyWidth, keyHeight);
     const frame = keyedCtx.getImageData(0, 0, keyWidth, keyHeight);
@@ -141,9 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const len = data.length;
     const threshold = config.chromaThreshold;
     const softness = config.chromaSoftness;
-
-    let minX = keyWidth, minY = keyHeight, maxX = 0, maxY = 0;
-    let foundFish = false;
 
     for (let i = 0; i < len; i += 4) {
       const r = data[i];
@@ -159,15 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
         data[i + 3] = Math.round(data[i + 3] * alphaRatio);
         data[i + 1] = maxOther;
       } else {
-        const pixelIdx = i / 4;
-        const px = pixelIdx % keyWidth;
-        const py = Math.floor(pixelIdx / keyWidth);
-        if (px < minX) minX = px;
-        if (px > maxX) maxX = px;
-        if (py < minY) minY = py;
-        if (py > maxY) maxY = py;
-        foundFish = true;
-
         if (g > maxOther * 1.15) {
           data[i + 1] = Math.round(maxOther * 1.05);
         }
@@ -175,14 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     keyedCtx.putImageData(frame, 0, 0);
-
-    if (foundFish && maxX > minX && maxY > minY) {
-      const pad = 10;
-      cropBox.sx = Math.max(0, minX - pad);
-      cropBox.sy = Math.max(0, minY - pad);
-      cropBox.sw = Math.min(keyWidth - cropBox.sx, (maxX - minX) + pad * 2);
-      cropBox.sh = Math.min(keyHeight - cropBox.sy, (maxY - minY) + pad * 2);
-    }
   }
 
   // =========================================================================
@@ -229,17 +215,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const segDuration = w2.t - w1.t;
     const rawT = (loopTime - w1.t) / segDuration;
 
-    // Hermite smoothstep for natural acceleration/deceleration between anchor points
-    const easedT = rawT * rawT * (3 - 2 * rawT);
-
-    // Closed loop neighbors
+    // Pure Catmull-Rom C1 continuity: perfectly continuous velocity with zero stutter or stops at waypoints
     const idx0 = (segIdx - 1 + N) % N;
     const idx1 = segIdx;
     const idx2 = (segIdx + 1) % N;
     const idx3 = (segIdx + 2) % N;
 
-    const normX = catmullRom(waypoints[idx0].x, waypoints[idx1].x, waypoints[idx2].x, waypoints[idx3].x, easedT);
-    const normY = catmullRom(waypoints[idx0].y, waypoints[idx1].y, waypoints[idx2].y, waypoints[idx3].y, easedT);
+    const normX = catmullRom(waypoints[idx0].x, waypoints[idx1].x, waypoints[idx2].x, waypoints[idx3].x, rawT);
+    const normY = catmullRom(waypoints[idx0].y, waypoints[idx1].y, waypoints[idx2].y, waypoints[idx3].y, rawT);
 
     // Micro-sway during hover phase (20s - 23s)
     let microX = 0;
