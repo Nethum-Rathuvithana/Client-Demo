@@ -1917,7 +1917,369 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       renderCatalog();
       const catEl = document.getElementById('complete-catalog');
-      if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
+      if (catEl) {
+        if (window.AQUARIA_LENIS) {
+          window.AQUARIA_LENIS.scrollTo(catEl, { duration: 1.4 });
+        } else {
+          catEl.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     }
   };
+
+  // =========================================================================
+  // --- 8. LENIS ULTRA-SMOOTH INERTIAL SCROLL ENGINE ---
+  // =========================================================================
+  let lenisInstance = null;
+  if (typeof Lenis !== 'undefined') {
+    lenisInstance = new Lenis({
+      duration: 1.35,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 0.95,
+      touchMultiplier: 1.6,
+      infinite: false,
+    });
+
+    function raf(time) {
+      lenisInstance.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    window.AQUARIA_LENIS = lenisInstance;
+
+    // Smooth anchor navigation
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const targetId = this.getAttribute('href');
+        if (targetId && targetId !== '#') {
+          const target = document.querySelector(targetId);
+          if (target && lenisInstance) {
+            e.preventDefault();
+            lenisInstance.scrollTo(target, { offset: -20, duration: 1.4 });
+          }
+        }
+      });
+    });
+  }
+
+  // =========================================================================
+  // --- 9. MATTER.JS 2D PHYSICS ENGINE & GRAVITY SIMULATION ---
+  // =========================================================================
+  const physicsCanvas = document.getElementById('aquarium-physics-canvas');
+  const physicsHudContainer = document.getElementById('physics-hud-container');
+  const physicsHudPanel = document.getElementById('physics-hud-panel');
+  const btnTogglePhysicsHud = document.getElementById('btn-toggle-physics-hud');
+  const btnClosePhysicsHud = document.getElementById('btn-close-physics-hud');
+  const hudGravityVal = document.getElementById('hud-gravity-val');
+  const pillGravityLabel = document.getElementById('pill-gravity-label');
+  const hudSliderLabel = document.getElementById('hud-slider-label');
+  const hudScrollVel = document.getElementById('hud-scroll-vel');
+  const hudBodyCount = document.getElementById('hud-body-count');
+  const gravitySlider = document.getElementById('gravity-slider');
+  const gravityPresetBtns = document.querySelectorAll('.gravity-preset-btn');
+  const btnDropFood = document.getElementById('btn-drop-food');
+  const btnClearPhysics = document.getElementById('btn-clear-physics');
+
+  let physicsEngine = null;
+  let physicsRunner = null;
+  let activeBodies = [];
+  let currentGravityY = 0.35; // Default Aquatic Buoyant Gravity
+  let wallBodies = [];
+
+  if (typeof Matter !== 'undefined' && physicsCanvas) {
+    const { Engine, Runner, Bodies, Composite, Body, Vector, Events } = Matter;
+
+    const ctx = physicsCanvas.getContext('2d');
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    function resizePhysicsCanvas() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      physicsCanvas.width = width * window.devicePixelRatio;
+      physicsCanvas.height = height * window.devicePixelRatio;
+      physicsCanvas.style.width = width + 'px';
+      physicsCanvas.style.height = height + 'px';
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      updateWorldBoundaries();
+    }
+
+    // 1. Create Engine with Aquatic Gravity
+    physicsEngine = Engine.create({
+      gravity: { x: 0, y: currentGravityY, scale: 0.001 }
+    });
+
+    // 2. Invisible World Boundaries
+    function updateWorldBoundaries() {
+      if (wallBodies.length > 0) {
+        Composite.remove(physicsEngine.world, wallBodies);
+      }
+      const wallThickness = 100;
+      // Floor (at bottom of viewport)
+      const floor = Bodies.rectangle(width / 2, height + wallThickness / 2, width * 2, wallThickness, { isStatic: true });
+      // Left wall
+      const leftWall = Bodies.rectangle(-wallThickness / 2, height / 2, wallThickness, height * 3, { isStatic: true });
+      // Right wall
+      const rightWall = Bodies.rectangle(width + wallThickness / 2, height / 2, wallThickness, height * 3, { isStatic: true });
+      // Ceiling (far above)
+      const ceiling = Bodies.rectangle(width / 2, -wallThickness * 4, width * 2, wallThickness, { isStatic: true });
+
+      wallBodies = [floor, leftWall, rightWall, ceiling];
+      Composite.add(physicsEngine.world, wallBodies);
+    }
+
+    resizePhysicsCanvas();
+    window.addEventListener('resize', resizePhysicsCanvas);
+
+    // 3. Spawning Functions: Food Pellets, Nutrient Pearls, Buoyant Bubbles
+    function spawnFoodPellets(x, y, count = 5) {
+      for (let i = 0; i < count; i++) {
+        const radius = 6 + Math.random() * 5;
+        const offsetX = (Math.random() - 0.5) * 60;
+        const offsetY = (Math.random() - 0.5) * 30;
+        const pellet = Bodies.circle(x + offsetX, y + offsetY, radius, {
+          restitution: 0.6,
+          friction: 0.04,
+          frictionAir: 0.035, // Water drag
+          density: 0.002
+        });
+        pellet.customType = 'food';
+        pellet.color = Math.random() > 0.5 ? '#f59e0b' : '#d97706';
+        pellet.glowColor = 'rgba(245, 158, 11, 0.4)';
+        pellet.createdAt = Date.now();
+        pellet.maxAge = 45000;
+        Composite.add(physicsEngine.world, pellet);
+        activeBodies.push(pellet);
+      }
+      updateBodyCountHud();
+    }
+
+    function spawnNutrientPearl(x, y) {
+      const radius = 9 + Math.random() * 6;
+      const pearl = Bodies.circle(x, y, radius, {
+        restitution: 0.75,
+        friction: 0.02,
+        frictionAir: 0.04,
+        density: 0.0018
+      });
+      pearl.customType = 'pearl';
+      pearl.color = Math.random() > 0.5 ? '#22d3ee' : '#34d399';
+      pearl.glowColor = pearl.color === '#22d3ee' ? 'rgba(34, 211, 238, 0.6)' : 'rgba(52, 211, 153, 0.6)';
+      pearl.createdAt = Date.now();
+      pearl.maxAge = 60000;
+      Composite.add(physicsEngine.world, pearl);
+      activeBodies.push(pearl);
+      updateBodyCountHud();
+    }
+
+    function spawnBuoyantBubble(x, y) {
+      const radius = 5 + Math.random() * 9;
+      const bubble = Bodies.circle(x, y, radius, {
+        restitution: 0.3,
+        friction: 0.01,
+        frictionAir: 0.045,
+        density: 0.0006
+      });
+      bubble.customType = 'bubble';
+      bubble.color = 'rgba(165, 243, 252, 0.7)';
+      bubble.glowColor = 'rgba(34, 211, 238, 0.5)';
+      bubble.createdAt = Date.now();
+      bubble.maxAge = 18000;
+      Composite.add(physicsEngine.world, bubble);
+      activeBodies.push(bubble);
+      updateBodyCountHud();
+    }
+
+    // Initial ambient physics bodies in the water
+    for (let i = 0; i < 12; i++) {
+      const startX = width * 0.15 + Math.random() * width * 0.7;
+      const startY = height * 0.2 + Math.random() * height * 0.6;
+      if (i % 2 === 0) {
+        spawnFoodPellets(startX, startY, 1);
+      } else {
+        spawnNutrientPearl(startX, startY);
+      }
+    }
+
+    // 4. Custom 60fps Canvas Render Loop for Physics Bodies
+    physicsRunner = Runner.create();
+    Runner.run(physicsRunner, physicsEngine);
+
+    function renderPhysicsWorld() {
+      ctx.clearRect(0, 0, width, height);
+
+      const now = Date.now();
+      // Filter out aged bodies
+      for (let i = activeBodies.length - 1; i >= 0; i--) {
+        const b = activeBodies[i];
+        if (now - b.createdAt > b.maxAge || b.position.y > height + 80) {
+          Composite.remove(physicsEngine.world, b);
+          activeBodies.splice(i, 1);
+          continue;
+        }
+
+        // Buoyant bubble upward force
+        if (b.customType === 'bubble') {
+          Body.applyForce(b, b.position, { x: 0, y: -0.0006 });
+          if (b.position.y < 30) {
+            Composite.remove(physicsEngine.world, b);
+            activeBodies.splice(i, 1);
+            continue;
+          }
+        }
+
+        // Draw body with aquatic glow
+        const pos = b.position;
+        const angle = b.angle;
+        ctx.save();
+        ctx.translate(pos.x, pos.y);
+        ctx.rotate(angle);
+
+        ctx.shadowColor = b.glowColor || 'rgba(34, 211, 238, 0.4)';
+        ctx.shadowBlur = b.customType === 'pearl' ? 14 : 8;
+
+        ctx.beginPath();
+        ctx.arc(0, 0, b.circleRadius || 8, 0, Math.PI * 2);
+        ctx.fillStyle = b.color || '#22d3ee';
+        ctx.fill();
+
+        // Shimmer highlight
+        ctx.beginPath();
+        ctx.arc(-2, -2, (b.circleRadius || 8) * 0.35, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      requestAnimationFrame(renderPhysicsWorld);
+    }
+    requestAnimationFrame(renderPhysicsWorld);
+
+    // 5. Connect Scroll Velocity to Hydrodynamic Fluid Impulses
+    if (lenisInstance) {
+      lenisInstance.on('scroll', ({ velocity }) => {
+        if (hudScrollVel) {
+          hudScrollVel.textContent = Math.abs(velocity).toFixed(1) + ' px/s';
+        }
+
+        // Hydrodynamic vertical draft: scrolling pushes water particles
+        if (Math.abs(velocity) > 0.4) {
+          const forceY = velocity * 0.00008;
+          activeBodies.forEach(b => {
+            const turbulentX = (Math.random() - 0.5) * 0.0003 * Math.abs(velocity);
+            Body.applyForce(b, b.position, { x: turbulentX, y: forceY });
+          });
+        }
+      });
+    }
+
+    // 6. Gravity Management
+    function setGravity(gValue) {
+      currentGravityY = parseFloat(gValue);
+      physicsEngine.gravity.y = currentGravityY;
+
+      const sign = currentGravityY >= 0 ? '+' : '';
+      const displayStr = `${sign}${currentGravityY.toFixed(2)}g`;
+
+      if (hudGravityVal) hudGravityVal.textContent = displayStr;
+      if (pillGravityLabel) pillGravityLabel.textContent = displayStr;
+      if (hudSliderLabel) hudSliderLabel.textContent = displayStr;
+      if (gravitySlider) gravitySlider.value = Math.round(currentGravityY * 100);
+
+      // Update preset buttons styling
+      gravityPresetBtns.forEach(btn => {
+        const presetG = parseFloat(btn.dataset.gravity);
+        if (Math.abs(presetG - currentGravityY) < 0.08) {
+          btn.classList.add('bg-cyan-500/20', 'border-cyan-500/40', 'text-cyan-200');
+          btn.classList.remove('bg-stone-900', 'border-stone-800', 'text-stone-300');
+        } else {
+          btn.classList.remove('bg-cyan-500/20', 'border-cyan-500/40', 'text-cyan-200');
+          btn.classList.add('bg-stone-900', 'border-stone-800', 'text-stone-300');
+        }
+      });
+    }
+
+    function updateBodyCountHud() {
+      if (hudBodyCount) hudBodyCount.textContent = activeBodies.length;
+    }
+
+    // Gravity Slider binding
+    if (gravitySlider) {
+      gravitySlider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value) / 100;
+        setGravity(val);
+      });
+    }
+
+    // Gravity Presets binding
+    gravityPresetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const g = parseFloat(btn.dataset.gravity);
+        setGravity(g);
+      });
+    });
+
+    // Drop Food Button
+    if (btnDropFood) {
+      btnDropFood.addEventListener('click', () => {
+        spawnFoodPellets(width * 0.5, height * 0.15, 8);
+        spawnNutrientPearl(width * 0.45, height * 0.18);
+        spawnBuoyantBubble(width * 0.55, height * 0.7);
+      });
+    }
+
+    // Clear Physics Button
+    if (btnClearPhysics) {
+      btnClearPhysics.addEventListener('click', () => {
+        activeBodies.forEach(b => Composite.remove(physicsEngine.world, b));
+        activeBodies = [];
+        updateBodyCountHud();
+      });
+    }
+
+    // Click anywhere on living canvas hero to drop pellets with gravity
+    const livingCanvas = document.getElementById('aquarium-canvas');
+    if (livingCanvas) {
+      livingCanvas.addEventListener('click', (e) => {
+        const rect = livingCanvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        spawnFoodPellets(clickX, clickY, 4);
+        spawnNutrientPearl(clickX + 15, clickY + 10);
+      });
+    }
+
+    // HUD Toggle
+    if (btnTogglePhysicsHud && physicsHudPanel) {
+      btnTogglePhysicsHud.addEventListener('click', () => {
+        physicsHudPanel.classList.toggle('hidden');
+      });
+    }
+    if (btnClosePhysicsHud && physicsHudPanel) {
+      btnClosePhysicsHud.addEventListener('click', () => {
+        physicsHudPanel.classList.add('hidden');
+      });
+    }
+
+    // Global Physics Exposure
+    window.AQUARIA_PHYSICS = {
+      engine: physicsEngine,
+      setGravity: setGravity,
+      spawnFood: spawnFoodPellets,
+      spawnPearl: spawnNutrientPearl,
+      spawnBubble: spawnBuoyantBubble,
+      applyScrollImpulse: (vel) => {
+        if (Math.abs(vel) > 0.4) {
+          activeBodies.forEach(b => {
+            Body.applyForce(b, b.position, { x: (Math.random() - 0.5) * 0.0002 * Math.abs(vel), y: vel * 0.00008 });
+          });
+        }
+      }
+    };
+  }
 });

@@ -573,3 +573,57 @@ body {
   pointer-events: none;
   z-index: 0;
 }
+
+
+/* -------------------------------------------------------------
+   LENIS SMOOTH SCROLLING & MOMENTUM PHYSICS
+------------------------------------------------------------- */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------
+   MATTER.JS INTERACTIVE AQUATIC PHYSICS CANVAS & GRAVITY HUD
+------------------------------------------------------------- */
+#aquarium-physics-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 15; /* sits between background living tank and interactive UI cards */
+}
+
+#aquarium-physics-canvas.interactive-mode {
+  pointer-events: auto;
+}
+
+.physics-hud-pill {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 60;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.physics-hud-panel {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.85), 0 0 35px rgba(34, 211, 238, 0.2);
+}
