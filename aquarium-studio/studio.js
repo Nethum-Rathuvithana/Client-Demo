@@ -1,7 +1,7 @@
 /* =========================================================================
    AQUARIUM SCENERY STUDIO — JAVASCRIPT ENGINE
-   World Path (Global Translation) Engine for realistic fish movement across
-   (X, Y) coordinates, Boids flocking, mouse hover deceleration & inspection.
+   Real-Time Green Screen Chroma-Keying & Photorealistic Video Fish Extraction.
+   World Path Translation across (X, Y) coordinates, Boids Flocking, & Hover.
 ========================================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,10 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const canvas = document.getElementById('studio-canvas');
   const ctx = canvas.getContext('2d');
+  const video = document.getElementById('source-tetra-video');
   const hoverCard = document.getElementById('fish-hover-card');
-  const cardName = document.getElementById('card-name');
-  const cardLatin = document.getElementById('card-latin');
-  const cardPrice = document.getElementById('card-price');
   const cardTelemetry = document.getElementById('card-telemetry');
 
   // Sliders & HUD Controls
@@ -22,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const labelCount = document.getElementById('label-fish-count');
   const sliderSpeed = document.getElementById('slider-fish-speed');
   const labelSpeed = document.getElementById('label-fish-speed');
-  const sliderFlocking = document.getElementById('slider-flocking');
-  const labelFlocking = document.getElementById('label-flocking');
+  const sliderThreshold = document.getElementById('slider-chroma-threshold');
+  const labelThreshold = document.getElementById('label-chroma-threshold');
 
   const btnFeed = document.getElementById('btn-feed');
   const btnScatter = document.getElementById('btn-scatter');
@@ -33,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const studioHudPanel = document.getElementById('studio-hud-panel');
   const hudToggleIcon = document.getElementById('hud-toggle-icon');
 
-  // Viewport Sizing
+  // Sizing
   let width = window.innerWidth;
   let height = window.innerHeight;
 
@@ -49,14 +47,16 @@ document.addEventListener('DOMContentLoaded', () => {
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  // Simulation Parameters
+  // Configuration
   const config = {
-    baseLength: 45, // default realistic Neon Tetra size in px
-    targetCount: 14,
+    baseLength: 55, // realistic Neon Tetra length in px
+    targetCount: 12,
     speedMultiplier: 1.0,
     flockingMultiplier: 1.0,
-    hoverRadius: 55,
-    margin: 90 // screen boundary bounce distance
+    hoverRadius: 60,
+    margin: 90,
+    chromaThreshold: 35, // green distance threshold
+    chromaSoftness: 18    // edge feathering
   };
 
   // Pellets Array
@@ -66,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const mouse = {
     x: -1000,
     y: -1000,
-    isHovering: false,
     hoveredFish: null
   };
 
@@ -83,36 +82,123 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =========================================================================
-  // --- FISH CLASS: ORGANIC ANATOMY & WORLD PATH SIMULATION ---
+  // --- REAL-TIME GREEN SCREEN CHROMA-KEY EXTRACTION PIPELINE ---
   // =========================================================================
-  class NeonTetra {
+  // Offscreen canvas for sampling and keying the video
+  const keyedCanvas = document.createElement('canvas');
+  const keyedCtx = keyedCanvas.getContext('2d', { willReadFrequently: true });
+  
+  // Downscaled processing size for 60FPS fluid execution
+  const keyWidth = 480;
+  const keyHeight = 270;
+  keyedCanvas.width = keyWidth;
+  keyedCanvas.height = keyHeight;
+
+  let isVideoReady = false;
+
+  video.addEventListener('loadeddata', () => {
+    isVideoReady = true;
+    video.play().catch(() => {});
+  });
+  if (video.readyState >= 2) {
+    isVideoReady = true;
+    video.play().catch(() => {});
+  }
+
+  // Crop bounding box around the active fish in the video
+  let cropBox = { sx: 0, sy: 0, sw: keyWidth, sh: keyHeight };
+
+  function processChromaKey() {
+    if (!isVideoReady || video.paused || video.ended) return;
+
+    // 1. Draw raw video frame onto offscreen canvas
+    keyedCtx.drawImage(video, 0, 0, keyWidth, keyHeight);
+
+    // 2. Extract pixel buffer
+    const frame = keyedCtx.getImageData(0, 0, keyWidth, keyHeight);
+    const data = frame.data;
+    const len = data.length;
+    const threshold = config.chromaThreshold;
+    const softness = config.chromaSoftness;
+
+    let minX = keyWidth, minY = keyHeight, maxX = 0, maxY = 0;
+    let foundFish = false;
+
+    // 3. Fast Chroma-Key & Spill Suppression Shader
+    for (let i = 0; i < len; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      // Green dominance calculation
+      const maxOther = Math.max(r, b);
+      const diff = g - maxOther;
+
+      // Pure green background check
+      if (diff > threshold) {
+        data[i + 3] = 0; // Transparent
+      } else if (diff > threshold - softness) {
+        // Edge feathering
+        const alphaRatio = (threshold - diff) / softness;
+        data[i + 3] = Math.round(data[i + 3] * alphaRatio);
+        // Despill green fringe
+        data[i + 1] = maxOther;
+      } else {
+        // Pixel belongs to fish! Track bounding box
+        const pixelIdx = i / 4;
+        const px = pixelIdx % keyWidth;
+        const py = Math.floor(pixelIdx / keyWidth);
+        if (px < minX) minX = px;
+        if (px > maxX) maxX = px;
+        if (py < minY) minY = py;
+        if (py > maxY) maxY = py;
+        foundFish = true;
+
+        // Despill subtle green reflections on body
+        if (g > maxOther * 1.15) {
+          data[i + 1] = Math.round(maxOther * 1.05);
+        }
+      }
+    }
+
+    // Put keyed pixels back
+    keyedCtx.putImageData(frame, 0, 0);
+
+    // Update fish crop coordinates if detected
+    if (foundFish && maxX > minX && maxY > minY) {
+      const pad = 8;
+      cropBox.sx = Math.max(0, minX - pad);
+      cropBox.sy = Math.max(0, minY - pad);
+      cropBox.sw = Math.min(keyWidth - cropBox.sx, (maxX - minX) + pad * 2);
+      cropBox.sh = Math.min(keyHeight - cropBox.sy, (maxY - minY) + pad * 2);
+    }
+  }
+
+  // =========================================================================
+  // --- FISH CLASS: PHOTOREALISTIC VIDEO-EXTRACTED ENTITY ---
+  // =========================================================================
+  class PhotorealisticTetra {
     constructor(id, x, y) {
       this.id = id;
       this.x = x || Math.random() * width;
       this.y = y || Math.random() * height;
-      
-      // World velocity
+
+      // Velocity in world coordinates
       const angle = Math.random() * Math.PI * 2;
-      const speed = 1.2 + Math.random() * 0.8;
+      const speed = 1.3 + Math.random() * 0.9;
       this.vx = Math.cos(angle) * speed;
       this.vy = Math.sin(angle) * speed;
-      
-      // Smoothed heading angle
+
+      // Smoothed heading & banking angle
       this.heading = angle;
       this.targetHeading = angle;
-      
-      // Z-depth: foreground (1.2) vs background depth (0.8)
-      this.depth = 0.85 + Math.random() * 0.35;
-      
-      // Organic Fin & Spine Oscillation
-      this.tailPhase = Math.random() * Math.PI * 2;
-      this.tailFrequency = 8 + Math.random() * 4;
-      
-      // Hover deceleration state
-      this.isHovered = false;
-      this.hoverFactor = 1.0; // 1.0 = normal, drops to 0.15 on hover
 
-      // Personality jitter
+      // Z-depth: 0.85 (deep in water) to 1.25 (foreground glass)
+      this.depth = 0.85 + Math.random() * 0.35;
+
+      // Fin wag & banking
+      this.isHovered = false;
+      this.hoverFactor = 1.0;
       this.wanderTimer = Math.random() * 100;
     }
 
@@ -126,37 +212,33 @@ document.addEventListener('DOMContentLoaded', () => {
       if (distMouse < effectiveRadius && !mouse.hoveredFish) {
         this.isHovered = true;
         mouse.hoveredFish = this;
-      } else if (mouse.hoveredFish === this && distMouse > effectiveRadius * 1.5) {
+      } else if (mouse.hoveredFish === this && distMouse > effectiveRadius * 1.6) {
         this.isHovered = false;
         mouse.hoveredFish = null;
       }
 
-      // Smooth deceleration on hover
+      // Smooth deceleration on hover (slow down by 85%)
       const targetHover = this.isHovered ? 0.15 : 1.0;
-      this.hoverFactor += (targetHover - this.hoverFactor) * 0.1;
+      this.hoverFactor += (targetHover - this.hoverFactor) * 0.12;
 
-      // 2. Swim Cycle Update
-      const currentSpeed = Math.hypot(this.vx, this.vy) * this.hoverFactor * config.speedMultiplier;
-      this.tailPhase += (this.tailFrequency * (currentSpeed + 0.3)) * 0.016;
-
-      // 3. Wandering & Natural Steering
-      this.wanderTimer += 0.02;
-      const wanderForce = Math.sin(this.wanderTimer) * 0.08;
+      // 2. Wandering & Natural Steering
+      this.wanderTimer += 0.025;
+      const wanderForce = Math.sin(this.wanderTimer) * 0.09;
       this.vx += -Math.sin(this.heading) * wanderForce;
       this.vy += Math.cos(this.heading) * wanderForce;
 
-      // 4. Soft Boundary Steering (Stay inside visible aquarium)
+      // 3. Soft Boundary Steering (Keep inside aquarium)
       const m = config.margin;
-      const boundaryTurn = 0.18;
+      const boundaryTurn = 0.2;
       if (this.x < m) this.vx += boundaryTurn;
       if (this.x > width - m) this.vx -= boundaryTurn;
       if (this.y < m) this.vy += boundaryTurn;
       if (this.y > height - m) this.vy -= boundaryTurn;
 
-      // 5. Attract to Food Pellets if any exist
+      // 4. Food Pellets attraction
       if (pellets.length > 0) {
         let nearestPellet = null;
-        let minDist = 350;
+        let minDist = 380;
         for (const p of pellets) {
           const d = Math.hypot(p.x - this.x, p.y - this.y);
           if (d < minDist) {
@@ -166,20 +248,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (nearestPellet) {
           const attractAngle = Math.atan2(nearestPellet.y - this.y, nearestPellet.x - this.x);
-          this.vx += Math.cos(attractAngle) * 0.15;
-          this.vy += Math.sin(attractAngle) * 0.15;
-          // Nibble pellet if close
-          if (minDist < 14) {
-            nearestPellet.eaten = true;
-          }
+          this.vx += Math.cos(attractAngle) * 0.18;
+          this.vy += Math.sin(attractAngle) * 0.18;
+          if (minDist < 16) nearestPellet.eaten = true;
         }
       }
 
-      // 6. Smooth Speed Limiting
+      // 5. Speed limits
       const rawSpeed = Math.hypot(this.vx, this.vy);
-      const maxSpeed = (2.2 * this.depth * config.speedMultiplier) * this.hoverFactor;
-      const minSpeed = (0.6 * this.depth * config.speedMultiplier) * this.hoverFactor;
-      
+      const maxSpeed = (2.4 * this.depth * config.speedMultiplier) * this.hoverFactor;
+      const minSpeed = (0.7 * this.depth * config.speedMultiplier) * this.hoverFactor;
+
       if (rawSpeed > maxSpeed) {
         this.vx = (this.vx / rawSpeed) * maxSpeed;
         this.vy = (this.vy / rawSpeed) * maxSpeed;
@@ -188,17 +267,17 @@ document.addEventListener('DOMContentLoaded', () => {
         this.vy = (this.vy / rawSpeed) * minSpeed;
       }
 
-      // 7. Update World Path Coordinates (X, Y)
+      // 6. Update World Path Coordinates (X, Y)
       this.x += this.vx;
       this.y += this.vy;
 
-      // 8. Smooth Heading Interpolation
+      // 7. Smooth Heading Interpolation
       if (rawSpeed > 0.05) {
         this.targetHeading = Math.atan2(this.vy, this.vx);
         let diff = this.targetHeading - this.heading;
         while (diff < -Math.PI) diff += Math.PI * 2;
         while (diff > Math.PI) diff -= Math.PI * 2;
-        this.heading += diff * 0.08;
+        this.heading += diff * 0.09;
       }
     }
 
@@ -206,121 +285,61 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.save();
       ctx.translate(this.x, this.y);
 
-      // Rotate to direction of motion
+      // Rotate along velocity vector
       ctx.rotate(this.heading);
 
-      // Depth perspective scale
+      // Flip vertically if swimming to the left so fish stays right-side up
+      const swimmingLeft = Math.cos(this.heading) < 0;
+      if (swimmingLeft) {
+        ctx.scale(1, -1);
+      }
+
+      // Depth scaling & lighting
       const len = config.baseLength * this.depth;
-      const w = len * 0.32; // body width
+      const aspect = cropBox.sh / (cropBox.sw || 1);
+      const drawW = len;
+      const drawH = len * (aspect > 0.2 && aspect < 1.0 ? aspect : 0.45);
 
-      // Tail oscillation
-      const tailWag = Math.sin(this.tailPhase) * (len * 0.18);
-
-      // Ambient depth lighting
-      const alpha = Math.min(1.0, 0.75 + this.depth * 0.25);
+      const alpha = Math.min(1.0, 0.8 + this.depth * 0.2);
       ctx.globalAlpha = alpha;
 
-      // Glow halo for electric neon stripe
-      ctx.shadowColor = 'rgba(0, 229, 255, 0.75)';
-      ctx.shadowBlur = this.isHovered ? 20 : 12;
+      // Depth shadow under fish
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+      ctx.shadowBlur = 12 * this.depth;
+      ctx.shadowOffsetY = 8 * this.depth;
 
-      // --- 1. Tail Fin (Forked Translucent Fin) ---
+      // Draw Keyed Video Fish directly!
+      if (cropBox.sw > 20 && cropBox.sh > 10) {
+        ctx.drawImage(
+          keyedCanvas,
+          cropBox.sx, cropBox.sy, cropBox.sw, cropBox.sh,
+          -drawW / 2, -drawH / 2, drawW, drawH
+        );
+      } else {
+        // Fallback to full keyed canvas
+        ctx.drawImage(keyedCanvas, 0, 0, keyWidth, keyHeight, -drawW / 2, -drawH / 2, drawW, drawH);
+      }
+      ctx.restore();
+
+      // Subtle water shimmer & electric blue accent glow
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.12)';
+      ctx.shadowColor = 'rgba(0, 229, 255, 0.6)';
+      ctx.shadowBlur = this.isHovered ? 25 : 10;
       ctx.beginPath();
-      ctx.moveTo(-len * 0.45, 0);
-      ctx.lineTo(-len * 0.75, tailWag - w * 0.7);
-      ctx.quadraticCurveTo(-len * 0.6, tailWag, -len * 0.75, tailWag + w * 0.7);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.ellipse(0, 0, drawW * 0.4, drawH * 0.25, 0, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
 
-      // --- 2. Main Torpedo Fish Body ---
-      ctx.beginPath();
-      // Nose / Snout
-      ctx.moveTo(len * 0.5, 0);
-      // Top curve (dorsal)
-      ctx.bezierCurveTo(len * 0.25, -w * 0.8, -len * 0.2, -w * 0.7, -len * 0.45, tailWag * 0.3);
-      // Bottom curve (ventral)
-      ctx.bezierCurveTo(-len * 0.2, w * 0.7, len * 0.2, w * 0.8, len * 0.5, 0);
-      ctx.closePath();
-
-      // Silver-blue base body
-      const bodyGrad = ctx.createLinearGradient(len * 0.5, -w, -len * 0.5, w);
-      bodyGrad.addColorStop(0, '#e2e8f0');
-      bodyGrad.addColorStop(0.3, '#0f2b38');
-      bodyGrad.addColorStop(0.7, '#081a22');
-      bodyGrad.addColorStop(1, '#051117');
-      ctx.fillStyle = bodyGrad;
-      ctx.fill();
-
-      // --- 3. THE ICONIC ELECTRIC NEON BLUE STRIPE ---
-      // Runs from snout/eye across upper lateral line
-      ctx.beginPath();
-      ctx.moveTo(len * 0.38, -w * 0.15);
-      ctx.quadraticCurveTo(0, -w * 0.3, -len * 0.35, -w * 0.1 + tailWag * 0.4);
-      ctx.lineTo(-len * 0.35, w * 0.05 + tailWag * 0.4);
-      ctx.quadraticCurveTo(0, -w * 0.1, len * 0.38, 0);
-      ctx.closePath();
-
-      const neonBlueGrad = ctx.createLinearGradient(len * 0.4, 0, -len * 0.4, 0);
-      neonBlueGrad.addColorStop(0, '#ffffff');
-      neonBlueGrad.addColorStop(0.2, '#00f7ff');
-      neonBlueGrad.addColorStop(0.8, '#00a6ff');
-      neonBlueGrad.addColorStop(1, '#0051ff');
-      ctx.fillStyle = neonBlueGrad;
-      ctx.fill();
-
-      // --- 4. THE VIVID RUBY CRIMSON RED POSTERIOR STRIPE ---
-      // Runs along ventral rear half to tail
-      ctx.beginPath();
-      ctx.moveTo(-len * 0.05, w * 0.1);
-      ctx.quadraticCurveTo(-len * 0.25, w * 0.2, -len * 0.45, tailWag * 0.3);
-      ctx.lineTo(-len * 0.45, tailWag * 0.3 - w * 0.15);
-      ctx.quadraticCurveTo(-len * 0.25, 0, -len * 0.05, 0);
-      ctx.closePath();
-
-      const neonRedGrad = ctx.createLinearGradient(-len * 0.05, 0, -len * 0.45, 0);
-      neonRedGrad.addColorStop(0, '#ff1a53');
-      neonRedGrad.addColorStop(0.5, '#e60039');
-      neonRedGrad.addColorStop(1, '#990026');
-      ctx.fillStyle = neonRedGrad;
-      ctx.fill();
-
-      // --- 5. Eye (Large black pupil with iridescent cyan ring) ---
-      ctx.shadowBlur = 0;
-      ctx.beginPath();
-      ctx.arc(len * 0.32, -w * 0.15, len * 0.065, 0, Math.PI * 2);
-      ctx.fillStyle = '#00f0ff';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(len * 0.32, -w * 0.15, len * 0.045, 0, Math.PI * 2);
-      ctx.fillStyle = '#050c12';
-      ctx.fill();
-
-      // --- 6. Dorsal & Pectoral Translucent Fins ---
-      ctx.beginPath();
-      ctx.moveTo(-len * 0.05, -w * 0.6);
-      ctx.lineTo(-len * 0.22, -w * 1.25);
-      ctx.lineTo(-len * 0.28, -w * 0.5);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.fill();
-
-      // Pectoral fin
-      ctx.beginPath();
-      ctx.moveTo(len * 0.1, w * 0.2);
-      ctx.lineTo(len * 0.02, w * 0.7);
-      ctx.lineTo(len * 0.18, w * 0.3);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
-      ctx.fill();
-
-      // Hover Reticle (if hovered)
+      // Hover Reticle indicator if targeted
       if (this.isHovered) {
-        ctx.strokeStyle = 'rgba(0, 229, 255, 0.7)';
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.8)';
         ctx.lineWidth = 1.5;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
-        ctx.arc(0, 0, len * 0.75, 0, Math.PI * 2);
+        ctx.arc(0, 0, drawW * 0.65, 0, Math.PI * 2);
         ctx.stroke();
         ctx.setLineDash([]);
       }
@@ -339,18 +358,18 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let i = 0; i < count; i++) {
       const x = width * 0.2 + Math.random() * (width * 0.6);
       const y = height * 0.2 + Math.random() * (height * 0.6);
-      school.push(new NeonTetra(i + 1, x, y));
+      school.push(new PhotorealisticTetra(i + 1, x, y));
     }
   }
   initSchool(config.targetCount);
 
   function applyBoidsFlocking() {
     const visualDist = 140 * config.flockingMultiplier;
-    const separateDist = 45;
+    const separateDist = 48;
 
     for (let i = 0; i < school.length; i++) {
       const f1 = school[i];
-      if (f1.isHovered) continue; // Hovered fish pauses flocking
+      if (f1.isHovered) continue;
 
       let alignX = 0, alignY = 0, alignCount = 0;
       let cohX = 0, cohY = 0, cohCount = 0;
@@ -362,17 +381,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const dist = Math.hypot(f2.x - f1.x, f2.y - f1.y);
 
         if (dist < visualDist) {
-          // Alignment
           alignX += f2.vx;
           alignY += f2.vy;
           alignCount++;
 
-          // Cohesion
           cohX += f2.x;
           cohY += f2.y;
           cohCount++;
 
-          // Separation
           if (dist < separateDist && dist > 0) {
             sepX += (f1.x - f2.x) / dist;
             sepY += (f1.y - f2.y) / dist;
@@ -380,7 +396,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Apply forces
       if (alignCount > 0) {
         alignX /= alignCount;
         alignY /= alignCount;
@@ -408,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.x = x;
       this.y = y;
       this.vx = (Math.random() - 0.5) * 1.5;
-      this.vy = 1.0 + Math.random() * 1.5; // gentle downward gravity
+      this.vy = 1.0 + Math.random() * 1.5;
       this.radius = 3 + Math.random() * 2.5;
       this.color = Math.random() > 0.5 ? '#f59e0b' : '#d97706';
       this.eaten = false;
@@ -418,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
     update() {
       this.x += this.vx;
       this.y += this.vy;
-      this.vx *= 0.98; // water drag
+      this.vx *= 0.98;
       this.age++;
     }
 
@@ -448,7 +463,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function loop() {
     ctx.clearRect(0, 0, width, height);
 
-    // 1. Update Pellets
+    // 1. Process Green Screen Chroma-Key on the Video Frame
+    processChromaKey();
+
+    // 2. Update Pellets
     for (let i = pellets.length - 1; i >= 0; i--) {
       const p = pellets[i];
       p.update();
@@ -458,10 +476,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // 2. Boids Flocking & Physics
+    // 3. Flocking & Physics
     applyBoidsFlocking();
 
-    // 3. Update & Draw Fish sorted by Z-depth
+    // 4. Update & Render Photorealistic Video Fish sorted by Z-depth
     school.sort((a, b) => a.depth - b.depth);
 
     for (const fish of school) {
@@ -469,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fish.draw();
     }
 
-    // 4. Update Hover Specimen Card Position & Content
+    // 5. Update Hover Specimen Card
     if (mouse.hoveredFish) {
       const hf = mouse.hoveredFish;
       hoverCard.style.left = hf.x + 'px';
@@ -493,19 +511,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // =========================================================================
-  // --- WORKBENCH HUD BINDINGS & CONTROLS ---
+  // --- WORKBENCH HUD CONTROLS ---
   // =========================================================================
-  
-  // Scale Slider
   if (sliderScale && labelScale) {
     sliderScale.addEventListener('input', (e) => {
       config.baseLength = parseInt(e.target.value);
-      const ratio = (config.baseLength / 45).toFixed(1);
+      const ratio = (config.baseLength / 55).toFixed(1);
       labelScale.textContent = `${config.baseLength}px (${ratio}x Real)`;
     });
   }
 
-  // Population Slider
   if (sliderCount && labelCount) {
     sliderCount.addEventListener('input', (e) => {
       const target = parseInt(e.target.value);
@@ -513,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
       config.targetCount = target;
 
       while (school.length < target) {
-        school.push(new NeonTetra(school.length + 1, width * 0.5, height * 0.5));
+        school.push(new PhotorealisticTetra(school.length + 1, width * 0.5, height * 0.5));
       }
       while (school.length > target) {
         school.pop();
@@ -521,7 +536,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Speed Slider
   if (sliderSpeed && labelSpeed) {
     sliderSpeed.addEventListener('input', (e) => {
       config.speedMultiplier = parseInt(e.target.value) / 10;
@@ -529,17 +543,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Flocking Slider
-  if (sliderFlocking && labelFlocking) {
-    sliderFlocking.addEventListener('input', (e) => {
-      const val = parseInt(e.target.value);
-      config.flockingMultiplier = val / 3;
-      const labels = ['Loose / Independent', 'Gentle Shoaling', 'Balanced Schooling', 'Tight School', 'Strict Swarm'];
-      labelFlocking.textContent = labels[val - 1] || 'Balanced';
+  if (sliderThreshold && labelThreshold) {
+    sliderThreshold.addEventListener('input', (e) => {
+      config.chromaThreshold = parseInt(e.target.value);
+      labelThreshold.textContent = config.chromaThreshold;
     });
   }
 
-  // Action Buttons
   if (btnFeed) {
     btnFeed.addEventListener('click', () => {
       spawnPellets(width * 0.5, height * 0.15, 12);
@@ -557,14 +567,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Video PiP Toggle
   if (btnToggleVideoPip && videoPipContainer) {
     btnToggleVideoPip.addEventListener('click', () => {
       videoPipContainer.classList.toggle('hidden');
     });
   }
 
-  // HUD Panel Toggle
   if (btnToggleHud && studioHudPanel) {
     let hudOpen = true;
     btnToggleHud.addEventListener('click', () => {

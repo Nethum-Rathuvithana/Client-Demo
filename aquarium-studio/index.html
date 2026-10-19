@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AQUARIA • Scenery Studio & Realistic Fish Workbench</title>
-  <meta name="description" content="Dedicated scenery studio for composing realistic schooling fish, full-screen global translation paths, and interactive specimen hover.">
+  <title>AQUARIA • Photorealistic Video Fish Studio & Scenery Workbench</title>
+  <meta name="description" content="Dedicated scenery studio extracting photorealistic fish from green-screen video into full-screen autonomous schooling simulation.">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -43,8 +43,11 @@
   <div class="caustic-overlay"></div>
   <div class="tank-frame-vignette"></div>
 
-  <!-- Hidden Source Video (loaded for frame comparison and telemetry) -->
-  <video id="source-tetra-video" src="neon_tetra_video.mp4" loop muted playsinline autoplay class="hidden"></video>
+  <!-- Green Screen Video Source (Hidden, sampled by canvas chroma-key engine) -->
+  <video id="source-tetra-video" src="neon_tetra_greenscreen.mp4" loop muted playsinline autoplay crossorigin="anonymous" class="hidden"></video>
+
+  <!-- Offscreen Chroma-Key Extraction Canvas (Hidden in DOM, used for rendering) -->
+  <canvas id="keyed-fish-canvas" class="hidden"></canvas>
 
   <!-- ================= HOVER SPECIMEN DETAILS CARD ================= -->
   <div id="fish-hover-card">
@@ -52,7 +55,7 @@
       <div class="flex items-center justify-between gap-3 border-b border-cyan-500/25 pb-2">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-          <span class="text-[10px] uppercase font-bold tracking-widest text-cyan-400 font-cinzel">Target Locked</span>
+          <span class="text-[10px] uppercase font-bold tracking-widest text-cyan-400 font-cinzel">Video Specimen Locked</span>
         </div>
         <span id="card-price" class="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-mono text-xs font-bold border border-cyan-500/40">
           $3.49
@@ -60,8 +63,8 @@
       </div>
 
       <div>
-        <h4 id="card-name" class="text-base font-bold font-cinzel text-white leading-tight">Neon Tetra</h4>
-        <p id="card-latin" class="text-xs text-stone-400 italic">Paracheirodon innesi</p>
+        <h4 id="card-name" class="text-base font-bold font-cinzel text-white leading-tight">Neon Tetra (Photorealistic)</h4>
+        <p id="card-latin" class="text-xs text-stone-400 italic">Paracheirodon innesi • Video Extracted</p>
       </div>
 
       <div class="space-y-1 text-[11px] text-stone-300">
@@ -70,18 +73,18 @@
           <span class="font-semibold text-emerald-300">2.5 - 3.0 cm (1.0 in)</span>
         </div>
         <div class="flex items-center justify-between">
-          <span class="text-stone-400">Zone / Water Column:</span>
-          <span class="font-semibold text-cyan-300">Midground Shoaler</span>
+          <span class="text-stone-400">Zone / Stratum:</span>
+          <span class="font-semibold text-cyan-300">Mid-water Shoaler</span>
         </div>
         <div class="flex items-center justify-between">
-          <span class="text-stone-400">Telemetry:</span>
-          <span id="card-telemetry" class="font-mono text-[10px] text-stone-400">Speed: 0.2x • Hover Active</span>
+          <span class="text-stone-400">Live Telemetry:</span>
+          <span id="card-telemetry" class="font-mono text-[10px] text-stone-400">Speed: 0.15x • Hover Active</span>
         </div>
       </div>
 
       <div class="pt-2 border-t border-cyan-500/20 flex items-center justify-between text-[10px] text-stone-400">
-        <span>Curious behavior: Decelerating</span>
-        <span class="text-cyan-400 font-bold">● Live Track</span>
+        <span>Video Swim Rate: Idle Slow</span>
+        <span class="text-cyan-400 font-bold">● 60 FPS Chroma Key</span>
       </div>
     </div>
   </div>
@@ -102,14 +105,14 @@
   <!-- Title Badge (Top Center) -->
   <div class="absolute top-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none text-center hidden md:block">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[11px] font-semibold tracking-widest uppercase mb-1">
-      <i data-lucide="compass" class="w-3.5 h-3.5"></i>
-      <span>World Path Simulation Workbench</span>
+      <i data-lucide="video" class="w-3.5 h-3.5"></i>
+      <span>Green-Screen Photorealism Extraction</span>
     </div>
     <h1 class="text-xl font-bold font-cinzel text-white drop-shadow-[0_2px_12px_rgba(0,229,255,0.4)]">
-      Aquarium Scenery Studio
+      Photorealistic Video Fish Studio
     </h1>
     <p class="text-[11px] text-stone-400 font-light">
-      Hover over any swimming fish to slow it down & inspect telemetry • Move mouse to interact
+      Extracted directly from real video footage • Hover to slow down & inspect details
     </p>
   </div>
 
@@ -122,10 +125,10 @@
       <!-- Studio Header -->
       <div class="flex items-center justify-between border-b border-cyan-500/25 pb-3">
         <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
           <div>
-            <h3 class="font-bold font-cinzel text-sm text-white">Scenery Workbench</h3>
-            <span class="text-[10px] text-stone-400 font-mono">Autonomous World Paths</span>
+            <h3 class="font-bold font-cinzel text-sm text-white">Chroma-Key Studio</h3>
+            <span class="text-[10px] text-stone-400 font-mono">Real Video Extracted Fish</span>
           </div>
         </div>
         <button id="btn-toggle-hud" class="w-7 h-7 rounded-lg bg-stone-900/80 hover:bg-stone-800 text-stone-300 hover:text-white flex items-center justify-center transition-colors">
@@ -133,7 +136,21 @@
         </button>
       </div>
 
-      <!-- Scenery Layers Pipeline -->
+      <!-- Video Extraction Status -->
+      <div class="p-3 rounded-2xl bg-stone-900/80 border border-emerald-500/30 space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-stone-300 font-semibold flex items-center gap-1.5">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+            Green Screen Video Active
+          </span>
+          <span id="video-status-badge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">60 FPS Keying</span>
+        </div>
+        <p class="text-[10px] text-stone-400 leading-relaxed">
+          Source: <strong class="text-stone-300">Neon_tetra_swimming_in_loop.mp4</strong>. Background is keyed out in real-time with green despill to render the actual video fish across the full screen.
+        </p>
+      </div>
+
+      <!-- Scenery Staging Pipeline -->
       <div class="space-y-2">
         <label class="text-[10px] uppercase font-bold tracking-wider text-stone-300 block">
           Scenery Staging Pipeline:
@@ -145,10 +162,10 @@
               <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
               <div>
                 <strong class="text-cyan-200 block text-xs">Specimen #1: Neon Tetra</strong>
-                <span class="text-[10px] text-stone-400 font-mono">Video Loop + Fullscreen Path</span>
+                <span class="text-[10px] text-stone-400 font-mono">Photorealistic Video Extraction</span>
               </div>
             </div>
-            <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">Active</span>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Extracted</span>
           </div>
 
           <!-- Open Fish Slot #2 -->
@@ -165,44 +182,45 @@
         </div>
       </div>
 
-      <!-- Global World Path Translation Controls -->
+      <!-- World Path & Realistic Scale Controls -->
       <div class="space-y-3 pt-2 border-t border-cyan-500/20">
         
-        <!-- Fish Scale (Realistic Size) -->
+        <!-- Fish Realistic Scale -->
         <div class="space-y-1">
           <div class="flex items-center justify-between text-xs">
-            <span class="text-stone-300">Fish Realistic Scale:</span>
-            <span id="label-fish-scale" class="font-mono text-cyan-300 font-bold">45px (1.0x Real)</span>
+            <span class="text-stone-300">Realistic Fish Scale:</span>
+            <span id="label-fish-scale" class="font-mono text-cyan-300 font-bold">55px (Natural 1.0x)</span>
           </div>
-          <input type="range" id="slider-fish-scale" min="20" max="110" value="45" class="w-full">
-          <span class="text-[9px] text-stone-400 block">Dial to natural 2.5-3cm size or zoom for inspecting details.</span>
+          <input type="range" id="slider-fish-scale" min="25" max="130" value="55" class="w-full">
+          <span class="text-[9px] text-stone-400 block">Dial to natural 2.5–3cm size or zoom to inspect skin scales & fins.</span>
         </div>
 
         <!-- School Population Count -->
         <div class="space-y-1">
           <div class="flex items-center justify-between text-xs">
             <span class="text-stone-300">Schooling Population:</span>
-            <span id="label-fish-count" class="font-mono text-cyan-300 font-bold">14 Tetras</span>
+            <span id="label-fish-count" class="font-mono text-cyan-300 font-bold">12 Tetras</span>
           </div>
-          <input type="range" id="slider-fish-count" min="1" max="30" value="14" class="w-full">
+          <input type="range" id="slider-fish-count" min="1" max="25" value="12" class="w-full">
         </div>
 
         <!-- Cruising Speed -->
         <div class="space-y-1">
           <div class="flex items-center justify-between text-xs">
-            <span class="text-stone-300">Cruising Speed:</span>
+            <span class="text-stone-300">Full-Screen Cruising Speed:</span>
             <span id="label-fish-speed" class="font-mono text-cyan-300 font-bold">1.0x Natural</span>
           </div>
           <input type="range" id="slider-fish-speed" min="3" max="25" value="10" class="w-full">
         </div>
 
-        <!-- Flocking Cohesion -->
+        <!-- Chroma Key Green Threshold -->
         <div class="space-y-1">
           <div class="flex items-center justify-between text-xs">
-            <span class="text-stone-300">Flocking Tightness:</span>
-            <span id="label-flocking" class="font-mono text-cyan-300 font-bold">Balanced</span>
+            <span class="text-stone-300">Chroma Key Threshold:</span>
+            <span id="label-chroma-threshold" class="font-mono text-emerald-300 font-bold">35</span>
           </div>
-          <input type="range" id="slider-flocking" min="1" max="5" value="3" class="w-full">
+          <input type="range" id="slider-chroma-threshold" min="10" max="80" value="35" class="w-full">
+          <span class="text-[9px] text-stone-400 block">Adjust green removal sensitivity for razor-sharp fish edges.</span>
         </div>
 
       </div>
@@ -223,7 +241,7 @@
         <!-- Toggle Source Video PiP -->
         <button id="btn-toggle-video-pip" class="w-full py-2 rounded-xl bg-stone-900/80 hover:bg-stone-800 text-[11px] font-semibold text-stone-300 border border-stone-800 flex items-center justify-center gap-1.5 transition-all">
           <i data-lucide="video" class="w-3.5 h-3.5 text-cyan-400"></i>
-          <span>Toggle Raw Video Comparison PiP</span>
+          <span>Show Raw Green Screen Video PiP</span>
         </button>
       </div>
 
@@ -232,14 +250,14 @@
     <!-- Raw Video Mini PiP Inspector (Collapsible) -->
     <div id="video-pip-container" class="hidden mt-3 p-3 rounded-2xl bg-stone-950/95 border border-cyan-500/30 shadow-2xl backdrop-blur-xl">
       <div class="flex items-center justify-between mb-2 text-xs">
-        <span class="font-bold text-cyan-300 font-cinzel text-[11px]">Source Reference Video</span>
-        <span class="text-[9px] text-stone-400 font-mono">gemini_generated_video_de1a403a.mp4</span>
+        <span class="font-bold text-cyan-300 font-cinzel text-[11px]">Raw Green-Screen Source</span>
+        <span class="text-[9px] text-stone-400 font-mono">1080p Video</span>
       </div>
       <div class="rounded-xl overflow-hidden border border-cyan-500/20 relative aspect-video bg-black">
-        <video id="pip-video" src="neon_tetra_video.mp4" loop muted playsinline autoplay class="w-full h-full object-cover"></video>
+        <video id="pip-video" src="neon_tetra_greenscreen.mp4" loop muted playsinline autoplay class="w-full h-full object-cover"></video>
       </div>
       <p class="text-[9px] text-stone-400 mt-2 leading-relaxed">
-        Notice in raw video fish stay in place. Our world-path engine takes this organic motion and animates it seamlessly across the entire 100vw × 100vh canvas!
+        This is your raw green-screen video. Notice how the green background is completely removed on the main screen, and the real video fish is now swimming freely everywhere!
       </p>
     </div>
 
