@@ -172,14 +172,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- 58-SECOND CHOREOGRAPHED WAYPOINTS TABLE ---
   // =========================================================================
   const waypoints = [
-    { t: 0,  x: 0.92, y: 0.40, stage: '1. Begin — Right-middle (Start)' },
-    { t: 10, x: 0.65, y: 0.27, stage: '2. Cross upper-middle (Glide left)' },
-    { t: 20, x: 0.18, y: 0.25, stage: '3. Pause & drift (Slow down upper-left)' },
-    { t: 23, x: 0.14, y: 0.35, stage: '3. Gentle hover drift (Upper-left)' },
-    { t: 31, x: 0.18, y: 0.72, stage: '4. Descend through left side (Wide lazy arc)' },
-    { t: 40, x: 0.47, y: 0.72, stage: '5. Cruise along lower area (Glide right)' },
-    { t: 50, x: 0.81, y: 0.60, stage: '6. Cross middle rightward (Broad curve)' },
-    { t: 58, x: 0.92, y: 0.40, stage: '7. Return & ease into loop (Right-middle)' }
+    { t: 0,  x: 0.08, y: 0.40, stage: '1. Begin — Left-middle (Start)' },
+    { t: 10, x: 0.35, y: 0.27, stage: '2. Cross upper-middle (Glide right)' },
+    { t: 20, x: 0.82, y: 0.25, stage: '3. Pause & drift (Slow down near upper-right)' },
+    { t: 23, x: 0.86, y: 0.35, stage: '3. Gentle hover drift (Upper-right)' },
+    { t: 31, x: 0.82, y: 0.72, stage: '4. Descend through right side (Wide lazy arc)' },
+    { t: 40, x: 0.53, y: 0.72, stage: '5. Cruise along lower area (Glide left)' },
+    { t: 50, x: 0.19, y: 0.60, stage: '6. Cross middle leftward (Broad curve)' },
+    { t: 58, x: 0.08, y: 0.40, stage: '7. Return & ease into loop' }
   ];
 
   const totalDuration = 58.0; // 58 seconds
@@ -245,27 +245,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // =========================================================================
   // =========================================================================
-  // --- SWARM ELEMENT CONTROLLER (Inverted X: Right->Left Upper, Left->Right Lower) ---
+  // =========================================================================
+  // --- SWARM ELEMENT CONTROLLER (Guaranteed Head-First Forward Swimming) ---
   // =========================================================================
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const swarm = {
     timelineSec: 0,
-    x: width * 0.92,
+    x: width * 0.08,
     y: height * 0.40,
-    normX: 0.92,
+    normX: 0.08,
     normY: 0.40,
     currentStage: waypoints[0].stage,
 
-    // Kinematics:
-    // Upper path (0s - 24s): Traveling Right to Left (Westward) -> Head faces West (Left)!
-    // Lower path (25s - 54.5s): Traveling Left to Right (Eastward) -> Head faces East (Right)!
-    facingDirection: -1, // -1 = West (left), +1 = East (right)
+    // Head-First Forward Swimming:
+    // Raw video heads face LEFT.
+    // Eastbound (traveling right): scaleX = -1.0 (flips head to face RIGHT -> swims forward!)
+    // Westbound (traveling left): scaleX = +1.0 (unflipped head faces LEFT -> swims forward!)
+    facingDirection: 1, // +1 = East (right), -1 = West (left)
     scaleX: -1.0,
     scaleY: 1.0,
     depthScale: 1.0,
     pitchRad: 0.0,
-    turnStateLabel: 'Swimming Forward Westbound ←',
+    turnStateLabel: 'Swimming Forward Eastbound →',
 
     // Hover Deceleration State
     isHovered: false,
@@ -317,66 +319,68 @@ document.addEventListener('DOMContentLoaded', () => {
       const nextPt = evaluateJourneyPath((pathTime + dtSample) % totalDuration);
       const vy = (nextPt.normY - this.normY) / dtSample;
 
-      // 5. 2.5D Simulated Turnaround (Head-First Forward in Travel Direction)
-      // If config.invertFacing is true, flips orientation
-      const flipSign = config.invertFacing ? -1 : 1;
+      // 5. Head-First Forward Swimming with 2.5D Turnarounds
+      // Raw video has fish heads pointing LEFT.
+      // - To swim RIGHT (East): we need head pointing RIGHT -> scaleX = -1.0 * flipMod
+      // - To swim LEFT (West): we need head pointing LEFT -> scaleX = +1.0 * flipMod
+      const flipMod = config.invertFacing ? -1 : 1;
       const minPositiveWidth = 0.22;
       const t = pathTime;
 
-      // Segment 1 (0.0s -> 24.0s): Gliding RIGHT TO LEFT across upper tank.
-      // Moving West: Head points WEST (Left)
+      // Segment 1 (0.0s -> 24.0s): Gliding LEFT TO RIGHT across upper tank.
+      // Direction: Traveling EAST (Right). Head points EAST (Right) -> scaleX = -1.0 * flipMod
       if (t < 24.0) {
-        this.scaleX = 1.0 * flipSign;
+        this.scaleX = -1.0 * flipMod;
         this.scaleY = 1.0;
-        this.facingDirection = -1;
-        this.turnStateLabel = flipSign > 0 ? 'Swimming Right-to-Left (Westbound) ←' : 'Swimming Eastbound →';
+        this.facingDirection = 1;
+        this.turnStateLabel = flipMod > 0 ? 'Swimming Forward Eastbound → (Head First)' : 'Swimming Eastbound (Inverted) →';
       }
-      // Turn 1 (24.0s -> 25.0s): 2.5D Turnaround in upper left (West to East)
+      // Turn 1 (24.0s -> 25.0s): 2.5D Turnaround in upper right (East to West)
       else if (t >= 24.0 && t <= 25.0) {
         const p = (t - 24.0) / 1.0;
         const comp = 1.0 - (1.0 - minPositiveWidth) * Math.sin(p * Math.PI);
         this.scaleY = 1.0 + 0.05 * Math.sin(p * Math.PI);
         if (p < 0.5) {
-          // Compressing while still Westbound
-          this.scaleX = comp * flipSign;
+          // Eastbound compressing into depth
+          this.scaleX = -comp * flipMod;
           this.turnStateLabel = `2.5D Turn: Banking into depth (${(comp * 100).toFixed(0)}% W)`;
         } else {
-          // Expanding facing Eastbound (Head points East/Right -> swims forward!)
-          this.scaleX = -comp * flipSign;
-          this.turnStateLabel = `2.5D Turn: Angling Eastward (${(comp * 100).toFixed(0)}% W)`;
+          // Switching to Westbound (Head points Left) expanding out
+          this.scaleX = comp * flipMod;
+          this.turnStateLabel = `2.5D Turn: Angling Westward (${(comp * 100).toFixed(0)}% W)`;
         }
-        this.facingDirection = 1;
+        this.facingDirection = -1;
       }
-      // Segment 2 (25.0s -> 54.5s): Cruising LEFT TO RIGHT along lower area & middle.
-      // Moving East: Head points EAST (Right)
+      // Segment 2 (25.0s -> 54.5s): Cruising RIGHT TO LEFT along lower area & middle.
+      // Direction: Traveling WEST (Left). Head points WEST (Left) -> scaleX = +1.0 * flipMod
       else if (t > 25.0 && t < 54.5) {
-        this.scaleX = -1.0 * flipSign;
+        this.scaleX = 1.0 * flipMod;
         this.scaleY = 1.0;
-        this.facingDirection = 1;
-        this.turnStateLabel = flipSign > 0 ? 'Swimming Left-to-Right (Eastbound) →' : 'Swimming Westbound ←';
+        this.facingDirection = -1;
+        this.turnStateLabel = flipMod > 0 ? 'Swimming Forward Westbound ← (Head First)' : 'Swimming Westbound (Inverted) ←';
       }
-      // Turn 2 (54.5s -> 55.5s): 2.5D Turnaround in right-middle (East to West)
+      // Turn 2 (54.5s -> 55.5s): 2.5D Turnaround on left side (West to East)
       else if (t >= 54.5 && t <= 55.5) {
         const p = (t - 54.5) / 1.0;
         const comp = 1.0 - (1.0 - minPositiveWidth) * Math.sin(p * Math.PI);
         this.scaleY = 1.0 + 0.05 * Math.sin(p * Math.PI);
         if (p < 0.5) {
-          // Compressing while Eastbound
-          this.scaleX = -comp * flipSign;
+          // Westbound compressing
+          this.scaleX = comp * flipMod;
           this.turnStateLabel = `2.5D Turn: Banking into depth (${(comp * 100).toFixed(0)}% W)`;
         } else {
-          // Expanding facing Westbound (Head points West/Left -> swims forward!)
-          this.scaleX = comp * flipSign;
-          this.turnStateLabel = `2.5D Turn: Angling Westward (${(comp * 100).toFixed(0)}% W)`;
+          // Switching to Eastbound (Head points Right) expanding out
+          this.scaleX = -comp * flipMod;
+          this.turnStateLabel = `2.5D Turn: Angling Eastward (${(comp * 100).toFixed(0)}% W)`;
         }
-        this.facingDirection = -1;
+        this.facingDirection = 1;
       }
-      // Segment 3 (55.5s -> 58.0s / 0.0s): Easing into loop Westbound
+      // Segment 3 (55.5s -> 58.0s / 0.0s): Easing into loop Eastbound
       else {
-        this.scaleX = 1.0 * flipSign;
+        this.scaleX = -1.0 * flipMod;
         this.scaleY = 1.0;
-        this.facingDirection = -1;
-        this.turnStateLabel = flipSign > 0 ? 'Swimming Right-to-Left (Westbound) ←' : 'Swimming Eastbound →';
+        this.facingDirection = 1;
+        this.turnStateLabel = flipMod > 0 ? 'Swimming Forward Eastbound → (Head First)' : 'Swimming Eastbound (Inverted) →';
       }
 
       // 6. Subtle Depth Pass (8-10% scale reduction during upper background pass: 12s - 34s)
@@ -436,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.rotate(this.pitchRad);
       }
 
-      // 2.5D horizontal scale compression + depth scale (Head-First Forward)
+      // Guaranteed Head-First Forward Swimming (scaled on origin)
       ctx.scale(this.scaleX * this.depthScale, this.scaleY * this.depthScale);
 
       const drawW = config.baseWidth;
