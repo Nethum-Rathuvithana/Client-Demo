@@ -996,68 +996,243 @@ document.addEventListener('DOMContentLoaded', () => {
   render3DFishStage();
 
   // --- 5. Ascending Vertical Botanical Canopy (Plants Section) ---
-  // "some scroll vertically"
-  const plantTrackLeft = document.getElementById('plant-track-left');
-  const plantTrackRight = document.getElementById('plant-track-right');
+  // "for the vertical scroll can you make the animation we can see the next 2 ones to come each smaller than the one closer tothe middle and the middle main one the biggest"
+  const verticalPlantStage = document.getElementById('vertical-plant-stage');
+  const verticalPlantStack = document.getElementById('vertical-plant-stack');
+  const btnPlantPrev = document.getElementById('btn-plant-prev');
+  const btnPlantNext = document.getElementById('btn-plant-next');
+  const plantStratumTitle = document.getElementById('plant-stratum-title');
+  const plantCounterBadge = document.getElementById('plant-counter-badge');
+  const activePlantPlacement = document.getElementById('active-plant-placement');
+  const activePlantName = document.getElementById('active-plant-name');
+  const activePlantLatin = document.getElementById('active-plant-latin');
+  const activePlantDesc = document.getElementById('active-plant-desc');
+  const activePlantLight = document.getElementById('active-plant-light');
+  const activePlantCo2 = document.getElementById('active-plant-co2');
+  const activePlantGrowth = document.getElementById('active-plant-growth');
+  const activePlantPrice = document.getElementById('active-plant-price');
+  const btnActivePlantCart = document.getElementById('btn-active-plant-cart');
+  const plantPaginationPills = document.getElementById('plant-pagination-pills');
 
-  function renderAscendingPlants() {
-    if (!plantTrackLeft || !plantTrackRight) return;
+  let activePlantIndex = 0;
+  const plantList = data.plants || [];
+  const totalPlants = plantList.length;
 
-    // Split plants into left (carpets & epiphytes) and right (tall stems & swords)
-    const leftPlants = data.plants.filter(p => p.placement.includes('Foreground') || p.placement.includes('Epiphyte') || p.placement.includes('Moss'));
-    const rightPlants = data.plants.filter(p => p.placement.includes('Background') || p.placement.includes('Stem') || p.placement.includes('Centerpiece'));
+  function renderPlantPerspectiveStack() {
+    if (!verticalPlantStack || totalPlants === 0) return;
 
-    function createPlantCardHtml(p) {
-      return `
-        <div class="plant-card-vertical p-6 flex flex-col justify-between group cursor-pointer" 
-             onclick="window.AQUARIA_APP.openProductModalById('${p.id}')">
-          <div class="relative h-56 rounded-2xl overflow-hidden mb-4 border border-emerald-500/20">
-            <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
-            <div class="absolute inset-0 bg-gradient-to-t from-abyss via-transparent to-transparent"></div>
-            <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/90 text-stone-950 font-cinzel">
-              ${p.badge}
-            </span>
-            <div class="absolute bottom-3 right-3 px-3 py-1 rounded-xl bg-stone-950/80 backdrop-blur-md text-sm font-bold text-emerald-300 font-cinzel border border-emerald-500/20">
-              ${p.priceFormatted}
+    // 1. Build cards HTML if not already initialized
+    if (!verticalPlantStack.hasChildNodes() || verticalPlantStack.children.length !== totalPlants) {
+      verticalPlantStack.innerHTML = plantList.map((p, idx) => {
+        return `
+          <div class="plant-stack-card" id="plant-card-${idx}" data-idx="${idx}" onclick="window.AQUARIA_APP.onPlantCardClick(${idx})">
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+              <!-- Specimen Image Preview -->
+              <div class="relative w-full sm:w-44 h-36 rounded-2xl overflow-hidden shrink-0 border border-emerald-500/25 bg-abyss">
+                <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover" loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-abyss/80 via-transparent to-transparent"></div>
+                <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/90 text-stone-950 font-cinzel">
+                  ${p.badge}
+                </span>
+                <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-stone-950/85 backdrop-blur-md text-xs font-bold text-emerald-300 font-cinzel border border-emerald-500/30">
+                  ${p.priceFormatted}
+                </span>
+              </div>
+
+              <!-- Specimen Info -->
+              <div class="flex-1 min-w-0 w-full space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-400 truncate">${p.placementTag}</span>
+                  <span class="text-[10px] text-stone-400 font-mono">Stratum 0${idx + 1}</span>
+                </div>
+                <h4 class="text-base sm:text-lg font-bold font-cinzel text-white truncate">
+                  ${p.name}
+                </h4>
+                <p class="text-xs text-stone-400 italic truncate">${p.scientificName}</p>
+                
+                <p class="text-xs text-stone-300/80 line-clamp-2 leading-relaxed">
+                  ${p.description}
+                </p>
+
+                <!-- Center Active Controls -->
+                <div class="pt-2 flex items-center gap-2">
+                  <button class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-stone-950 transition-all flex items-center gap-1 shadow-md shadow-emerald-500/20"
+                          onclick="event.stopPropagation(); window.AQUARIA_APP.addToCartById('${p.id}')">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Add to Cart</span>
+                  </button>
+                  <button class="px-3 py-1.5 rounded-xl bg-stone-800/80 hover:bg-stone-700 text-stone-300 text-xs font-semibold border border-stone-700/60"
+                          onclick="event.stopPropagation(); window.AQUARIA_APP.openProductModalById('${p.id}')">
+                    <span>Inspect</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div>
-            <span class="text-[10px] uppercase font-bold tracking-widest text-emerald-400 block mb-1">${p.placementTag}</span>
-            <h4 class="text-xl font-bold font-cinzel text-white group-hover:text-emerald-200 transition-colors mb-1">
-              ${p.name}
-            </h4>
-            <p class="text-xs text-stone-400 italic mb-3">${p.scientificName}</p>
-            <p class="text-xs text-stone-300/80 leading-relaxed mb-4 line-clamp-2">
-              ${p.description}
-            </p>
-
-            <div class="flex items-center gap-2 mb-4 text-[11px] text-stone-300">
-              <span class="px-2 py-0.5 rounded bg-stone-900 border border-stone-800">Light: ${p.lightDemand}</span>
-              <span class="px-2 py-0.5 rounded bg-stone-900 border border-stone-800">CO2: ${p.co2Demand}</span>
-            </div>
-          </div>
-
-          <div class="pt-3 border-t border-emerald-500/20 flex items-center gap-2">
-            <button class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-stone-950 transition-all flex items-center justify-center gap-1.5"
-                    onclick="event.stopPropagation(); window.AQUARIA_APP.addToCartById('${p.id}')">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Add to Cart</span>
-            </button>
-            <button class="px-3.5 py-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 text-xs font-semibold">
-              <i data-lucide="eye" class="w-3.5 h-3.5 text-emerald-400"></i>
-            </button>
-          </div>
-        </div>
-      `;
+        `;
+      }).join('');
+      if (window.lucide) window.lucide.createIcons();
     }
 
-    plantTrackLeft.innerHTML = leftPlants.map(createPlantCardHtml).join('');
-    plantTrackRight.innerHTML = rightPlants.map(createPlantCardHtml).join('');
-    if (window.lucide) window.lucide.createIcons();
-  }
-  renderAscendingPlants();
+    // 2. Position each card according to its offset from activePlantIndex:
+    // MIDDLE: BIGGEST (pos-center)
+    // NEXT 1 TO COME: SMALLER (pos-near-next)
+    // NEXT 2 TO COME: EVEN SMALLER (pos-far-next)
+    // PREV 1: SMALLER (pos-near-prev)
+    // PREV 2: EVEN SMALLER (pos-far-prev)
+    plantList.forEach((_, idx) => {
+      const card = document.getElementById(`plant-card-${idx}`);
+      if (!card) return;
 
+      const diff = idx - activePlantIndex;
+
+      card.classList.remove(
+        'pos-center',
+        'pos-near-next',
+        'pos-near-prev',
+        'pos-far-next',
+        'pos-far-prev',
+        'pos-hidden-next',
+        'pos-hidden-prev'
+      );
+
+      if (diff === 0) {
+        card.classList.add('pos-center');
+      } else if (diff === 1) {
+        card.classList.add('pos-near-next');
+      } else if (diff === 2) {
+        card.classList.add('pos-far-next');
+      } else if (diff === -1) {
+        card.classList.add('pos-near-prev');
+      } else if (diff === -2) {
+        card.classList.add('pos-far-prev');
+      } else if (diff > 2) {
+        card.classList.add('pos-hidden-next');
+      } else {
+        card.classList.add('pos-hidden-prev');
+      }
+    });
+
+    // 3. Update Left Telemetry Panel for Active Plant
+    const cur = plantList[activePlantIndex];
+    if (cur) {
+      if (plantStratumTitle) plantStratumTitle.textContent = cur.placement;
+      if (plantCounterBadge) plantCounterBadge.textContent = `0${activePlantIndex + 1} / 0${totalPlants}`;
+      if (activePlantPlacement) activePlantPlacement.textContent = cur.placementTag;
+      if (activePlantName) activePlantName.textContent = cur.name;
+      if (activePlantLatin) activePlantLatin.textContent = cur.scientificName;
+      if (activePlantDesc) activePlantDesc.textContent = cur.description;
+      if (activePlantLight) activePlantLight.textContent = cur.lightDemand;
+      if (activePlantCo2) activePlantCo2.textContent = cur.co2Demand;
+      if (activePlantGrowth) activePlantGrowth.textContent = cur.growthRate || 'Moderate';
+      if (activePlantPrice) activePlantPrice.textContent = cur.priceFormatted;
+
+      if (btnActivePlantCart) {
+        btnActivePlantCart.onclick = () => window.AQUARIA_APP.addToCartById(cur.id);
+      }
+    }
+
+    // 4. Update Navigation Pills
+    if (plantPaginationPills) {
+      plantPaginationPills.innerHTML = plantList.map((p, idx) => {
+        const isActive = idx === activePlantIndex;
+        const activeClass = isActive 
+          ? 'bg-emerald-500 text-stone-950 font-bold border-emerald-400 shadow-md shadow-emerald-500/30' 
+          : 'bg-stone-900/80 text-stone-400 hover:text-stone-200 border-stone-800';
+        const shortName = p.name.split(' ')[0];
+        return `
+          <button onclick="window.AQUARIA_APP.setPlantIndex(${idx})" 
+                  class="px-2.5 py-1 rounded-lg border text-[10px] tracking-wide transition-all ${activeClass}">
+            0${idx + 1} ${shortName}
+          </button>
+        `;
+      }).join('');
+    }
+  }
+
+  function setPlantIndex(newIdx) {
+    if (newIdx < 0) newIdx = 0;
+    if (newIdx >= totalPlants) newIdx = totalPlants - 1;
+    activePlantIndex = newIdx;
+    renderPlantPerspectiveStack();
+  }
+
+  function nextPlant() {
+    if (activePlantIndex < totalPlants - 1) {
+      setPlantIndex(activePlantIndex + 1);
+    } else {
+      setPlantIndex(0); // loop
+    }
+  }
+
+  function prevPlant() {
+    if (activePlantIndex > 0) {
+      setPlantIndex(activePlantIndex - 1);
+    } else {
+      setPlantIndex(totalPlants - 1); // loop
+    }
+  }
+
+  // Bind Buttons
+  if (btnPlantPrev) btnPlantPrev.addEventListener('click', prevPlant);
+  if (btnPlantNext) btnPlantNext.addEventListener('click', nextPlant);
+
+  // Wheel Scroll over Vertical Plant Stage:
+  if (verticalPlantStage) {
+    let lastWheelTime = 0;
+    verticalPlantStage.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const now = Date.now();
+      if (now - lastWheelTime < 240) return; // throttle for smooth step
+      lastWheelTime = now;
+
+      if (e.deltaY > 0) {
+        nextPlant();
+      } else if (e.deltaY < 0) {
+        prevPlant();
+      }
+    }, { passive: false });
+
+    // Touch Swipe over Stage
+    let touchStartY = 0;
+    verticalPlantStage.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    verticalPlantStage.addEventListener('touchend', (e) => {
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffY = touchStartY - touchEndY;
+      if (Math.abs(diffY) > 40) {
+        if (diffY > 0) nextPlant();
+        else prevPlant();
+      }
+    }, { passive: true });
+  }
+
+  // Keyboard navigation when in view
+  window.addEventListener('keydown', (e) => {
+    const plantsSection = document.getElementById('plants-canopy');
+    if (!plantsSection) return;
+    const rect = plantsSection.getBoundingClientRect();
+    const inView = rect.top < window.innerHeight && rect.bottom > 0;
+    if (!inView) return;
+
+    if (e.key === 'ArrowUp') {
+      prevPlant();
+    } else if (e.key === 'ArrowDown') {
+      nextPlant();
+    }
+  });
+
+  // Expose to window.AQUARIA_APP
+  window.AQUARIA_APP.setPlantIndex = setPlantIndex;
+  window.AQUARIA_APP.onPlantCardClick = (idx) => {
+    setPlantIndex(idx);
+  };
+
+  renderPlantPerspectiveStack();
+
+  
   // --- 6. Horizontal Architectural Glass Aquascapes ---
   const tanksContainer = document.getElementById('tanks-horizontal-container');
   const tanksLeftBtn = document.getElementById('tanks-scroll-left');

@@ -292,3 +292,146 @@ body {
 .pulse-indicator {
   animation: pulseSubtle 2.5s infinite ease-in-out;
 }
+
+/* -------------------------------------------------------------
+   VERTICAL BOTANICAL PERSPECTIVE STACK (PLANTS SECTION)
+   "we can see the next 2 ones to come each smaller than the one closer to the middle and the middle main one the biggest"
+------------------------------------------------------------- */
+.vertical-plant-stage {
+  position: relative;
+  height: 720px;
+  overflow: hidden;
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
+  border-radius: 32px;
+  background: radial-gradient(circle at 50% 50%, rgba(16, 69, 59, 0.45) 0%, rgba(10, 29, 34, 0.85) 100%);
+  border: 1px solid rgba(52, 211, 153, 0.22);
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.7), 0 24px 60px rgba(0, 0, 0, 0.6);
+  user-select: none;
+}
+
+@media (max-width: 640px) {
+  .vertical-plant-stage {
+    height: 600px;
+  }
+}
+
+.vertical-plant-stack {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.plant-stack-card {
+  position: absolute;
+  width: 90%;
+  max-width: 580px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(16, 69, 59, 0.94) 0%, rgba(13, 42, 48, 0.98) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+  padding: 20px 24px;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.4s ease,
+              box-shadow 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .plant-stack-card {
+    padding: 14px 16px;
+    max-width: 360px;
+  }
+}
+
+/* Middle active main card: BIGGEST */
+.plant-stack-card.pos-center {
+  transform: translateY(0px) scale(1.06) translateZ(0px);
+  opacity: 1;
+  z-index: 30;
+  border-color: rgba(52, 211, 153, 0.8);
+  box-shadow: 0 28px 70px -10px rgba(0, 0, 0, 0.9), 0 0 45px rgba(52, 211, 153, 0.35);
+  filter: blur(0px);
+  pointer-events: auto;
+}
+
+/* 1 position away (next 1 to come below, or 1 above): SMALLER than middle */
+.plant-stack-card.pos-near-next {
+  transform: translateY(178px) scale(0.85) translateZ(-60px);
+  opacity: 0.74;
+  z-index: 20;
+  border-color: rgba(52, 211, 153, 0.35);
+  filter: blur(0.4px);
+}
+.plant-stack-card.pos-near-prev {
+  transform: translateY(-178px) scale(0.85) translateZ(-60px);
+  opacity: 0.74;
+  z-index: 20;
+  border-color: rgba(52, 211, 153, 0.35);
+  filter: blur(0.4px);
+}
+
+/* 2 positions away (next 2nd to come below, or 2nd above): EVEN SMALLER than pos-near */
+.plant-stack-card.pos-far-next {
+  transform: translateY(330px) scale(0.68) translateZ(-130px);
+  opacity: 0.42;
+  z-index: 10;
+  border-color: rgba(52, 211, 153, 0.18);
+  filter: blur(1.5px);
+}
+.plant-stack-card.pos-far-prev {
+  transform: translateY(-330px) scale(0.68) translateZ(-130px);
+  opacity: 0.42;
+  z-index: 10;
+  border-color: rgba(52, 211, 153, 0.18);
+  filter: blur(1.5px);
+}
+
+/* Mobile responsive scale offsets */
+@media (max-width: 640px) {
+  .plant-stack-card.pos-center {
+    transform: translateY(0px) scale(1.02) translateZ(0px);
+  }
+  .plant-stack-card.pos-near-next {
+    transform: translateY(145px) scale(0.82) translateZ(-50px);
+  }
+  .plant-stack-card.pos-near-prev {
+    transform: translateY(-145px) scale(0.82) translateZ(-50px);
+  }
+  .plant-stack-card.pos-far-next {
+    transform: translateY(265px) scale(0.64) translateZ(-110px);
+  }
+  .plant-stack-card.pos-far-prev {
+    transform: translateY(-265px) scale(0.64) translateZ(-110px);
+  }
+}
+
+/* 3 or more away: fully hidden */
+.plant-stack-card.pos-hidden-next {
+  transform: translateY(460px) scale(0.5) translateZ(-200px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.plant-stack-card.pos-hidden-prev {
+  transform: translateY(-460px) scale(0.5) translateZ(-200px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.plant-nav-dot {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.plant-nav-dot.active {
+  background-color: #34d399 !important;
+  box-shadow: 0 0 14px #34d399;
+  transform: scale(1.3);
+}
