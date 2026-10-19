@@ -59,7 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Configuration
   const config = {
-    baseWidth: 240, // realistic swarm element width in px
+    baseWidth: 240,
+    colorVibrancy: 1.45, // Boosts dull video colors into living fluorescent neon // realistic swarm element width in px
     speedMultiplier: 1.0,
     directionMode: 'forward',
     invertFacing: false, // set to true to instantly flip heading
@@ -453,7 +454,13 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.shadowBlur = 12 * this.depthScale;
       ctx.shadowOffsetY = 6 * this.depthScale;
 
-      // Render the extracted photorealistic video frame centered on origin
+      // Render the extracted photorealistic video frame with living fluorescent vibrancy
+      ctx.save();
+      const vib = config.colorVibrancy || 1.45;
+      const contrast = 1.0 + (vib - 1.0) * 0.25;
+      const brightness = 1.0 + (vib - 1.0) * 0.15;
+      ctx.filter = `saturate(${vib.toFixed(2)}) contrast(${contrast.toFixed(2)}) brightness(${brightness.toFixed(2)})`;
+
       if (cropBox.sw > 20 && cropBox.sh > 10) {
         ctx.drawImage(
           keyedCanvas,
@@ -463,18 +470,10 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         ctx.drawImage(keyedCanvas, 0, 0, keyWidth, keyHeight, -drawW / 2, -drawH / 2, drawW, drawH);
       }
-      ctx.restore();
+      ctx.restore(); // Restore filter
+      ctx.restore(); // Restore shadow
 
-      // Soft natural water shimmer
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = 'rgba(0, 229, 255, 0.09)';
-      ctx.shadowColor = 'rgba(0, 229, 255, 0.5)';
-      ctx.shadowBlur = this.isHovered ? 20 : 10;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, drawW * 0.44, drawH * 0.30, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
+      // Completely removed artificial oval shape behind fish - clean natural water
 
       // Hover Reticle indicator if targeted
       if (this.isHovered) {
@@ -613,6 +612,18 @@ document.addEventListener('DOMContentLoaded', () => {
       btnFacingInvert.classList.toggle('text-stone-950');
       btnFacingInvert.classList.toggle('font-bold');
       console.log('Fish facing inverted:', config.invertFacing);
+    });
+  }
+
+  
+  // Living Color Vibrancy Slider Listener
+  const sliderVibrancy = document.getElementById('slider-fish-vibrancy');
+  const labelVibrancy = document.getElementById('label-fish-vibrancy');
+  if (sliderVibrancy && labelVibrancy) {
+    sliderVibrancy.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      config.colorVibrancy = val / 100;
+      labelVibrancy.textContent = `${val}% (Luminous Neon)`;
     });
   }
 
