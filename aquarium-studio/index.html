@@ -245,7 +245,10 @@
 
           <div class="grid grid-cols-2 gap-2 text-[10px] text-stone-300 font-mono">
             <div>Coords: <span id="hud-coords" class="text-emerald-300">8.0% X, 40.0% Y</span></div>
-            <div>Orientation: <span class="text-cyan-300">Natural Upright</span></div>
+            <div>Depth: <span id="hud-depth-display" class="text-cyan-300">Midground (100%)</span></div>
+            <div class="col-span-2">Motion: <span id="hud-orientation" class="text-emerald-300 font-semibold">Cruising Eastbound →</span></div>
+            <div>Pitch: <span id="hud-pitch-display" class="text-stone-300">0.0°</span></div>
+            <div>Video: <span class="text-cyan-300">Continuous 60fps</span></div>
           </div>
         </div>
 
@@ -254,13 +257,15 @@
           <label class="text-[10px] uppercase font-bold tracking-wider text-stone-300 block">
             Jump to Waypoint:
           </label>
-          <div class="grid grid-cols-3 gap-1 text-[10px] font-mono">
-            <button class="stage-jump-btn py-1 px-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="0">0s Start</button>
-            <button class="stage-jump-btn py-1 px-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="10">10s Glide</button>
-            <button class="stage-jump-btn py-1 px-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="20">20s Hover</button>
-            <button class="stage-jump-btn py-1 px-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="31">31s Descend</button>
-            <button class="stage-jump-btn py-1 px-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="40">40s Lower</button>
-            <button class="stage-jump-btn py-1 px-1.5 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="50">50s Middle</button>
+          <div class="grid grid-cols-4 gap-1 text-[10px] font-mono">
+            <button class="stage-jump-btn py-1 px-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="0">0s Start</button>
+            <button class="stage-jump-btn py-1 px-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="20">20s Hover</button>
+            <button class="stage-jump-btn py-1 px-1 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 transition-all text-center font-bold" data-time="24">24s Turn 1</button>
+            <button class="stage-jump-btn py-1 px-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="31">31s Descend</button>
+            <button class="stage-jump-btn py-1 px-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="40">40s West</button>
+            <button class="stage-jump-btn py-1 px-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="50">50s Middle</button>
+            <button class="stage-jump-btn py-1 px-1 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 transition-all text-center font-bold" data-time="54.5">54.5s Turn 2</button>
+            <button class="stage-jump-btn py-1 px-1 rounded-lg bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-300 hover:text-cyan-300 transition-all text-center" data-time="58">58s Loop</button>
           </div>
         </div>
 

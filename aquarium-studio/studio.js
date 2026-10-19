@@ -238,8 +238,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =========================================================================
-  // --- SWARM ELEMENT CONTROLLER ---
+  // --- SWARM ELEMENT CONTROLLER (2.5D Turnaround, Depth & Buoyancy) ---
   // =========================================================================
+  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const swarm = {
     timelineSec: 0,
     x: width * 0.08,
@@ -247,6 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
     normX: 0.08,
     normY: 0.40,
     currentStage: waypoints[0].stage,
+
+    // 2.5D Simulated Turnaround Kinematics
+    facing: 1, // +1 = Eastbound (facing right), -1 = Westbound (facing left)
+    scaleX: 1.0,
+    scaleY: 1.0,
+    depthScale: 1.0,
+    pitchRad: 0.0,
+    turnStateLabel: 'Cruising Eastward →',
 
     // Hover Deceleration State
     isHovered: false,
@@ -272,7 +282,8 @@ document.addEventListener('DOMContentLoaded', () => {
       this.hoverFactor += (targetHover - this.hoverFactor) * 0.1;
 
       // 2. Advance journey timeline
-      const advanceSec = dt * config.speedMultiplier * this.hoverFactor;
+      const speedFactor = prefersReducedMotion ? 0.6 : 1.0;
+      const advanceSec = dt * config.speedMultiplier * this.hoverFactor * speedFactor;
       this.timelineSec = (this.timelineSec + advanceSec) % totalDuration;
 
       // 3. Evaluate position on Catmull-Rom spline
@@ -291,7 +302,75 @@ document.addEventListener('DOMContentLoaded', () => {
       this.x = paddingX + this.normX * usableW;
       this.y = paddingY + this.normY * usableH;
 
-      // 4. Update HUD Telemetry
+      // 4. Compute 2.5D Simulated Turnaround (0.8 - 1.2s window, never zero width)
+      const t = this.timelineSec;
+      const minPositiveWidth = 0.22; // Small positive minimum width (never flat-sheet zero!)
+
+      // Turn 1: East -> West (1.0s window: 24.0s - 25.0s during upper descent)
+      if (t >= 24.0 && t <= 25.0) {
+        const p = (t - 24.0) / 1.0;
+        const comp = 1.0 - (1.0 - minPositiveWidth) * Math.sin(p * Math.PI);
+        this.scaleY = 1.0 + 0.05 * Math.sin(p * Math.PI); // subtle 2.5D depth preservation
+        if (p < 0.5) {
+          this.scaleX = comp; // Eastbound compressing
+          this.turnStateLabel = `2.5D Turn: Banking into depth (${(comp * 100).toFixed(0)}% W)`;
+        } else {
+          this.scaleX = -comp; // Orientation switches cleanly at narrowest point to Westbound
+          this.turnStateLabel = `2.5D Turn: Angling Westward (${(comp * 100).toFixed(0)}% W)`;
+        }
+        this.facing = -1;
+      }
+      // Westbound cruise (25.0s -> 54.5s)
+      else if (t > 25.0 && t < 54.5) {
+        this.scaleX = -1.0;
+        this.scaleY = 1.0;
+        this.facing = -1;
+        this.turnStateLabel = 'Cruising Westward ←';
+      }
+      // Turn 2: West -> East (1.0s window: 54.5s - 55.5s easing into starting region)
+      else if (t >= 54.5 && t <= 55.5) {
+        const p = (t - 54.5) / 1.0;
+        const comp = 1.0 - (1.0 - minPositiveWidth) * Math.sin(p * Math.PI);
+        this.scaleY = 1.0 + 0.05 * Math.sin(p * Math.PI);
+        if (p < 0.5) {
+          this.scaleX = -comp; // Westbound compressing
+          this.turnStateLabel = `2.5D Turn: Banking into depth (${(comp * 100).toFixed(0)}% W)`;
+        } else {
+          this.scaleX = comp; // Orientation switches cleanly at narrowest point to Eastbound
+          this.turnStateLabel = `2.5D Turn: Angling Eastward (${(comp * 100).toFixed(0)}% W)`;
+        }
+        this.facing = 1;
+      }
+      // Eastbound cruise (55.5s -> 24.0s, including 58s/0s boundary)
+      else {
+        this.scaleX = 1.0;
+        this.scaleY = 1.0;
+        this.facing = 1;
+        this.turnStateLabel = 'Cruising Eastward →';
+      }
+
+      // 5. Subtle Depth Pass (8-10% scale reduction during upper background pass: 12s - 34s)
+      if (t >= 12.0 && t <= 34.0) {
+        const depthP = (t - 12.0) / (34.0 - 12.0);
+        this.depthScale = 1.0 - 0.10 * Math.sin(depthP * Math.PI);
+      } else {
+        this.depthScale = 1.0;
+      }
+
+      // 6. Subtle Hydrodynamic Pitch (2-3 degrees: 0.035 to 0.05 rad)
+      if (!prefersReducedMotion) {
+        const dtSample = 0.1;
+        const nextPoint = evaluateJourneyPath(this.timelineSec + dtSample);
+        const vyNorm = (nextPoint.normY - this.normY) / dtSample;
+        // vyNorm > 0 is descending (nose down), vyNorm < 0 is climbing (nose up)
+        const maxPitch = 2.5 * (Math.PI / 180); // 2.5 degrees max
+        const targetPitch = Math.max(-maxPitch, Math.min(maxPitch, vyNorm * 0.7 * this.facing));
+        this.pitchRad += (targetPitch - this.pitchRad) * 0.1;
+      } else {
+        this.pitchRad = 0;
+      }
+
+      // 7. Update HUD Telemetry
       if (hudTimeDisplay) {
         hudTimeDisplay.textContent = `${this.timelineSec.toFixed(1)}s / ${totalDuration.toFixed(1)}s`;
       }
@@ -305,29 +384,47 @@ document.addEventListener('DOMContentLoaded', () => {
       if (hudCoords) {
         hudCoords.textContent = `${(this.normX * 100).toFixed(1)}% X, ${(this.normY * 100).toFixed(1)}% Y`;
       }
+      const hudOrientation = document.getElementById('hud-orientation');
+      if (hudOrientation) {
+        hudOrientation.textContent = this.turnStateLabel;
+      }
+      const hudDepthDisplay = document.getElementById('hud-depth-display');
+      if (hudDepthDisplay) {
+        const depthPct = Math.round(this.depthScale * 100);
+        hudDepthDisplay.textContent = depthPct < 96 ? `Background Pass (${depthPct}%)` : `Midground (${depthPct}%)`;
+      }
+      const hudPitchDisplay = document.getElementById('hud-pitch-display');
+      if (hudPitchDisplay) {
+        hudPitchDisplay.textContent = `${(this.pitchRad * (180 / Math.PI)).toFixed(1)}°`;
+      }
     },
 
     draw() {
       ctx.save();
+      
+      // Preserve visual centre of swarm throughout transition
       ctx.translate(this.x, this.y);
 
-      // =======================================================================
-      // MANDATORY RULE: PRESERVE ORIGINAL VIDEO ORIENTATION
-      // Never rotate, flip, mirror, or reverse the video frame!
-      // ctx.rotate is strictly 0! ctx.scale is strictly 1, 1!
-      // =======================================================================
+      // Subtle hydrodynamic pitch (2-3 degrees)
+      if (Math.abs(this.pitchRad) > 0.001) {
+        ctx.rotate(this.pitchRad);
+      }
+
+      // 2.5D horizontal scale compression + depth scale
+      // Width is never 0; switches orientation cleanly at minimum positive width
+      ctx.scale(this.scaleX * this.depthScale, this.scaleY * this.depthScale);
 
       const drawW = config.baseWidth;
       const aspect = cropBox.sh / (cropBox.sw || 1);
       const drawH = drawW * (aspect > 0.2 && aspect < 1.0 ? aspect : 0.52);
 
-      // Subtle atmospheric water shadow
+      // Subtle atmospheric water shadow (gentle, no heavy artificial overlay)
       ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-      ctx.shadowBlur = 14;
-      ctx.shadowOffsetY = 8;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      ctx.shadowBlur = 12 * this.depthScale;
+      ctx.shadowOffsetY = 6 * this.depthScale;
 
-      // Render the extracted photorealistic video frame upright & unrotated
+      // Render the extracted photorealistic video frame centered on origin
       if (cropBox.sw > 20 && cropBox.sh > 10) {
         ctx.drawImage(
           keyedCanvas,
@@ -339,14 +436,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       ctx.restore();
 
-      // Soft water depth shimmer
+      // Soft natural water shimmer (gentle, avoids dramatic flashes)
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = 'rgba(0, 229, 255, 0.12)';
-      ctx.shadowColor = 'rgba(0, 229, 255, 0.65)';
-      ctx.shadowBlur = this.isHovered ? 26 : 12;
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.09)';
+      ctx.shadowColor = 'rgba(0, 229, 255, 0.5)';
+      ctx.shadowBlur = this.isHovered ? 20 : 10;
       ctx.beginPath();
-      ctx.ellipse(0, 0, drawW * 0.45, drawH * 0.32, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, drawW * 0.44, drawH * 0.30, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
@@ -364,46 +461,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.restore();
     }
   };
-
-  // =========================================================================
-  // --- SINKING FOOD PELLETS SIMULATION ---
-  // =========================================================================
-  class Pellet {
-    constructor(x, y) {
-      this.x = x;
-      this.y = y;
-      this.vx = (Math.random() - 0.5) * 1.5;
-      this.vy = 1.0 + Math.random() * 1.5;
-      this.radius = 3 + Math.random() * 2.5;
-      this.color = Math.random() > 0.5 ? '#f59e0b' : '#d97706';
-      this.eaten = false;
-      this.age = 0;
-    }
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.vx *= 0.98;
-      this.age++;
-    }
-    draw() {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.color;
-      ctx.shadowColor = 'rgba(245, 158, 11, 0.5)';
-      ctx.shadowBlur = 6;
-      ctx.fill();
-      ctx.restore();
-    }
-  }
-
-  function spawnPellets(originX, originY, count = 8) {
-    for (let i = 0; i < count; i++) {
-      const offsetX = (Math.random() - 0.5) * 80;
-      const offsetY = (Math.random() - 0.5) * 30;
-      pellets.push(new Pellet(originX + offsetX, originY + offsetY));
-    }
-  }
 
   // =========================================================================
   // --- MAIN 60FPS SIMULATION LOOP ---
