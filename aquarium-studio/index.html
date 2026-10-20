@@ -44,7 +44,7 @@
   <div class="tank-frame-vignette"></div>
 
   <!-- Green Screen Video Source (Hidden, sampled by canvas chroma-key engine) -->
-  <video id="source-tetra-video" src="neon_tetra_group.mp4" loop muted playsinline autoplay crossorigin="anonymous" class="hidden"></video>
+  <video id="source-tetra-video" src="neon_tetra_group.mp4" loop muted playsinline autoplay crossorigin="anonymous" style="position: fixed; top: -9999px; left: -9999px; width: 320px; height: 180px; opacity: 0; pointer-events: none; z-index: -999;"></video>
 
   <!-- Offscreen Chroma-Key Extraction Canvas (Hidden in DOM, used for rendering) -->
   <canvas id="keyed-fish-canvas" class="hidden"></canvas>
@@ -366,6 +366,6 @@
 
   </div>
 
-  <script src="studio.js?v=1792412119535"></script>
+  <script src="studio.js?v=1792473529247"></script>
 </body>
 </html>

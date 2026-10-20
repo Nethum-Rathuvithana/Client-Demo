@@ -132,15 +132,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Stable cropbox to prevent micro-jitter of the sprite bounding box
   let cropBox = { sx: 50, sy: 50, sw: 540, sh: 260 };
-  let lastVideoTime = -1;
+
+  // Ensure video is actively playing and looping
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+
+  function ensureVideoPlayback() {
+    if (video.paused && video.readyState >= 2) {
+      video.play().catch(() => {});
+    }
+  }
+
+  // User interaction fallback to unlock browser autoplay policy
+  ['click', 'touchstart', 'keydown'].forEach(evt => {
+    window.addEventListener(evt, () => {
+      ensureVideoPlayback();
+    }, { once: false, passive: true });
+  });
 
   function processChromaKey() {
-    if (!isVideoReady || video.paused || video.ended) return;
+    ensureVideoPlayback();
+    if (!isVideoReady || video.readyState < 2) return;
 
-    // Only process when video actually presents a new frame (avoids redundant CPU bus stalls)
-    if (Math.abs(video.currentTime - lastVideoTime) < 0.005) return;
-    lastVideoTime = video.currentTime;
-
+    // Draw active video frame into keyed canvas
     keyedCtx.drawImage(video, 0, 0, keyWidth, keyHeight);
     const frame = keyedCtx.getImageData(0, 0, keyWidth, keyHeight);
     const data = frame.data;
