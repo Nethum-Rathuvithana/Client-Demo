@@ -1,10 +1,10 @@
-// Owita Restaurant & Cafe — Interactive Application Engine
-// Manages Menu, Cart, Timers, Multi-user Auth, Payment Portal, Digital Receipt & Admin Portal
+// Ovita Restaurant & Cafe — Interactive Application Engine
+// Complete Suite: Dynamic Kitchen Clock, POS Terminal, Daily Sales, Offers with Red Ribbons, Auth, Digital Receipts & Live Tracking
 
 (function() {
   'use strict';
 
-  // --- AUDIO SYNTHESIZER (NO EXTERNAL AUDIO FILES NEEDED) ---
+  // --- AUDIO SYNTHESIZER ---
   const soundEffects = {
     chime: function() {
       try {
@@ -12,8 +12,8 @@
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
         gain.gain.setValueAtTime(0.15, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
         osc.connect(gain);
@@ -43,33 +43,43 @@
 
   // --- STATE STORAGE ---
   const STORAGE_KEYS = {
-    MENU: 'owita_menu_items_v1',
-    OFFERS: 'owita_offers_v1',
-    USERS: 'owita_users_v1',
-    CURRENT_USER: 'owita_current_user_v1',
-    ORDERS: 'owita_orders_v1',
-    CART: 'owita_cart_v1',
-    ACTIVE_VIEW: 'owita_active_view_v1' // 'customer' or 'admin'
+    MENU: 'owita_menu_items_v3',
+    OFFERS: 'owita_offers_v3',
+    USERS: 'owita_users_v3',
+    ORDERS: 'owita_orders_v3',
+    CART: 'owita_cart_v3',
+    CURRENT_USER: 'owita_current_user_v3',
+    ACTIVE_VIEW: 'owita_active_view_v3',
+    DAILY_SALES: 'owita_daily_sales_v3'
   };
 
-  // Initialize or fetch state
-  function getStorage(key, defaultVal) {
-    const val = localStorage.getItem(key);
-    return val ? JSON.parse(val) : defaultVal;
-  }
-  function setStorage(key, val) {
-    localStorage.setItem(key, JSON.stringify(val));
+  function getStorage(key, fallback) {
+    try {
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : fallback;
+    } catch (e) {
+      return fallback;
+    }
   }
 
+  function setStorage(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {}
+  }
+
+  // Reactive State
   let menuItems = getStorage(STORAGE_KEYS.MENU, DEFAULT_MENU_ITEMS);
   let offers = getStorage(STORAGE_KEYS.OFFERS, DEFAULT_OFFERS);
   let users = getStorage(STORAGE_KEYS.USERS, DEFAULT_USERS);
-  let currentUser = getStorage(STORAGE_KEYS.CURRENT_USER, DEFAULT_USERS[0]); // default customer logged in for smooth demo
   let orders = getStorage(STORAGE_KEYS.ORDERS, DEFAULT_SEED_ORDERS);
   let cart = getStorage(STORAGE_KEYS.CART, []);
-  let activeView = getStorage(STORAGE_KEYS.ACTIVE_VIEW, 'customer'); // 'customer' or 'admin'
+  let currentUser = getStorage(STORAGE_KEYS.CURRENT_USER, DEFAULT_USERS[0]);
+  let activeView = getStorage(STORAGE_KEYS.ACTIVE_VIEW, 'customer');
   let activeCategory = 'all';
   let activeGalleryCategory = 'all';
+  let adminActiveTab = 'orders'; // 'orders', 'pos', 'sales', 'menu', 'offers'
+  let posCart = [];
   let customerLocation = null;
 
   // Curated Visual Gallery
@@ -124,103 +134,326 @@
     }
   ];
 
+  // Helper: Format Countdown Timer (e.g. "3d 15h 07m 37s" or "04h 22m 15s")
+  function formatCountdown(targetTime) {
+    const diff = new Date(targetTime).getTime() - Date.now();
+    if (diff <= 0) return 'EXPIRED';
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
-  // --- ORDER TIMER CALCULATION FORMULA ---
-  // Spec: 10 mins for 1 item, 10 more if 2 items (20 mins), and 5 mins for each item thereafter.
-  function calculatePrepTimeMins(totalItemsCount) {
-    if (!totalItemsCount || totalItemsCount <= 0) return 0;
-    if (totalItemsCount === 1) return 10;
-    if (totalItemsCount === 2) return 20;
-    return 20 + ((totalItemsCount - 2) * 5);
+    if (days > 0) {
+      return `${days}d ${String(hours).padStart(2, '0')}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
+    }
+    return `${String(hours).padStart(2, '0')}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
+  }
+
+  // --- PREPARATION TIME FORMULA ---
+  // Spec: "10 mins for each item and 10 more if its 2 items and from there on add 5 mins each"
+  function calculatePrepTimeMins(totalItemCount) {
+    if (!totalItemCount || totalItemCount <= 0) return 0;
+    if (totalItemCount === 1) return 10;
+    if (totalItemCount === 2) return 20; // 10 + 10
+    return 20 + (totalItemCount - 2) * 5; // +5 mins for each extra
   }
 
   function getCartItemsTotalCount() {
-    return cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    return cart.reduce((sum, item) => sum + item.quantity, 0);
   }
 
-  // --- TOAST NOTIFICATIONS ---
-  function showToast(message, type = 'success') {
-    const toast = document.getElementById('owitaToast');
-    const toastText = document.getElementById('owitaToastText');
-    const toastIcon = document.getElementById('owitaToastIcon');
-    if (!toast || !toastText) return;
-
-    toastText.textContent = message;
-    if (type === 'alert') {
-      toast.className = 'fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-amber-950/95 border border-amber-500 text-amber-200 shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-0 opacity-100';
-      soundEffects.alert();
-    } else {
-      toast.className = 'fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#121217]/95 border border-amber-500/30 text-stone-100 shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-0 opacity-100';
-      soundEffects.chime();
+  // --- TOAST NOTIFIER (AUTO DISMISS IN MAX 4.5 SECONDS) ---
+  let _toastTimer = null;
+  function showToast(message, type = 'info') {
+    let toast = document.getElementById('owitaLiveToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'owitaLiveToast';
+      document.body.appendChild(toast);
     }
 
-    clearTimeout(window._toastTimeout);
-    window._toastTimeout = setTimeout(() => {
-      toast.classList.add('translate-y-12', 'opacity-0');
-    }, 3800);
+    toast.className = 'fixed bottom-6 right-6 z-[300] flex items-center justify-between gap-3 px-5 py-3.5 rounded-2xl shadow-2xl backdrop-blur-md border transition-all duration-500 transform translate-y-0 opacity-100 max-w-md ' +
+      (type === 'success' ? 'bg-[#0A1A12]/95 border-emerald-500/50 text-emerald-200' :
+       type === 'alert' ? 'bg-[#220B0B]/95 border-red-500/60 text-red-200 animate-pulse' :
+       type === 'warning' ? 'bg-[#1E1408]/95 border-amber-500/50 text-amber-200' :
+       'bg-[#121218]/95 border-amber-500/30 text-stone-200');
+
+    toast.innerHTML = `
+      <div class="flex items-center gap-2.5">
+        <span class="w-2.5 h-2.5 rounded-full ${type === 'alert' ? 'bg-red-400' : type === 'success' ? 'bg-emerald-400' : 'bg-amber-400'} animate-ping shrink-0"></span>
+        <span class="text-xs font-semibold leading-snug">${message}</span>
+      </div>
+      <button onclick="this.parentElement.classList.add('opacity-0', 'translate-y-4')" class="text-stone-400 hover:text-white p-1 ml-2 shrink-0">
+        ✕
+      </button>
+    `;
+
+    clearTimeout(_toastTimer);
+    // Auto disappear in 4.5 seconds (under the user's 6 seconds limit)
+    _toastTimer = setTimeout(() => {
+      toast.classList.add('opacity-0', 'translate-y-4');
+    }, 4500);
   }
 
-  // --- RENDER MENU & SIGNATURE COLLECTION ---
-  function renderSignatureDishes() {
-    const container = document.getElementById('signatureCollectionGrid');
+  // --- LUXURY SCROLL REVEAL OBSERVER (RELAXED, CINEMATIC SMOOTHNESS) ---
+  let scrollObserver = null;
+  function initScrollObserver() {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal-init').forEach(el => el.classList.add('reveal-active'));
+      return;
+    }
+
+    if (!scrollObserver) {
+      scrollObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-active');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.08,
+        rootMargin: '0px 0px -20px 0px'
+      });
+    }
+
+    document.querySelectorAll('.reveal-init:not(.reveal-active)').forEach(el => {
+      scrollObserver.observe(el);
+    });
+  }
+
+  // --- HELPER: GET ITEM EFFECTIVE PRICE & ACTIVE OFFER ---
+  function getItemPricing(item) {
+    const offer = offers.find(o => o.dishId === item.id && o.active && new Date(o.expiresAt) > new Date());
+    if (offer) {
+      let finalPrice = item.price;
+      if (offer.discountType === 'percent') {
+        finalPrice = Math.round(item.price * (1 - offer.discountValue / 100));
+      } else if (offer.discountType === 'fixed') {
+        finalPrice = Math.max(100, item.price - offer.discountValue);
+      }
+      return {
+        hasOffer: true,
+        offer,
+        currentPrice: finalPrice,
+        originalPrice: item.originalPrice || item.price,
+        savings: (item.originalPrice || item.price) - finalPrice,
+        tag: offer.tag || (offer.discountType === 'percent' ? `${offer.discountValue}% OFF` : `SAVE LKR ${offer.discountValue}`),
+        expiresAt: offer.expiresAt
+      };
+    }
+    return {
+      hasOffer: false,
+      offer: null,
+      currentPrice: item.price,
+      originalPrice: item.price,
+      savings: 0,
+      tag: null,
+      expiresAt: null
+    };
+  }
+
+  // --- RENDER DEDICATED OFFERS SECTION ---
+  function renderActiveOffersSection() {
+    const container = document.getElementById('exclusiveOffersGrid');
+    const section = document.getElementById('offersSectionContainer');
     if (!container) return;
 
-    const signatureItems = menuItems.filter(item => item.isSignature);
-    container.innerHTML = signatureItems.map((item, idx) => `
-      <div class="owita-card rounded-2xl overflow-hidden flex flex-col justify-between group reveal-init reveal-bottom stagger-${(idx % 4) + 1}">
-        <div>
-          <div class="relative h-56 overflow-hidden">
-            <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#101014] via-transparent to-transparent"></div>
-            
-            <div class="absolute top-3 left-3 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-500/30 text-[10px] font-semibold text-amber-400">
-              <i data-lucide="clock" class="w-3 h-3"></i>
-              <span>~10 Mins Prep</span>
-            </div>
+    const now = new Date();
+    const activeOffers = offers.filter(o => o.active && new Date(o.expiresAt) > now);
 
-            ${item.isOffer ? `
-              <div class="absolute top-3 right-3 bg-amber-500 text-black px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                ${item.offerDiscountPercent}% OFF
-              </div>
-            ` : ''}
+    if (activeOffers.length === 0) {
+      if (section) section.classList.add('hidden');
+      return;
+    }
 
-            <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-semibold text-amber-400 flex items-center gap-1">
-              <span>★</span>
-              <span>${item.rating}</span>
-            </div>
-          </div>
+    if (section) section.classList.remove('hidden');
 
-          <div class="p-5 space-y-2">
-            <h3 class="font-serif-luxury text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
-              ${item.name}
-            </h3>
-            ${item.sinhala ? `<div class="text-[11px] text-amber-500/80 font-medium">${item.sinhala}</div>` : ''}
-            <p class="text-xs text-stone-400 line-clamp-2 leading-relaxed">
-              ${item.description}
-            </p>
-          </div>
-        </div>
+    container.innerHTML = activeOffers.map((offer, idx) => {
+      const item = menuItems.find(m => m.id === offer.dishId);
+      if (!item) return '';
 
-        <div class="p-5 pt-0 flex items-center justify-between border-t border-white/5 mt-2">
+      const pricing = getItemPricing(item);
+
+      return `
+        <div class="owita-card menu-item-card rounded-2xl overflow-hidden flex flex-col justify-between group reveal-init reveal-bottom stagger-${(idx % 4) + 1} border-red-500/30 shadow-xl">
           <div>
-            <div class="text-[10px] text-stone-500 uppercase tracking-widest font-mono">Price</div>
-            <div class="text-lg font-bold font-mono text-amber-400">
-              LKR ${item.price.toLocaleString()}
+            <div class="relative h-56 overflow-hidden">
+              <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+              <div class="absolute inset-0 bg-gradient-to-t from-[#101014] via-black/20 to-transparent"></div>
+              
+              <!-- Red Ribbon Discount Badge -->
+              <div class="absolute top-0 right-0 z-20 offer-ribbon-red urgency-pulse px-3.5 py-1.5 rounded-bl-xl text-[10px] font-black tracking-wider flex items-center gap-1.5">
+                <span>🔥</span>
+                <span>${pricing.tag}</span>
+              </div>
+
+              <!-- Live Countdown Badge -->
+              <div class="absolute bottom-3 left-3 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-mono font-bold text-red-400 border border-red-500/40 flex items-center gap-1 live-offer-timer" data-expires="${offer.expiresAt}">
+                <span>⏳ Ends: ${formatCountdown(offer.expiresAt)}</span>
+              </div>
+
+              <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-semibold text-amber-400">
+                ★ ${item.rating}
+              </div>
+            </div>
+
+            <div class="p-5 space-y-2">
+              <div class="text-[10px] font-mono font-bold text-red-400 uppercase tracking-widest">${offer.title}</div>
+              <h3 class="font-serif-luxury text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
+                ${item.name}
+              </h3>
+              ${item.sinhala ? `<div class="text-[11px] text-amber-500/80 font-medium">${item.sinhala}</div>` : ''}
+              <p class="text-xs text-stone-400 line-clamp-2 leading-relaxed">
+                ${offer.description || item.description}
+              </p>
+
+              <!-- Point-wise Inclusions -->
+              <div class="portion-inclusions-box mt-3 space-y-1.5">
+                <div class="flex items-center justify-between text-[11px] font-mono text-amber-400 uppercase tracking-wider border-b border-white/5 pb-1 font-semibold">
+                  <span class="flex items-center gap-1"><i data-lucide="utensils" class="w-3 h-3 text-amber-400"></i> Portion Inclusions</span>
+                  <span class="text-[10px] text-stone-400 font-normal">${item.serves || ''}</span>
+                </div>
+                <ul class="text-[11px] text-stone-300 space-y-1 pt-0.5">
+                  ${(item.portionIncludes || []).map(inc => `
+                    <li class="flex items-start gap-1.5 leading-snug">
+                      <span class="text-amber-400 font-bold">✦</span>
+                      <span>${inc}</span>
+                    </li>
+                  `).join('')}
+                </ul>
+              </div>
             </div>
           </div>
 
-          <button onclick="window.OwitaApp.addToCart('${item.id}')" class="px-4 py-2.5 rounded-xl amber-btn-primary flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-            <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
-            <span>Add</span>
-          </button>
+          <div class="p-5 pt-0 flex items-center justify-between border-t border-white/5 mt-3">
+            <div>
+              <div class="text-[10px] text-stone-500 uppercase tracking-widest font-mono">Special Price</div>
+              <div class="flex items-baseline gap-2">
+                <span class="text-lg font-bold font-mono text-red-400">
+                  LKR ${pricing.currentPrice.toLocaleString()}
+                </span>
+                <span class="text-xs font-mono text-stone-500 line-through">
+                  LKR ${pricing.originalPrice.toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <button onclick="window.OwitaApp.addToCart('${item.id}')" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white flex items-center gap-2 text-xs font-bold uppercase tracking-wider shadow-lg shadow-red-600/30">
+              <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+              <span>Claim Deal</span>
+            </button>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     if (window.lucide) lucide.createIcons();
     initScrollObserver();
   }
 
+  // --- RENDER SIGNATURE COLLECTION ---
+  function renderSignatureDishes() {
+    const container = document.getElementById('signatureCollectionGrid');
+    if (!container) return;
+
+    const signatureItems = menuItems.filter(item => item.isSignature);
+    container.innerHTML = signatureItems.map((item, idx) => {
+      const pricing = getItemPricing(item);
+
+      return `
+        <div class="owita-card menu-item-card rounded-2xl overflow-hidden flex flex-col justify-between group reveal-init reveal-bottom stagger-${(idx % 4) + 1} relative">
+          <div>
+            <div class="relative h-56 overflow-hidden">
+              <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+              <div class="absolute inset-0 bg-gradient-to-t from-[#101014] via-black/20 to-transparent"></div>
+              
+              <!-- Prep time badge -->
+              <div class="absolute top-3 left-3 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-500/30 text-[10px] font-semibold text-amber-400">
+                <i data-lucide="clock" class="w-3 h-3"></i>
+                <span>~10 Mins Prep</span>
+              </div>
+
+              <!-- Red Ribbon if Offer is Active -->
+              ${pricing.hasOffer ? `
+                <div class="absolute top-0 right-0 z-20 offer-ribbon-red urgency-pulse px-3 py-1 rounded-bl-xl text-[10px] font-black tracking-wider">
+                  🔥 ${pricing.tag}
+                </div>
+              ` : `
+                <div class="absolute top-3 right-3 bg-amber-500/90 text-black px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  ${item.serves || 'Portion'}
+                </div>
+              `}
+
+              <!-- Live timer for active offer -->
+              ${pricing.hasOffer ? `
+                <div class="absolute bottom-3 left-3 bg-black/85 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-mono font-bold text-red-400 border border-red-500/30 live-offer-timer" data-expires="${pricing.expiresAt}">
+                  ⏳ Ends: ${formatCountdown(pricing.expiresAt)}
+                </div>
+              ` : ''}
+
+              <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-semibold text-amber-400 flex items-center gap-1">
+                <span>★</span>
+                <span>${item.rating}</span>
+              </div>
+            </div>
+
+            <div class="p-5 space-y-2">
+              <h3 class="font-serif-luxury text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
+                ${item.name}
+              </h3>
+              ${item.sinhala ? `<div class="text-[11px] text-amber-500/80 font-medium">${item.sinhala}</div>` : ''}
+              <p class="text-xs text-stone-400 line-clamp-2 leading-relaxed">
+                ${item.description}
+              </p>
+
+              <!-- POINT-WISE INCLUSIONS BREAKDOWN -->
+              <div class="portion-inclusions-box mt-3 space-y-1.5">
+                <div class="flex items-center justify-between text-[11px] font-mono text-amber-400 uppercase tracking-wider border-b border-white/5 pb-1 font-semibold">
+                  <span class="flex items-center gap-1"><i data-lucide="utensils" class="w-3 h-3 text-amber-400"></i> What's Included</span>
+                  <span class="text-[10px] text-stone-400 font-normal">${item.serves || ''}</span>
+                </div>
+                <ul class="text-[11px] text-stone-300 space-y-1 pt-0.5">
+                  ${(item.portionIncludes || []).map(inc => `
+                    <li class="flex items-start gap-1.5 leading-snug">
+                      <span class="text-amber-400 font-bold">✦</span>
+                      <span>${inc}</span>
+                    </li>
+                  `).join('')}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-5 pt-0 flex items-center justify-between border-t border-white/5 mt-3">
+            <div>
+              <div class="text-[10px] text-stone-500 uppercase tracking-widest font-mono">Price</div>
+              <div class="flex items-baseline gap-2">
+                <span class="text-lg font-bold font-mono ${pricing.hasOffer ? 'text-red-400' : 'text-amber-400'}">
+                  LKR ${pricing.currentPrice.toLocaleString()}
+                </span>
+                ${pricing.hasOffer ? `
+                  <span class="text-xs font-mono text-stone-500 line-through">
+                    LKR ${pricing.originalPrice.toLocaleString()}
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+
+            <button onclick="window.OwitaApp.addToCart('${item.id}')" class="px-4 py-2.5 rounded-xl amber-btn-primary flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+              <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+              <span>Add to Cart</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+    initScrollObserver();
+  }
+
+  // --- RENDER FULL MENU ---
   function renderFullMenu() {
     const container = document.getElementById('fullMenuGrid');
     if (!container) return;
@@ -240,1123 +473,103 @@
       return;
     }
 
-    container.innerHTML = filtered.map(item => `
-      <div class="owita-card rounded-2xl overflow-hidden flex flex-col justify-between group ${!item.inStock ? 'opacity-60 grayscale' : ''}">
-        <div>
-          <div class="relative h-48 overflow-hidden">
-            <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-            <div class="absolute inset-0 bg-gradient-to-t from-[#101014] via-transparent to-transparent"></div>
-            
-            <div class="absolute top-3 left-3 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-amber-500/30 text-[10px] font-semibold text-amber-400">
-              <i data-lucide="clock" class="w-3 h-3"></i>
-              <span>~10 Mins Prep</span>
-            </div>
+    container.innerHTML = filtered.map((item, idx) => {
+      const pricing = getItemPricing(item);
 
-            ${!item.inStock ? `
-              <div class="absolute inset-0 bg-black/70 flex items-center justify-center text-xs font-bold uppercase tracking-widest text-red-400">
-                Sold Out
-              </div>
-            ` : ''}
-
-            <div class="absolute bottom-2.5 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-semibold text-amber-400">
-              ★ ${item.rating || '4.8'}
-            </div>
-          </div>
-
-          <div class="p-4 space-y-1.5">
-            <h4 class="font-serif-luxury text-lg font-bold text-white group-hover:text-amber-400 transition-colors">
-              ${item.name}
-            </h4>
-            <p class="text-xs text-stone-400 line-clamp-2 leading-relaxed">
-              ${item.description}
-            </p>
-          </div>
-        </div>
-
-        <div class="p-4 pt-0 flex items-center justify-between border-t border-white/5 mt-2">
+      return `
+        <div class="owita-card menu-item-card rounded-2xl overflow-hidden flex flex-col justify-between group reveal-init reveal-bottom stagger-${(idx % 6) + 1} ${!item.inStock ? 'opacity-60 grayscale' : ''}">
           <div>
-            <div class="text-base font-bold font-mono text-amber-400">
-              LKR ${item.price.toLocaleString()}
+            <div class="relative h-48 overflow-hidden">
+              <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+              <div class="absolute inset-0 bg-gradient-to-t from-[#101014] via-black/20 to-transparent"></div>
+              
+              <div class="absolute top-3 left-3 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-amber-500/30 text-[10px] font-semibold text-amber-400">
+                <i data-lucide="clock" class="w-3 h-3"></i>
+                <span>~10 Mins Prep</span>
+              </div>
+
+              ${pricing.hasOffer ? `
+                <div class="absolute top-0 right-0 z-20 offer-ribbon-red urgency-pulse px-3 py-1 rounded-bl-xl text-[10px] font-black tracking-wider">
+                  🔥 ${pricing.tag}
+                </div>
+              ` : `
+                <div class="absolute top-3 right-3 bg-amber-500/90 text-black px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  ${item.serves || 'Portion'}
+                </div>
+              `}
+
+              ${!item.inStock ? `
+                <div class="absolute inset-0 bg-black/70 flex items-center justify-center text-xs font-bold uppercase tracking-widest text-red-400">
+                  Sold Out
+                </div>
+              ` : ''}
+
+              ${pricing.hasOffer ? `
+                <div class="absolute bottom-2 left-3 bg-black/85 backdrop-blur-md px-2 py-0.5 rounded text-[9px] font-mono font-bold text-red-400 border border-red-500/30 live-offer-timer" data-expires="${pricing.expiresAt}">
+                  ⏳ Ends: ${formatCountdown(pricing.expiresAt)}
+                </div>
+              ` : ''}
+
+              <div class="absolute bottom-2.5 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-semibold text-amber-400">
+                ★ ${item.rating || '4.8'}
+              </div>
+            </div>
+
+            <div class="p-4 space-y-2">
+              <h4 class="font-serif-luxury text-lg font-bold text-white group-hover:text-amber-400 transition-colors">
+                ${item.name}
+              </h4>
+              ${item.sinhala ? `<div class="text-[10px] text-amber-500/80">${item.sinhala}</div>` : ''}
+              <p class="text-xs text-stone-400 line-clamp-2 leading-relaxed font-light">
+                ${item.description}
+              </p>
+
+              <!-- Point-wise Inclusions -->
+              <div class="portion-inclusions-box mt-2 space-y-1.5">
+                <div class="flex items-center justify-between text-[10px] font-mono text-amber-400 uppercase tracking-wider border-b border-white/5 pb-1 font-semibold">
+                  <span class="flex items-center gap-1"><i data-lucide="utensils" class="w-3 h-3 text-amber-400"></i> Portion Details</span>
+                  <span class="text-[10px] text-stone-400 font-normal">${item.serves || ''}</span>
+                </div>
+                <ul class="text-[11px] text-stone-300 space-y-1 pt-0.5">
+                  ${(item.portionIncludes || []).map(inc => `
+                    <li class="flex items-start gap-1.5 leading-snug">
+                      <span class="text-amber-400 font-bold">✦</span>
+                      <span>${inc}</span>
+                    </li>
+                  `).join('')}
+                </ul>
+              </div>
             </div>
           </div>
 
-          ${item.inStock ? `
-            <button onclick="window.OwitaApp.addToCart('${item.id}')" class="px-3.5 py-2 rounded-xl amber-btn-primary flex items-center gap-1.5 text-xs font-bold">
+          <div class="p-4 pt-0 flex items-center justify-between border-t border-white/5 mt-2">
+            <div>
+              <div class="flex items-baseline gap-2">
+                <span class="text-base font-bold font-mono ${pricing.hasOffer ? 'text-red-400' : 'text-amber-400'}">
+                  LKR ${pricing.currentPrice.toLocaleString()}
+                </span>
+                ${pricing.hasOffer ? `
+                  <span class="text-xs font-mono text-stone-500 line-through">
+                    LKR ${pricing.originalPrice.toLocaleString()}
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+
+            <button onclick="window.OwitaApp.addToCart('${item.id}')" ${!item.inStock ? 'disabled' : ''} class="px-3.5 py-2 rounded-xl amber-btn-primary flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider ${!item.inStock ? 'opacity-40 cursor-not-allowed' : ''}">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               <span>Add</span>
             </button>
-          ` : `
-            <span class="text-xs text-stone-500 uppercase font-mono">Unavailable</span>
-          `}
-        </div>
-      </div>
-    `).join('');
-
-    if (window.lucide) lucide.createIcons();
-  }
-
-  // --- CART MANAGEMENT ---
-  function addToCart(itemId) {
-    const item = menuItems.find(i => i.id === itemId);
-    if (!item) return;
-
-    const existing = cart.find(c => c.id === itemId);
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        img: item.img,
-        quantity: 1,
-        notes: ''
-      });
-    }
-
-    setStorage(STORAGE_KEYS.CART, cart);
-    updateCartBadges();
-    renderCartDrawer();
-    showToast(`Added ${item.name} to cart`);
-  }
-
-  function updateCartQuantity(itemId, delta) {
-    const item = cart.find(c => c.id === itemId);
-    if (!item) return;
-
-    item.quantity += delta;
-    if (item.quantity <= 0) {
-      cart = cart.filter(c => c.id !== itemId);
-    }
-
-    setStorage(STORAGE_KEYS.CART, cart);
-    updateCartBadges();
-    renderCartDrawer();
-  }
-
-  function removeFromCart(itemId) {
-    cart = cart.filter(c => c.id !== itemId);
-    setStorage(STORAGE_KEYS.CART, cart);
-    updateCartBadges();
-    renderCartDrawer();
-    showToast('Item removed from cart');
-  }
-
-  function updateCartBadges() {
-    const totalCount = getCartItemsTotalCount();
-    document.querySelectorAll('.cart-count-badge').forEach(el => {
-      el.textContent = totalCount;
-      el.classList.toggle('hidden', totalCount === 0);
-    });
-
-    // Update dynamic prep timer estimate in cart
-    const prepMins = calculatePrepTimeMins(totalCount);
-    document.querySelectorAll('.cart-prep-estimate-time').forEach(el => {
-      el.textContent = `${prepMins} Mins`;
-    });
-  }
-
-  function renderCartDrawer() {
-    const container = document.getElementById('cartDrawerItems');
-    const summaryBox = document.getElementById('cartSummaryBox');
-    const emptyBox = document.getElementById('cartEmptyBox');
-    if (!container) return;
-
-    const totalCount = getCartItemsTotalCount();
-
-    if (cart.length === 0) {
-      container.innerHTML = '';
-      if (summaryBox) summaryBox.classList.add('hidden');
-      if (emptyBox) emptyBox.classList.remove('hidden');
-      return;
-    }
-
-    if (emptyBox) emptyBox.classList.add('hidden');
-    if (summaryBox) summaryBox.classList.remove('hidden');
-
-    let subtotal = 0;
-    container.innerHTML = cart.map(item => {
-      const itemSubtotal = item.price * item.quantity;
-      subtotal += itemSubtotal;
-      return `
-        <div class="flex items-center gap-3.5 p-3 rounded-xl bg-white/[0.03] border border-white/5">
-          <img src="${item.img}" alt="${item.name}" class="w-14 h-14 rounded-lg object-cover">
-          <div class="flex-1 min-w-0">
-            <h4 class="text-sm font-semibold text-white truncate">${item.name}</h4>
-            <div class="text-xs font-mono text-amber-400 mt-0.5">LKR ${item.price.toLocaleString()}</div>
-            <div class="flex items-center gap-2 mt-2">
-              <button onclick="window.OwitaApp.updateCartQuantity('${item.id}', -1)" class="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs">
-                -
-              </button>
-              <span class="text-xs font-mono text-white px-1">${item.quantity}</span>
-              <button onclick="window.OwitaApp.updateCartQuantity('${item.id}', 1)" class="w-6 h-6 rounded bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xs">
-                +
-              </button>
-            </div>
-          </div>
-          <div class="text-right">
-            <div class="text-xs font-mono font-bold text-white">LKR ${itemSubtotal.toLocaleString()}</div>
-            <button onclick="window.OwitaApp.removeFromCart('${item.id}')" class="text-stone-500 hover:text-red-400 text-xs mt-3 block ml-auto">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
           </div>
         </div>
       `;
     }).join('');
 
-    const serviceFee = Math.round(subtotal * 0.05);
-    const packagingFee = OWITA_CONFIG.packagingFeeLKR;
-    const total = subtotal + serviceFee + packagingFee;
-    const prepMins = calculatePrepTimeMins(totalCount);
-
-    document.getElementById('cartDrawerSubtotal').textContent = `LKR ${subtotal.toLocaleString()}`;
-    document.getElementById('cartDrawerServiceFee').textContent = `LKR ${serviceFee.toLocaleString()}`;
-    document.getElementById('cartDrawerPackagingFee').textContent = `LKR ${packagingFee.toLocaleString()}`;
-    document.getElementById('cartDrawerTotal').textContent = `LKR ${total.toLocaleString()}`;
-    document.getElementById('cartDrawerPrepExplanation').textContent = 
-      totalCount === 1 ? '10 mins for 1 item' : 
-      totalCount === 2 ? '20 mins for 2 items' : 
-      `20 mins base + ${(totalCount - 2) * 5} mins for ${totalCount} items`;
-
     if (window.lucide) lucide.createIcons();
+    initScrollObserver();
   }
 
-  // --- CHECKOUT & PAYMENT MODAL FLOW ---
-  function proceedToCheckout() {
-    if (cart.length === 0) {
-      showToast('Your cart is empty', 'alert');
-      return;
-    }
-
-    // Spec Requirement: Customers must order after signing in, give option to sign in when confirming order!
-    if (!currentUser || currentUser.role !== 'customer') {
-      closeCartDrawer();
-      openAuthModal('signin', () => {
-        openCheckoutModal();
-      });
-      return;
-    }
-
-    closeCartDrawer();
-    openCheckoutModal();
-  }
-
-  function openCheckoutModal() {
-    const modal = document.getElementById('checkoutPaymentModal');
-    if (!modal) return;
-
-    const totalCount = getCartItemsTotalCount();
-    const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
-    const serviceFee = Math.round(subtotal * 0.05);
-    const packagingFee = OWITA_CONFIG.packagingFeeLKR;
-    const total = subtotal + serviceFee + packagingFee;
-    const prepMins = calculatePrepTimeMins(totalCount);
-
-    // Populate Review list
-    const reviewContainer = document.getElementById('checkoutOrderReviewItems');
-    if (reviewContainer) {
-      reviewContainer.innerHTML = cart.map(item => `
-        <div class="flex items-center justify-between text-xs py-1.5 border-b border-white/5">
-          <span class="text-stone-300 font-medium">${item.quantity}x ${item.name}</span>
-          <span class="font-mono text-amber-400">LKR ${(item.price * item.quantity).toLocaleString()}</span>
-        </div>
-      `).join('');
-    }
-
-    document.getElementById('checkoutSubtotal').textContent = `LKR ${subtotal.toLocaleString()}`;
-    document.getElementById('checkoutServiceFee').textContent = `LKR ${serviceFee.toLocaleString()}`;
-    document.getElementById('checkoutPackagingFee').textContent = `LKR ${packagingFee.toLocaleString()}`;
-    document.getElementById('checkoutGrandTotal').textContent = `LKR ${total.toLocaleString()}`;
-    document.getElementById('checkoutTotalItems').textContent = `${totalCount} Dish${totalCount > 1 ? 'es' : ''}`;
-    document.getElementById('checkoutEstimatedMins').textContent = `${prepMins} Minutes`;
-
-    // Customer details
-    document.getElementById('checkoutCustomerName').value = currentUser.name || '';
-    document.getElementById('checkoutCustomerPhone').value = currentUser.phone || '';
-    document.getElementById('checkoutCustomerEmail').value = currentUser.email || '';
-
-    modal.classList.remove('hidden');
-  }
-
-  function closeCheckoutModal() {
-    const modal = document.getElementById('checkoutPaymentModal');
-    if (modal) modal.classList.add('hidden');
-  }
-
-  // Handle Payment & Order Placement
-  function executePaymentAndPlaceOrder(e) {
-    e.preventDefault();
-
-    const paymentMethodRadio = document.querySelector('input[name="paymentMethod"]:checked');
-    const paymentMethod = paymentMethodRadio ? paymentMethodRadio.value : 'Credit / Debit Card';
-    const pickupNotes = document.getElementById('checkoutOrderNotes').value || '';
-
-    const totalCount = getCartItemsTotalCount();
-    const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
-    const serviceFee = Math.round(subtotal * 0.05);
-    const packagingFee = OWITA_CONFIG.packagingFeeLKR;
-    const total = subtotal + serviceFee + packagingFee;
-    const prepMins = calculatePrepTimeMins(totalCount);
-
-    // Generate Unique Order ID: #OW-XXXX
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const orderId = `OW-${randomSuffix}`;
-
-    const newOrder = {
-      orderId: orderId,
-      userId: currentUser.id,
-      customerName: currentUser.name,
-      customerPhone: currentUser.phone,
-      customerEmail: currentUser.email,
-      pickupAddress: 'Pickup at Counter — Nagoda Junction, Kalutara',
-      items: JSON.parse(JSON.stringify(cart)),
-      itemCount: totalCount,
-      subtotal: subtotal,
-      serviceFee: serviceFee,
-      packagingFee: packagingFee,
-      discountAmount: 0,
-      total: total,
-      paymentStatus: 'Paid',
-      paymentMethod: paymentMethod,
-      paymentReference: `PAYHERE-TXN-${Date.now().toString().slice(-6)}`,
-      orderStatus: 'In Kitchen',
-      createdAt: Date.now(),
-      prepTimeMins: prepMins,
-      estimatedReadyAt: Date.now() + (prepMins * 60 * 1000),
-      restaurantConfirmed: true,
-      changeRequest: null,
-      notes: pickupNotes
-    };
-
-    // Prepend order
-    orders.unshift(newOrder);
-    setStorage(STORAGE_KEYS.ORDERS, orders);
-
-    // Clear cart
-    cart = [];
-    setStorage(STORAGE_KEYS.CART, cart);
-    updateCartBadges();
-
-    closeCheckoutModal();
-    showToast(`Payment successful! Order ${orderId} placed & confirmed!`);
-
-    // Open Digital Receipt Modal
-    openReceiptModal(newOrder.orderId);
-
-    // Re-render dashboards
-    renderCustomerOrders();
-    renderAdminOrders();
-  }
-
-  // --- DIGITAL RECEIPT GENERATOR ---
-  function openReceiptModal(orderId) {
-    const order = orders.find(o => o.orderId === orderId);
-    if (!order) return;
-
-    const receiptBox = document.getElementById('digitalReceiptContent');
-    if (!receiptBox) return;
-
-    const dateFormatted = new Date(order.createdAt).toLocaleDateString('en-GB', {
-      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
-    const readyTimeFormatted = new Date(order.estimatedReadyAt).toLocaleTimeString('en-GB', {
-      hour: '2-digit', minute: '2-digit'
-    });
-
-    receiptBox.innerHTML = `
-      <div class="text-center pb-4 border-b border-dashed border-stone-700">
-        <div class="font-serif-luxury text-2xl font-bold text-amber-400">${OWITA_CONFIG.restaurantName}</div>
-        <div class="text-xs text-stone-400 mt-0.5">${OWITA_CONFIG.sinhalaName}</div>
-        <div class="text-[11px] text-stone-500 mt-1">${OWITA_CONFIG.address}</div>
-        <div class="text-[11px] text-stone-500">Tel: ${OWITA_CONFIG.phone}</div>
-      </div>
-
-      <div class="py-3 border-b border-dashed border-stone-700 text-xs space-y-1">
-        <div class="flex justify-between">
-          <span class="text-stone-400 font-mono">ORDER NUMBER:</span>
-          <span class="font-mono font-bold text-white">${order.orderId}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-stone-400">Date & Time:</span>
-          <span class="text-stone-200">${dateFormatted}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-stone-400">Customer:</span>
-          <span class="text-stone-200">${order.customerName} (${order.customerPhone})</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-stone-400">Payment:</span>
-          <span class="text-emerald-400 font-medium">${order.paymentStatus} via ${order.paymentMethod}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-stone-400">Txn Ref:</span>
-          <span class="text-stone-400 font-mono text-[10px]">${order.paymentReference}</span>
-        </div>
-      </div>
-
-      <div class="py-3 border-b border-dashed border-stone-700 space-y-2">
-        <div class="text-[11px] font-bold uppercase text-stone-400 tracking-wider">Itemized Bill</div>
-        ${order.items.map(item => `
-          <div class="flex justify-between text-xs">
-            <span class="text-stone-200">${item.quantity}x ${item.name}</span>
-            <span class="font-mono text-stone-300">LKR ${(item.price * item.quantity).toLocaleString()}</span>
-          </div>
-        `).join('')}
-      </div>
-
-      <div class="py-3 border-b border-dashed border-stone-700 text-xs space-y-1">
-        <div class="flex justify-between text-stone-400">
-          <span>Subtotal:</span>
-          <span class="font-mono">LKR ${order.subtotal.toLocaleString()}</span>
-        </div>
-        <div class="flex justify-between text-stone-400">
-          <span>Packaging Fee:</span>
-          <span class="font-mono">LKR ${order.packagingFee.toLocaleString()}</span>
-        </div>
-        <div class="flex justify-between text-stone-400">
-          <span>Kitchen Service (5%):</span>
-          <span class="font-mono">LKR ${order.serviceFee.toLocaleString()}</span>
-        </div>
-        <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-stone-800">
-          <span class="text-amber-400">TOTAL AMOUNT:</span>
-          <span class="font-mono text-amber-400">LKR ${order.total.toLocaleString()}</span>
-        </div>
-      </div>
-
-      <div class="pt-4 text-center space-y-2">
-        <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
-          <div class="text-[11px] font-semibold text-amber-400 uppercase tracking-widest">Estimated Ready Time</div>
-          <div class="text-xl font-bold font-mono text-white mt-0.5">Approx. ${readyTimeFormatted}</div>
-          <div class="text-[11px] text-stone-400 mt-1">Preparation Window: ~${order.prepTimeMins} Minutes</div>
-        </div>
-
-        <div class="text-[11px] text-stone-500 italic">
-          Thank you for dining with Owita Family Restaurant!
-        </div>
-      </div>
-    `;
-
-    // Add return button at bottom of receipt card
-    const backBtnDiv = document.createElement('div');
-    backBtnDiv.className = 'pt-2';
-    backBtnDiv.innerHTML = `
-      <button onclick="window.OwitaApp.closeReceiptModal()" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-amber-500/20 text-stone-300 hover:text-amber-300 text-xs font-semibold flex items-center justify-center gap-2 border border-white/10 transition-all">
-        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-        <span>Back to Menu & Orders</span>
-      </button>
-    `;
-    receiptBox.appendChild(backBtnDiv);
-
-    const modal = document.getElementById('digitalReceiptModal');
-    if (modal) {
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-      const card = modal.querySelector('.owita-card');
-      if (card) {
-        card.classList.remove('modal-animate-in');
-        void card.offsetWidth; // trigger reflow
-        card.classList.add('modal-animate-in');
-      }
-    }
-    if (window.lucide) lucide.createIcons();
-  }
-
-  function closeReceiptModal() {
-    const modal = document.getElementById('digitalReceiptModal');
-    if (modal) {
-      modal.classList.add('hidden');
-    }
-    document.body.style.overflow = '';
-  }
-
-  // --- CUSTOMER DASHBOARD & ORDER TRACKING ---
-  // Spec: "and a one customer order shouldn't be visible to another customer but every order should be visible to restaurant."
-  function renderCustomerOrders() {
-    const container = document.getElementById('customerOrdersList');
-    if (!container) return;
-
-    if (!currentUser || currentUser.role !== 'customer') {
-      container.innerHTML = `
-        <div class="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
-          <i data-lucide="user" class="w-10 h-10 mx-auto text-amber-400 mb-2"></i>
-          <p class="text-sm text-stone-300">Sign in to view your orders and track live preparation status.</p>
-          <button onclick="window.OwitaApp.openAuthModal('signin')" class="mt-4 px-5 py-2.5 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider">
-            Sign In / Register
-          </button>
-        </div>
-      `;
-      if (window.lucide) lucide.createIcons();
-      return;
-    }
-
-    // Filter to ONLY this customer's orders!
-    const myOrders = orders.filter(o => o.userId === currentUser.id);
-
-    if (myOrders.length === 0) {
-      container.innerHTML = `
-        <div class="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl text-stone-400">
-          <i data-lucide="receipt" class="w-10 h-10 mx-auto mb-2 opacity-30"></i>
-          <p class="text-sm">You haven't placed any orders yet.</p>
-          <a href="#menu" class="inline-block mt-4 px-5 py-2.5 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider">
-            Explore Menu & Order
-          </a>
-        </div>
-      `;
-      if (window.lucide) lucide.createIcons();
-      return;
-    }
-
-    container.innerHTML = myOrders.map(order => {
-      const isReady = order.orderStatus === 'Ready for Pickup';
-      const isCompleted = order.orderStatus === 'Completed';
-      const isCancelled = order.orderStatus === 'Cancelled';
-      const isChangeRequested = order.orderStatus === 'Change Requested' || order.orderStatus === 'Cancellation Requested';
-
-      return `
-        <div class="owita-card rounded-2xl p-6 space-y-5" id="orderCard-${order.orderId}">
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/5">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-mono text-stone-400">ORDER:</span>
-                <span class="font-mono font-bold text-amber-400 text-base">${order.orderId}</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                  isReady ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                  isCompleted ? 'bg-stone-800 text-stone-400 border border-stone-700' :
-                  isCancelled ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                  isChangeRequested ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' :
-                  'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                }">
-                  ${order.orderStatus}
-                </span>
-              </div>
-              <div class="text-[11px] text-stone-500 mt-1">
-                Placed ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · Payment: ${order.paymentStatus}
-              </div>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <button onclick="window.OwitaApp.openReceiptModal('${order.orderId}')" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-medium text-stone-300 flex items-center gap-1.5 border border-white/10">
-                <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
-                <span>Receipt</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Live Timer Progress -->
-          ${(!isCompleted && !isCancelled) ? `
-            <div class="p-4 rounded-xl bg-black/40 border border-amber-500/20 space-y-2">
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-stone-300 font-semibold flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full ${isReady ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}"></span>
-                  ${isReady ? 'READY FOR PICKUP AT NAGODA COUNTER!' : 'Kitchen Preparation Status:'}
-                </span>
-                <span class="font-mono font-bold text-amber-400 live-timer-text" data-ready-at="${order.estimatedReadyAt}">
-                  Calculating...
-                </span>
-              </div>
-
-              <div class="kitchen-timer-meter">
-                <div class="kitchen-timer-fill live-timer-bar" data-created-at="${order.createdAt}" data-ready-at="${order.estimatedReadyAt}" style="width: 50%;"></div>
-              </div>
-
-              <div class="text-[11px] text-stone-400 flex justify-between">
-                <span>Total Prep Time: ${order.prepTimeMins} mins (${order.itemCount} items)</span>
-                <span>Counter: Nagoda Junction</span>
-              </div>
-            </div>
-          ` : ''}
-
-          <!-- Items Ordered -->
-          <div class="space-y-1.5">
-            <div class="text-xs font-semibold text-stone-400">Items:</div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              ${order.items.map(i => `
-                <div class="p-2.5 rounded-lg bg-white/[0.02] border border-white/5 flex justify-between">
-                  <span>${i.quantity}x ${i.name}</span>
-                  <span class="font-mono text-amber-400">LKR ${(i.price * i.quantity).toLocaleString()}</span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-
-          <!-- Customer Action: Change / Cancel Request -->
-          <!-- Spec: If restaurant confirmed, order won't change instantly; asks restaurant to confirm change/cancel! -->
-          ${(!isCompleted && !isCancelled && order.orderStatus !== 'Ready for Pickup') ? `
-            <div class="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs">
-              ${isChangeRequested ? `
-                <div class="text-amber-300 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/30 flex items-center gap-2">
-                  <i data-lucide="clock" class="w-4 h-4 animate-spin"></i>
-                  <span>Awaiting Restaurant Approval for ${order.changeRequest?.type === 'cancel' ? 'Cancellation' : 'Modification'}...</span>
-                </div>
-              ` : `
-                <div class="flex items-center gap-2">
-                  <button onclick="window.OwitaApp.requestOrderChange('${order.orderId}', 'modify')" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-300 border border-white/10 text-xs">
-                    Modify Items / Notes
-                  </button>
-                  <button onclick="window.OwitaApp.requestOrderChange('${order.orderId}', 'cancel')" class="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs">
-                    Cancel Order
-                  </button>
-                </div>
-                <div class="text-[11px] text-stone-500">
-                  Confirmed orders require restaurant acceptance to change.
-                </div>
-              `}
-            </div>
-          ` : ''}
-        </div>
-      `;
-    }).join('');
-
-    if (window.lucide) lucide.createIcons();
-    updateLiveTimers();
-  }
-
-  // Customer triggers Change or Cancel Request
-  function requestOrderChange(orderId, requestType) {
-    const order = orders.find(o => o.orderId === orderId);
-    if (!order) return;
-
-    if (requestType === 'cancel') {
-      const reason = prompt(`Please specify why you would like to cancel Order ${orderId}:`, 'Change of plans');
-      if (reason === null) return; // User clicked cancel on prompt
-
-      order.orderStatus = 'Cancellation Requested';
-      order.changeRequest = {
-        type: 'cancel',
-        reason: reason,
-        requestedAt: Date.now()
-      };
-      setStorage(STORAGE_KEYS.ORDERS, orders);
-      showToast(`Cancellation requested for ${orderId}. Restaurant has been notified.`, 'alert');
-    } else {
-      const modification = prompt(`What changes would you like to make to Order ${orderId}? (e.g. Add extra chili paste, change spice level):`, order.notes || '');
-      if (modification === null) return;
-
-      order.orderStatus = 'Change Requested';
-      order.changeRequest = {
-        type: 'modify',
-        reason: modification,
-        requestedAt: Date.now()
-      };
-      setStorage(STORAGE_KEYS.ORDERS, orders);
-      showToast(`Modification request sent to Owita kitchen.`, 'alert');
-    }
-
-    renderCustomerOrders();
-    renderAdminOrders();
-  }
-
-  // --- RESTAURANT ADMIN PORTAL ---
-  function renderAdminOrders() {
-    const container = document.getElementById('adminOrdersTableBody');
-    const badgeCount = document.getElementById('adminPendingOrdersBadge');
-    if (!container) return;
-
-    // Filter pending/active for badge
-    const activeKitchenOrders = orders.filter(o => o.orderStatus === 'In Kitchen' || o.orderStatus === 'Change Requested' || o.orderStatus === 'Cancellation Requested');
-    if (badgeCount) {
-      badgeCount.textContent = activeKitchenOrders.length;
-      badgeCount.classList.toggle('hidden', activeKitchenOrders.length === 0);
-    }
-
-    // Render all orders
-    container.innerHTML = orders.map(order => {
-      const isChangeReq = order.orderStatus === 'Change Requested' || order.orderStatus === 'Cancellation Requested';
-      return `
-        <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors ${isChangeReq ? 'bg-amber-950/20' : ''}">
-          <td class="p-4 font-mono font-bold text-amber-400">
-            ${order.orderId}
-          </td>
-          <td class="p-4">
-            <div class="font-medium text-white text-xs">${order.customerName}</div>
-            <div class="text-[11px] text-stone-500 font-mono">${order.customerPhone}</div>
-          </td>
-          <td class="p-4 text-xs">
-            <div class="space-y-0.5">
-              ${order.items.map(i => `<div class="text-stone-300">${i.quantity}x ${i.name}</div>`).join('')}
-              ${order.notes ? `<div class="text-[11px] text-amber-400 italic">Note: ${order.notes}</div>` : ''}
-            </div>
-          </td>
-          <td class="p-4 text-xs font-mono font-bold text-white">
-            LKR ${order.total.toLocaleString()}
-            <div class="text-[10px] text-emerald-400 font-normal">${order.paymentStatus} (${order.paymentMethod.split(' ')[0]})</div>
-          </td>
-          <td class="p-4 text-xs">
-            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              order.orderStatus === 'Ready for Pickup' ? 'bg-emerald-500/20 text-emerald-400' :
-              order.orderStatus === 'Completed' ? 'bg-stone-800 text-stone-400' :
-              order.orderStatus === 'Cancelled' ? 'bg-red-500/20 text-red-400' :
-              isChangeReq ? 'bg-amber-500/30 text-amber-200 animate-pulse border border-amber-500/50' :
-              'bg-amber-500/20 text-amber-400'
-            }">
-              ${order.orderStatus}
-            </span>
-
-            ${isChangeReq ? `
-              <div class="mt-2 p-2 rounded bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200">
-                <strong>Customer Request:</strong> ${order.changeRequest?.reason}
-                <div class="flex gap-2 mt-1.5">
-                  <button onclick="window.OwitaApp.adminHandleChangeRequest('${order.orderId}', true)" class="px-2 py-1 rounded bg-emerald-600 text-white font-bold text-[10px]">
-                    Approve
-                  </button>
-                  <button onclick="window.OwitaApp.adminHandleChangeRequest('${order.orderId}', false)" class="px-2 py-1 rounded bg-stone-700 hover:bg-stone-600 text-white font-bold text-[10px]">
-                    Decline
-                  </button>
-                </div>
-              </div>
-            ` : ''}
-          </td>
-          <td class="p-4 text-xs font-mono">
-            ${order.orderStatus === 'In Kitchen' ? `
-              <div class="live-timer-text text-amber-400 font-bold" data-ready-at="${order.estimatedReadyAt}">--:--</div>
-              <div class="flex items-center gap-1 mt-1.5">
-                <button onclick="window.OwitaApp.adminAdjustOrderTime('${order.orderId}', 5)" title="Add 5 Mins Delay" class="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] text-stone-300">
-                  +5m
-                </button>
-                <button onclick="window.OwitaApp.adminAdjustOrderTime('${order.orderId}', 10)" title="Add 10 Mins Delay" class="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] text-stone-300">
-                  +10m
-                </button>
-              </div>
-            ` : order.orderStatus === 'Ready for Pickup' ? `
-              <span class="text-emerald-400 font-bold">READY NOW</span>
-            ` : `
-              <span class="text-stone-500">Ended</span>
-            `}
-          </td>
-          <td class="p-4 text-xs">
-            <div class="flex items-center gap-1.5">
-              ${order.orderStatus === 'In Kitchen' ? `
-                <button onclick="window.OwitaApp.adminUpdateOrderStatus('${order.orderId}', 'Ready for Pickup')" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] whitespace-nowrap">
-                  Mark Ready
-                </button>
-              ` : order.orderStatus === 'Ready for Pickup' ? `
-                <button onclick="window.OwitaApp.adminUpdateOrderStatus('${order.orderId}', 'Completed')" class="px-2.5 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 font-semibold text-[11px] whitespace-nowrap">
-                  Complete
-                </button>
-              ` : `
-                <span class="text-stone-500 text-[11px]">Archived</span>
-              `}
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-    updateAdminAnalytics();
-  }
-
-  // Admin modifies order status
-  function adminUpdateOrderStatus(orderId, newStatus) {
-    const order = orders.find(o => o.orderId === orderId);
-    if (!order) return;
-
-    order.orderStatus = newStatus;
-    if (newStatus === 'Ready for Pickup') {
-      order.estimatedReadyAt = Date.now();
-    }
-    setStorage(STORAGE_KEYS.ORDERS, orders);
-
-    showToast(`Order ${orderId} marked as ${newStatus}!`);
-    renderAdminOrders();
-    renderCustomerOrders();
-  }
-
-  // Admin handles customer cancellation or change request
-  function adminHandleChangeRequest(orderId, isApproved) {
-    const order = orders.find(o => o.orderId === orderId);
-    if (!order || !order.changeRequest) return;
-
-    const reqType = order.changeRequest.type;
-    if (isApproved) {
-      if (reqType === 'cancel') {
-        order.orderStatus = 'Cancelled';
-        order.paymentStatus = 'Refund Processed';
-        showToast(`Cancellation approved for ${orderId}. Refund queued.`);
-      } else {
-        order.orderStatus = 'In Kitchen';
-        order.notes = (order.notes ? order.notes + ' | ' : '') + `Modified: ${order.changeRequest.reason}`;
-        showToast(`Modification approved for ${orderId}.`);
-      }
-    } else {
-      order.orderStatus = 'In Kitchen';
-      showToast(`Request declined for ${orderId}. Kitchen proceeding with original.`);
-    }
-
-    order.changeRequest = null;
-    setStorage(STORAGE_KEYS.ORDERS, orders);
-    renderAdminOrders();
-    renderCustomerOrders();
-  }
-
-  // Admin adjusts prep time (kitchen delay +5m or +10m)
-  function adminAdjustOrderTime(orderId, additionalMins) {
-    const order = orders.find(o => o.orderId === orderId);
-    if (!order) return;
-
-    order.prepTimeMins += additionalMins;
-    order.estimatedReadyAt += (additionalMins * 60 * 1000);
-    setStorage(STORAGE_KEYS.ORDERS, orders);
-
-    showToast(`Added ${additionalMins} mins to Order ${orderId}. Customer notified.`, 'alert');
-    renderAdminOrders();
-    renderCustomerOrders();
-  }
-
-  // Admin Menu Manager
-  function renderAdminMenuManager() {
-    const container = document.getElementById('adminMenuItemsList');
-    if (!container) return;
-
-    container.innerHTML = menuItems.map(item => `
-      <div class="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.02] border border-white/5">
-        <div class="flex items-center gap-3">
-          <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover">
-          <div>
-            <div class="text-sm font-semibold text-white flex items-center gap-2">
-              <span>${item.name}</span>
-              ${!item.inStock ? '<span class="text-[10px] text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">Out of Stock</span>' : ''}
-            </div>
-            <div class="text-xs text-amber-400 font-mono">LKR ${item.price.toLocaleString()} · ${item.category}</div>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <button onclick="window.OwitaApp.adminToggleStock('${item.id}')" class="px-2.5 py-1 rounded text-xs border ${item.inStock ? 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10' : 'border-stone-700 text-stone-400 hover:bg-stone-800'}">
-            ${item.inStock ? 'In Stock' : 'Mark In Stock'}
-          </button>
-          <button onclick="window.OwitaApp.adminEditPrice('${item.id}')" class="px-2.5 py-1 rounded text-xs bg-white/5 hover:bg-white/10 text-stone-300">
-            Edit Price
-          </button>
-          <button onclick="window.OwitaApp.adminDeleteDish('${item.id}')" class="p-1 text-stone-500 hover:text-red-400">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-    `).join('');
-
-    if (window.lucide) lucide.createIcons();
-  }
-
-  function adminToggleStock(itemId) {
-    const item = menuItems.find(i => i.id === itemId);
-    if (!item) return;
-    item.inStock = !item.inStock;
-    setStorage(STORAGE_KEYS.MENU, menuItems);
-    renderAdminMenuManager();
-    renderFullMenu();
-    renderGallery();
-    renderSignatureDishes();
-    showToast(`${item.name} marked ${item.inStock ? 'In Stock' : 'Out of Stock'}`);
-  }
-
-  function adminEditPrice(itemId) {
-    const item = menuItems.find(i => i.id === itemId);
-    if (!item) return;
-    const newPriceStr = prompt(`Enter new price in LKR for ${item.name}:`, item.price);
-    if (newPriceStr === null) return;
-    const newPrice = parseInt(newPriceStr, 10);
-    if (!isNaN(newPrice) && newPrice > 0) {
-      item.price = newPrice;
-      setStorage(STORAGE_KEYS.MENU, menuItems);
-      renderAdminMenuManager();
-      renderFullMenu();
-      renderSignatureDishes();
-      showToast(`Price updated for ${item.name} to LKR ${newPrice.toLocaleString()}`);
-    }
-  }
-
-  function adminDeleteDish(itemId) {
-    if (!confirm('Are you sure you want to remove this dish from the menu?')) return;
-    menuItems = menuItems.filter(i => i.id !== itemId);
-    setStorage(STORAGE_KEYS.MENU, menuItems);
-    renderAdminMenuManager();
-    renderFullMenu();
-    renderSignatureDishes();
-    showToast('Dish removed from menu');
-  }
-
-  function adminAddNewDish(e) {
-    e.preventDefault();
-    const name = document.getElementById('newDishName').value;
-    const category = document.getElementById('newDishCategory').value;
-    const price = parseInt(document.getElementById('newDishPrice').value, 10);
-    const description = document.getElementById('newDishDesc').value;
-    const img = document.getElementById('newDishImg').value || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80';
-
-    const newDish = {
-      id: `ow-custom-${Date.now()}`,
-      name: name,
-      category: category,
-      price: price,
-      description: description,
-      img: img,
-      inStock: true,
-      rating: 5.0,
-      isSignature: false,
-      isOffer: false
-    };
-
-    menuItems.push(newDish);
-    setStorage(STORAGE_KEYS.MENU, menuItems);
-
-    document.getElementById('adminNewDishModal').classList.add('hidden');
-    document.getElementById('newDishForm').reset();
-
-    renderAdminMenuManager();
-    renderFullMenu();
-    showToast(`Added ${name} to Owita Menu!`);
-  }
-
-  function updateAdminAnalytics() {
-    const totalOrdersCount = orders.length;
-    const totalRevenue = orders.filter(o => o.orderStatus !== 'Cancelled').reduce((s, o) => s + (o.total || 0), 0);
-    const inKitchenCount = orders.filter(o => o.orderStatus === 'In Kitchen').length;
-
-    const revEl = document.getElementById('adminStatRevenue');
-    const ordEl = document.getElementById('adminStatOrders');
-    const kitEl = document.getElementById('adminStatKitchen');
-
-    if (revEl) revEl.textContent = `LKR ${totalRevenue.toLocaleString()}`;
-    if (ordEl) ordEl.textContent = totalOrdersCount;
-    if (kitEl) kitEl.textContent = inKitchenCount;
-  }
-
-  // --- LIVE TIMER LOOP ---
-  function updateLiveTimers() {
-    const now = Date.now();
-    document.querySelectorAll('.live-timer-text').forEach(el => {
-      const readyAt = parseInt(el.dataset.readyAt, 10);
-      if (!readyAt) return;
-
-      const diffMs = readyAt - now;
-      if (diffMs <= 0) {
-        el.textContent = 'READY FOR PICKUP';
-        el.className = 'font-mono font-bold text-emerald-400';
-      } else {
-        const totalSecs = Math.floor(diffMs / 1000);
-        const mins = Math.floor(totalSecs / 60);
-        const secs = totalSecs % 60;
-        el.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')} remaining`;
-      }
-    });
-
-    document.querySelectorAll('.live-timer-bar').forEach(el => {
-      const createdAt = parseInt(el.dataset.createdAt, 10);
-      const readyAt = parseInt(el.dataset.readyAt, 10);
-      if (!createdAt || !readyAt) return;
-
-      const totalDuration = readyAt - createdAt;
-      const elapsed = now - createdAt;
-      const percent = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
-      el.style.width = `${percent}%`;
-    });
-  }
-
-  // Start ticker
-  setInterval(updateLiveTimers, 1000);
-
-  // --- AUTHENTICATION & SESSION MANAGEMENT ---
-  function updateAuthUI() {
-    const userBtnText = document.getElementById('userNavBtnText');
-    const userNavSub = document.getElementById('userNavBtnSub');
-    if (currentUser) {
-      if (userBtnText) userBtnText.textContent = currentUser.name.split(' ')[0];
-      if (userNavSub) userNavSub.textContent = currentUser.role === 'admin' ? 'Kitchen Admin' : 'Customer';
-    } else {
-      if (userBtnText) userBtnText.textContent = 'Sign In';
-      if (userNavSub) userNavSub.textContent = 'Account';
-    }
-  }
-
-  let authCallback = null;
-  function openAuthModal(mode = 'signin', callback = null) {
-    authCallback = callback;
-    const modal = document.getElementById('owitaAuthModal');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    switchAuthTab(mode);
-  }
-
-  function closeAuthModal() {
-    const modal = document.getElementById('owitaAuthModal');
-    if (modal) modal.classList.add('hidden');
-  }
-
-  function switchAuthTab(tab) {
-    const signinForm = document.getElementById('authSignInForm');
-    const registerForm = document.getElementById('authRegisterForm');
-    const tabSignin = document.getElementById('authTabSignIn');
-    const tabRegister = document.getElementById('authTabRegister');
-
-    if (tab === 'signin') {
-      signinForm.classList.remove('hidden');
-      registerForm.classList.add('hidden');
-      tabSignin.className = 'flex-1 py-2 font-bold text-xs uppercase tracking-wider border-b-2 border-amber-500 text-amber-400';
-      tabRegister.className = 'flex-1 py-2 font-bold text-xs uppercase tracking-wider text-stone-400 hover:text-white';
-    } else {
-      signinForm.classList.add('hidden');
-      registerForm.classList.remove('hidden');
-      tabRegister.className = 'flex-1 py-2 font-bold text-xs uppercase tracking-wider border-b-2 border-amber-500 text-amber-400';
-      tabSignin.className = 'flex-1 py-2 font-bold text-xs uppercase tracking-wider text-stone-400 hover:text-white';
-    }
-  }
-
-  function handleSignIn(e) {
-    e.preventDefault();
-    const email = document.getElementById('authSignInEmail').value.trim();
-    const password = document.getElementById('authSignInPassword').value;
-
-    const matched = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-    if (matched) {
-      currentUser = matched;
-      setStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
-      updateAuthUI();
-      closeAuthModal();
-      showToast(`Welcome back, ${currentUser.name}!`);
-      renderCustomerOrders();
-      if (authCallback) {
-        authCallback();
-        authCallback = null;
-      }
-    } else {
-      showToast('Invalid credentials. (Hint: customer@owita.lk / password123)', 'alert');
-    }
-  }
-
-  function handleRegister(e) {
-    e.preventDefault();
-    const name = document.getElementById('authRegName').value.trim();
-    const phone = document.getElementById('authRegPhone').value.trim();
-    const email = document.getElementById('authRegEmail').value.trim();
-    const password = document.getElementById('authRegPassword').value;
-
-    if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-      showToast('Account with this email already exists', 'alert');
-      return;
-    }
-
-    const newUser = {
-      id: `usr-${Date.now()}`,
-      name: name,
-      phone: phone,
-      email: email,
-      password: password,
-      role: 'customer',
-      address: 'Nagoda, Kalutara'
-    };
-
-    users.push(newUser);
-    setStorage(STORAGE_KEYS.USERS, users);
-
-    currentUser = newUser;
-    setStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
-
-    updateAuthUI();
-    closeAuthModal();
-    showToast(`Account created for ${newUser.name}!`);
-    renderCustomerOrders();
-    if (authCallback) {
-      authCallback();
-      authCallback = null;
-    }
-  }
-
-  function toggleRoleSwitch() {
-    // Quickly flip between customer view and admin portal
-    if (activeView === 'customer') {
-      activeView = 'admin';
-    } else {
-      activeView = 'customer';
-    }
-    setStorage(STORAGE_KEYS.ACTIVE_VIEW, activeView);
-    applyActiveView();
-  }
-
-  function applyActiveView() {
-    const customerView = document.getElementById('customerWebsiteContainer');
-    const adminView = document.getElementById('adminPortalContainer');
-    const toggleBtn = document.getElementById('viewModeToggleBtn');
-
-    if (activeView === 'admin') {
-      if (customerView) customerView.classList.add('hidden');
-      if (adminView) adminView.classList.remove('hidden');
-      if (toggleBtn) {
-        toggleBtn.innerHTML = `
-          <i data-lucide="utensils" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>Switch to Customer Store</span>
-        `;
-      }
-      renderAdminOrders();
-      renderAdminMenuManager();
-    } else {
-      if (adminView) adminView.classList.add('hidden');
-      if (customerView) customerView.classList.remove('hidden');
-      if (toggleBtn) {
-        toggleBtn.innerHTML = `
-          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>Restaurant Admin Portal</span>
-          <span id="adminPendingOrdersBadge" class="w-5 h-5 rounded-full bg-amber-500 text-black text-[10px] font-bold flex items-center justify-center hidden">0</span>
-        `;
-      }
-      renderSignatureDishes();
-      renderFullMenu();
-      renderCustomerOrders();
-    }
-
-    if (window.lucide) lucide.createIcons();
-  }
-
-  // --- DRAWERS & MODALS HELPERS ---
-  function openCartDrawer() {
-    renderCartDrawer();
-    document.getElementById('owitaCartDrawer').classList.remove('translate-x-full');
-    document.getElementById('owitaCartDrawerBackdrop').classList.remove('hidden');
-  }
-
-  function closeCartDrawer() {
-    document.getElementById('owitaCartDrawer').classList.add('translate-x-full');
-    document.getElementById('owitaCartDrawerBackdrop').classList.add('hidden');
-  }
-
-  function setCategory(cat) {
-    activeCategory = cat;
-    document.querySelectorAll('.category-pill').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.category === cat);
-    });
-    renderFullMenu();
-  }
-
-  // --- INITIALIZE APP ---
-  
-  // --- LUXURY SCROLL REVEAL OBSERVER ---
-  let scrollObserver = null;
-  function initScrollObserver() {
-    if (!('IntersectionObserver' in window)) {
-      document.querySelectorAll('.reveal-init').forEach(el => el.classList.add('reveal-active'));
-      return;
-    }
-
-    if (!scrollObserver) {
-      scrollObserver = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('reveal-active');
-            obs.unobserve(entry.target);
-          }
-        });
-      }, {
-        threshold: 0.12,
-        rootMargin: '0px 0px -40px 0px'
-      });
-    }
-
-    document.querySelectorAll('.reveal-init:not(.reveal-active)').forEach(el => {
-      scrollObserver.observe(el);
-    });
-  }
-
-  
-  // --- VISUAL GALLERY ENGINE ---
+  // --- RENDER VISUAL GALLERY ---
   function renderGallery() {
     const container = document.getElementById('galleryGrid');
     if (!container) return;
@@ -1492,19 +705,1551 @@
     );
   }
 
-  function init() {
+  // --- CART CONTROLLER ---
+  function addToCart(itemId) {
+    const item = menuItems.find(i => i.id === itemId);
+    if (!item) return;
+
+    const pricing = getItemPricing(item);
+    const existing = cart.find(c => c.id === itemId);
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({
+        id: item.id,
+        name: item.name,
+        price: pricing.currentPrice,
+        originalPrice: pricing.originalPrice,
+        img: item.img,
+        quantity: 1
+      });
+    }
+
+    setStorage(STORAGE_KEYS.CART, cart);
+    updateCartBadges();
+    renderCartDrawer();
+    soundEffects.chime();
+    showToast(`Added "${item.name}" to cart!`, 'success');
+  }
+
+  function updateCartQuantity(itemId, delta) {
+    const item = cart.find(c => c.id === itemId);
+    if (!item) return;
+
+    item.quantity += delta;
+    if (item.quantity <= 0) {
+      cart = cart.filter(c => c.id !== itemId);
+    }
+
+    setStorage(STORAGE_KEYS.CART, cart);
+    updateCartBadges();
+    renderCartDrawer();
+  }
+
+  function removeFromCart(itemId) {
+    cart = cart.filter(c => c.id !== itemId);
+    setStorage(STORAGE_KEYS.CART, cart);
+    updateCartBadges();
+    renderCartDrawer();
+  }
+
+  function updateCartBadges() {
+    const totalCount = getCartItemsTotalCount();
+    const prepMins = calculatePrepTimeMins(totalCount);
+
+    document.querySelectorAll('.cart-count-badge').forEach(badge => {
+      badge.textContent = totalCount;
+      badge.style.display = totalCount > 0 ? 'flex' : 'none';
+    });
+
+    document.querySelectorAll('.cart-prep-mins').forEach(el => {
+      el.textContent = `~${prepMins} Mins`;
+    });
+  }
+
+  function renderCartDrawer() {
+    const itemsList = document.getElementById('cartDrawerItems');
+    const emptyState = document.getElementById('cartEmptyState');
+    const summaryBox = document.getElementById('cartSummaryBox');
+
+    if (!itemsList) return;
+
+    const totalCount = getCartItemsTotalCount();
+
+    if (cart.length === 0) {
+      itemsList.innerHTML = '';
+      if (emptyState) emptyState.classList.remove('hidden');
+      if (summaryBox) summaryBox.classList.add('hidden');
+      return;
+    }
+
+    if (emptyState) emptyState.classList.add('hidden');
+    if (summaryBox) summaryBox.classList.remove('hidden');
+
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const packagingFee = 150;
+    const serviceFee = Math.round(subtotal * 0.05);
+    const grandTotal = subtotal + packagingFee + serviceFee;
+    const prepMins = calculatePrepTimeMins(totalCount);
+
+    itemsList.innerHTML = cart.map(item => `
+      <div class="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+        <img src="${item.img}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg border border-white/10 shrink-0">
+        <div class="flex-1 min-w-0">
+          <h5 class="text-xs font-bold text-white truncate">${item.name}</h5>
+          <div class="text-xs font-mono text-amber-400 mt-0.5">LKR ${(item.price * item.quantity).toLocaleString()}</div>
+          <div class="text-[10px] text-stone-500">LKR ${item.price.toLocaleString()} each</div>
+        </div>
+        <div class="flex items-center gap-1.5 bg-black/60 border border-white/10 rounded-lg p-1">
+          <button onclick="window.OwitaApp.updateCartQuantity('${item.id}', -1)" class="w-6 h-6 rounded flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/10 text-xs">
+            -
+          </button>
+          <span class="w-6 text-center text-xs font-mono font-bold text-white">${item.quantity}</span>
+          <button onclick="window.OwitaApp.updateCartQuantity('${item.id}', 1)" class="w-6 h-6 rounded flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/10 text-xs">
+            +
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('cartSubtotalText').textContent = `LKR ${subtotal.toLocaleString()}`;
+    document.getElementById('cartPackagingFeeText').textContent = `LKR ${packagingFee.toLocaleString()}`;
+    document.getElementById('cartServiceFeeText').textContent = `LKR ${serviceFee.toLocaleString()}`;
+    document.getElementById('cartTotalText').textContent = `LKR ${grandTotal.toLocaleString()}`;
+
+    const timerBadge = document.getElementById('cartTimerExplanation');
+    if (timerBadge) {
+      timerBadge.innerHTML = `
+        <div class="flex items-center justify-between text-xs font-mono font-bold text-amber-400">
+          <span>⚡ Kitchen Clock Estimate:</span>
+          <span>~${prepMins} Minutes</span>
+        </div>
+        <div class="text-[10px] text-stone-400 mt-1">
+          Formula: 10m for 1st item · +10m for 2nd · +5m for each extra (${totalCount} items). Timer activates when confirmed by kitchen!
+        </div>
+      `;
+    }
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function proceedToCheckout() {
+    if (cart.length === 0) {
+      showToast('Your cart is empty! Select dishes from the menu first.', 'warning');
+      return;
+    }
+
+    if (!currentUser || currentUser.role !== 'customer') {
+      showToast('Please sign in or register to place your order.', 'warning');
+      openAuthModal('signin');
+      return;
+    }
+
+    closeCartDrawer();
+    openCheckoutModal();
+  }
+
+  function openCheckoutModal() {
+    const modal = document.getElementById('checkoutPaymentModal');
+    if (!modal) return;
+
+    const totalCount = getCartItemsTotalCount();
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const packagingFee = 150;
+    const serviceFee = Math.round(subtotal * 0.05);
+    const grandTotal = subtotal + packagingFee + serviceFee;
+    const prepMins = calculatePrepTimeMins(totalCount);
+
+    document.getElementById('checkoutCustomerName').value = currentUser.name || '';
+    document.getElementById('checkoutCustomerPhone').value = currentUser.phone || '';
+    document.getElementById('checkoutTotalDisplay').textContent = `LKR ${grandTotal.toLocaleString()}`;
+    document.getElementById('checkoutPrepDisplay').textContent = `~${prepMins} Mins (${totalCount} items)`;
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function closeCheckoutModal() {
+    const modal = document.getElementById('checkoutPaymentModal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // --- PAYMENT SIMULATION & ORDER GENERATOR (STARTS AS 'UNDER REVIEW') ---
+  // Spec: "and the timer for order shhouldn't start till the order is confirmed by the admin, until then say under review"
+  function executePaymentAndPlaceOrder(e) {
+    if (e) e.preventDefault();
+
+    if (cart.length === 0) return;
+
+    const totalCount = getCartItemsTotalCount();
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const packagingFee = 150;
+    const serviceFee = Math.round(subtotal * 0.05);
+    const grandTotal = subtotal + packagingFee + serviceFee;
+    const prepMins = calculatePrepTimeMins(totalCount);
+
+    const customerName = document.getElementById('checkoutCustomerName').value.trim() || currentUser.name;
+    const customerPhone = document.getElementById('checkoutCustomerPhone').value.trim() || currentUser.phone;
+    const notes = document.getElementById('checkoutSpecialNotes').value.trim();
+    const paymentMethodEl = document.querySelector('input[name="checkoutPaymentMethod"]:checked');
+    const paymentMethod = paymentMethodEl ? paymentMethodEl.value : 'PayHere Card Simulator';
+
+    const orderIdNumber = Math.floor(1000 + Math.random() * 9000);
+    const newOrder = {
+      orderId: 'OV-' + orderIdNumber,
+      userId: currentUser.id,
+      customerName,
+      customerPhone,
+      items: JSON.parse(JSON.stringify(cart)),
+      itemCount: totalCount,
+      subtotal,
+      packagingFee,
+      serviceFee,
+      total: grandTotal,
+      paymentMethod,
+      paymentStatus: paymentMethod === 'Cash on Counter Pickup' ? 'Pending Counter Payment' : 'Paid',
+      paymentReference: 'PAY-LK-' + Math.floor(100000 + Math.random() * 900000),
+      orderStatus: 'Under Review',
+      isConfirmed: false,
+      prepTimeMins: prepMins,
+      createdAt: new Date().toISOString(),
+      confirmedAt: null,
+      estimatedReadyAt: null, // Timer will NOT start until confirmed by admin!
+      notes,
+      hasChangeRequest: false,
+      changeDetails: '',
+      source: 'Online Website'
+    };
+
+    orders.unshift(newOrder);
+    setStorage(STORAGE_KEYS.ORDERS, orders);
+
+    // Clear cart
+    cart = [];
+    setStorage(STORAGE_KEYS.CART, cart);
+    updateCartBadges();
+    renderCartDrawer();
+
+    closeCheckoutModal();
+    soundEffects.chime();
+    showToast(`Order ${newOrder.orderId} submitted! Awaiting kitchen confirmation.`, 'warning');
+
+    openReceiptModal(newOrder.orderId);
+    renderCustomerOrders();
+    renderAdminOrders();
+  }
+
+  // --- DIGITAL RECEIPT GENERATOR (BIG CENTERED ORDER NUMBER & DYNAMIC SYNCED READY TIME) ---
+  function openReceiptModal(orderId) {
+    const order = orders.find(o => o.orderId === orderId);
+    if (!order) return;
+
+    const receiptBox = document.getElementById('digitalReceiptContent');
+    if (!receiptBox) return;
+
+    const dateFormatted = new Date(order.createdAt).toLocaleDateString('en-GB', {
+      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+
+    const isConfirmed = order.isConfirmed && order.estimatedReadyAt;
+    const readyTimeFormatted = isConfirmed 
+      ? new Date(order.estimatedReadyAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+      : null;
+
+    receiptBox.innerHTML = `
+      <!-- Restaurant Header -->
+      <div class="text-center pb-3 border-b border-dashed border-stone-700">
+        <div class="font-serif-luxury text-2xl font-bold text-amber-400">${OWITA_CONFIG.restaurantName}</div>
+        <div class="text-xs text-stone-400 mt-0.5">${OWITA_CONFIG.sinhalaName}</div>
+        <div class="text-[11px] text-stone-500 mt-1">${OWITA_CONFIG.address}</div>
+        <div class="text-[11px] text-stone-500">Tel: ${OWITA_CONFIG.phone}</div>
+      </div>
+
+      <!-- BIG CENTERED ORDER IDENTIFIER -->
+      <div class="receipt-order-hero">
+        <div class="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-semibold">Official Order Identifier</div>
+        <div class="text-3xl sm:text-4xl font-mono font-extrabold text-amber-400 tracking-wider my-1">${order.orderId}</div>
+        <div class="text-[11px] font-mono ${isConfirmed ? 'text-emerald-400' : 'text-amber-300 animate-pulse'}">
+          ${isConfirmed ? '● Kitchen Confirmed · Food Sizzling' : '⏳ Status: Under Review by Kitchen'}
+        </div>
+      </div>
+
+      <!-- Order Details -->
+      <div class="py-3 border-b border-dashed border-stone-700 text-xs space-y-1">
+        <div class="flex justify-between">
+          <span class="text-stone-400">Date & Time:</span>
+          <span class="text-stone-200">${dateFormatted}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-stone-400">Customer:</span>
+          <span class="text-stone-200">${order.customerName} (${order.customerPhone})</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-stone-400">Payment:</span>
+          <span class="text-emerald-400 font-medium">${order.paymentStatus} via ${order.paymentMethod}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-stone-400">Txn Ref:</span>
+          <span class="text-stone-400 font-mono text-[10px]">${order.paymentReference}</span>
+        </div>
+      </div>
+
+      <!-- Itemized Bill -->
+      <div class="py-3 border-b border-dashed border-stone-700 space-y-2">
+        <div class="text-[11px] font-bold uppercase text-stone-400 tracking-wider">Itemized Bill</div>
+        ${order.items.map(item => `
+          <div class="flex justify-between text-xs">
+            <span class="text-stone-200">${item.quantity}x ${item.name}</span>
+            <span class="font-mono text-stone-300">LKR ${(item.price * item.quantity).toLocaleString()}</span>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Financial Totals -->
+      <div class="py-3 border-b border-dashed border-stone-700 text-xs space-y-1">
+        <div class="flex justify-between text-stone-400">
+          <span>Subtotal:</span>
+          <span class="font-mono">LKR ${order.subtotal.toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between text-stone-400">
+          <span>Packaging Fee:</span>
+          <span class="font-mono">LKR ${order.packagingFee.toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between text-stone-400">
+          <span>Kitchen Service (5%):</span>
+          <span class="font-mono">LKR ${order.serviceFee.toLocaleString()}</span>
+        </div>
+        <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-stone-800">
+          <span class="text-amber-400">TOTAL AMOUNT:</span>
+          <span class="font-mono text-amber-400">LKR ${order.total.toLocaleString()}</span>
+        </div>
+      </div>
+
+      <!-- DYNAMIC ESTIMATED READY TIME -->
+      <div class="pt-4 text-center space-y-2">
+        <div class="p-3.5 rounded-xl ${isConfirmed ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'} border">
+          <div class="text-[11px] font-semibold ${isConfirmed ? 'text-emerald-400' : 'text-amber-400'} uppercase tracking-widest flex items-center justify-center gap-1.5">
+            <span class="w-2 h-2 rounded-full ${isConfirmed ? 'bg-emerald-400' : 'bg-amber-400 animate-ping'}"></span>
+            <span>${isConfirmed ? 'Kitchen Confirmed Live Timer' : 'Awaiting Kitchen Review'}</span>
+          </div>
+          <div class="text-xl font-bold font-mono text-white mt-0.5">
+            ${isConfirmed ? `Approx. ${readyTimeFormatted}` : 'Under Review'}
+          </div>
+          <div class="text-[11px] text-stone-400 mt-1">
+            ${isConfirmed 
+              ? `Preparation Window: ~${order.prepTimeMins} Minutes (Synchronized with Live Kitchen Clock)`
+              : `Estimated Window: ~${order.prepTimeMins} Minutes (Clock will start once confirmed by kitchen)`}
+          </div>
+        </div>
+
+        <div class="text-[11px] text-stone-500 italic">
+          Thank you for dining with Ovita Family Restaurant, Nagoda Junction!
+        </div>
+      </div>
+    `;
+
+    const backBtnDiv = document.createElement('div');
+    backBtnDiv.className = 'pt-2';
+    backBtnDiv.innerHTML = `
+      <button onclick="window.OwitaApp.closeReceiptModal()" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-amber-500/20 text-stone-300 hover:text-amber-300 text-xs font-semibold flex items-center justify-center gap-2 border border-white/10 transition-all">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        <span>Back to Menu & Orders</span>
+      </button>
+    `;
+    receiptBox.appendChild(backBtnDiv);
+
+    const modal = document.getElementById('digitalReceiptModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      const card = modal.querySelector('.owita-card');
+      if (card) {
+        card.classList.remove('modal-animate-in');
+        void card.offsetWidth;
+        card.classList.add('modal-animate-in');
+      }
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function closeReceiptModal() {
+    const modal = document.getElementById('digitalReceiptModal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+    document.body.style.overflow = '';
+  }
+
+  // --- CUSTOMER DASHBOARD & ORDER TRACKING ---
+  function renderCustomerOrders() {
+    const container = document.getElementById('customerOrdersList');
+    if (!container) return;
+
+    if (!currentUser || currentUser.role !== 'customer') {
+      container.innerHTML = `
+        <div class="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
+          <i data-lucide="user" class="w-10 h-10 mx-auto text-amber-400 mb-2"></i>
+          <p class="text-sm text-stone-300">Sign in to view your orders and track live preparation status.</p>
+          <button onclick="window.OwitaApp.openAuthModal('signin')" class="mt-4 px-5 py-2.5 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider">
+            Sign In / Register
+          </button>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+      return;
+    }
+
+    const myOrders = orders.filter(o => o.userId === currentUser.id);
+
+    if (myOrders.length === 0) {
+      container.innerHTML = `
+        <div class="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl text-stone-400">
+          <i data-lucide="receipt" class="w-10 h-10 mx-auto mb-2 opacity-30"></i>
+          <p class="text-sm">You haven't placed any orders yet.</p>
+          <a href="#menu" class="inline-block mt-4 px-5 py-2.5 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider">
+            Explore Menu & Order
+          </a>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+      return;
+    }
+
+    container.innerHTML = myOrders.map(order => {
+      const isUnderReview = order.orderStatus === 'Under Review' || !order.isConfirmed;
+      const isReady = order.orderStatus === 'Ready for Pickup';
+      const isCompleted = order.orderStatus === 'Completed';
+      const isCancelled = order.orderStatus === 'Cancelled';
+      const isChangeRequested = order.orderStatus === 'Change Requested' || order.orderStatus === 'Cancellation Requested';
+
+      return `
+        <div class="owita-card rounded-2xl p-6 space-y-5" id="orderCard-${order.orderId}">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/5">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono text-stone-400">ORDER:</span>
+                <span class="font-mono font-bold text-amber-400 text-lg">${order.orderId}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  isUnderReview ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' :
+                  isReady ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                  isCompleted ? 'bg-stone-800 text-stone-400 border border-stone-700' :
+                  isCancelled ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                  isChangeRequested ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' :
+                  'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                }">
+                  ${isUnderReview ? '⏳ Under Review' : order.orderStatus}
+                </span>
+              </div>
+              <div class="text-[11px] text-stone-500 mt-1">
+                Placed ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · Payment: ${order.paymentStatus}
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="window.OwitaApp.openReceiptModal('${order.orderId}')" class="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-medium text-stone-200 flex items-center gap-1.5 border border-white/10">
+                <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+                <span>View Receipt</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Timer Progress or Under Review Banner -->
+          ${isUnderReview ? `
+            <div class="p-4 rounded-xl bg-amber-500/[0.04] border border-amber-500/30 space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-amber-300 font-semibold flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+                  <span>Order Placed · Awaiting Kitchen Confirmation</span>
+                </span>
+                <span class="font-mono font-bold text-amber-400">Standby</span>
+              </div>
+              <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                <div class="h-full bg-amber-500/50 rounded-full animate-pulse" style="width: 30%;"></div>
+              </div>
+              <div class="text-[11px] text-stone-400 flex justify-between">
+                <span>The preparation clock will start as soon as kitchen confirms your order.</span>
+                <span>Window: ~${order.prepTimeMins} mins</span>
+              </div>
+            </div>
+          ` : (!isCompleted && !isCancelled) ? `
+            <div class="p-4 rounded-xl bg-black/40 border border-amber-500/20 space-y-2">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-stone-300 font-semibold flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full ${isReady ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}"></span>
+                  ${isReady ? 'READY FOR PICKUP AT NAGODA COUNTER!' : 'Kitchen Preparation Status:'}
+                </span>
+                <span class="font-mono font-bold text-amber-400 live-timer-text" data-ready-at="${order.estimatedReadyAt}">
+                  Calculating...
+                </span>
+              </div>
+
+              <div class="kitchen-timer-meter">
+                <div class="kitchen-timer-fill live-timer-bar" data-created-at="${order.confirmedAt || order.createdAt}" data-ready-at="${order.estimatedReadyAt}" style="width: 50%;"></div>
+              </div>
+
+              <div class="text-[11px] text-stone-400 flex justify-between">
+                <span>Total Prep Time: ${order.prepTimeMins} mins (${order.itemCount} items)</span>
+                <span>Counter: Nagoda Junction</span>
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Order Items Breakdown -->
+          <div class="space-y-1.5 text-xs">
+            ${order.items.map(item => `
+              <div class="flex justify-between text-stone-300">
+                <span>${item.quantity}x ${item.name}</span>
+                <span class="font-mono text-stone-400">LKR ${(item.price * item.quantity).toLocaleString()}</span>
+              </div>
+            `).join('')}
+            <div class="flex justify-between font-bold text-white pt-2 border-t border-white/5">
+              <span>Total Paid / Payable:</span>
+              <span class="font-mono text-amber-400">LKR ${order.total.toLocaleString()}</span>
+            </div>
+          </div>
+
+          <!-- Change / Cancel Request Workflow -->
+          ${(!isCompleted && !isCancelled) ? `
+            <div class="pt-2 border-t border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div class="text-[11px] text-stone-500">
+                Need to add items or cancel? Once confirmed, changes require kitchen approval.
+              </div>
+
+              <div class="flex gap-2">
+                <button onclick="window.OwitaApp.requestOrderChange('${order.orderId}', 'change')" ${isChangeRequested ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-300 text-xs font-semibold ${isChangeRequested ? 'opacity-40 cursor-not-allowed' : ''}">
+                  Modify Items
+                </button>
+                <button onclick="window.OwitaApp.requestOrderChange('${order.orderId}', 'cancel')" ${isChangeRequested ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-semibold ${isChangeRequested ? 'opacity-40 cursor-not-allowed' : ''}">
+                  Request Cancel
+                </button>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+    updateLiveTimers();
+    initScrollObserver();
+  }
+
+  function requestOrderChange(orderId, actionType) {
+    const order = orders.find(o => o.orderId === orderId);
+    if (!order) return;
+
+    const reason = prompt(actionType === 'cancel' 
+      ? 'Reason for order cancellation (requires restaurant review):'
+      : 'What changes would you like to make to your order?');
+
+    if (!reason) return;
+
+    order.hasChangeRequest = true;
+    order.changeDetails = `[${actionType.toUpperCase()}] ${reason}`;
+    order.orderStatus = actionType === 'cancel' ? 'Cancellation Requested' : 'Change Requested';
+
+    setStorage(STORAGE_KEYS.ORDERS, orders);
+    renderCustomerOrders();
+    renderAdminOrders();
+    soundEffects.chime();
+    showToast('Your request has been submitted to Ovita kitchen team for approval.', 'warning');
+  }
+
+  // --- ADMIN CONFIRM ORDER (STARTS PREP CLOCK & NOTIFIES CUSTOMER) ---
+  // Spec: "and when admin confirms it give a notification saying will be reay in ...time..."
+  function adminConfirmOrder(orderId) {
+    const order = orders.find(o => o.orderId === orderId);
+    if (!order) return;
+
+    order.isConfirmed = true;
+    order.orderStatus = 'Preparing in Kitchen';
+    order.confirmedAt = new Date().toISOString();
+    order.estimatedReadyAt = new Date(Date.now() + order.prepTimeMins * 60 * 1000).toISOString();
+
+    setStorage(STORAGE_KEYS.ORDERS, orders);
+    renderAdminOrders();
+    renderCustomerOrders();
+
+    soundEffects.alert();
+    const readyTimeStr = new Date(order.estimatedReadyAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    showToast(`🔔 Order ${order.orderId} Confirmed! Your food is now sizzling and will be ready in ${order.prepTimeMins} mins (approx. ${readyTimeStr})!`, 'alert');
+  }
+
+  // --- RESTAURANT BACKSTAGE ADMIN PORTAL & POS CONTROLLER ---
+  function setAdminTab(tab) {
+    adminActiveTab = tab;
+    document.querySelectorAll('.admin-nav-tab').forEach(btn => {
+      if (btn.dataset.adminTab === tab) {
+        btn.classList.add('border-amber-500', 'text-amber-400', 'bg-white/[0.04]');
+        btn.classList.remove('text-stone-400');
+      } else {
+        btn.classList.remove('border-amber-500', 'text-amber-400', 'bg-white/[0.04]');
+        btn.classList.add('text-stone-400');
+      }
+    });
+
+    // Toggle panels
+    document.getElementById('adminTabOrders')?.classList.toggle('hidden', tab !== 'orders');
+    document.getElementById('adminTabPos')?.classList.toggle('hidden', tab !== 'pos');
+    document.getElementById('adminTabSales')?.classList.toggle('hidden', tab !== 'sales');
+    document.getElementById('adminTabMenu')?.classList.toggle('hidden', tab !== 'menu');
+    document.getElementById('adminTabOffers')?.classList.toggle('hidden', tab !== 'offers');
+
+    if (tab === 'orders') renderAdminOrders();
+    else if (tab === 'pos') renderPosTerminal();
+    else if (tab === 'sales') renderDailySalesTracker();
+    else if (tab === 'menu') renderAdminMenuManager();
+    else if (tab === 'offers') renderAdminOffersManager();
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  // 1. ADMIN ORDERS TABLE
+  function renderAdminOrders() {
+    const container = document.getElementById('adminOrdersTableBody');
+    if (!container) return;
+
+    if (orders.length === 0) {
+      container.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-stone-400">No customer orders placed yet.</td></tr>';
+      return;
+    }
+
+    container.innerHTML = orders.map(order => {
+      const isUnderReview = order.orderStatus === 'Under Review' || !order.isConfirmed;
+      const isReady = order.orderStatus === 'Ready for Pickup';
+      const isCompleted = order.orderStatus === 'Completed';
+      const isCancelled = order.orderStatus === 'Cancelled';
+      const hasReq = order.hasChangeRequest;
+
+      return `
+        <tr class="border-b border-white/5 hover:bg-white/[0.01] transition-colors ${isUnderReview ? 'bg-amber-500/[0.04]' : hasReq ? 'bg-amber-500/[0.08]' : ''}">
+          <td class="p-4">
+            <div class="font-mono font-bold text-white text-base">${order.orderId}</div>
+            <div class="text-[10px] text-stone-400 font-mono">${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+            <div class="text-[9px] text-amber-500/80 font-mono uppercase">${order.source || 'Online'}</div>
+          </td>
+          <td class="p-4">
+            <div class="text-xs font-semibold text-white">${order.customerName}</div>
+            <div class="text-[11px] text-amber-400 font-mono">${order.customerPhone}</div>
+          </td>
+          <td class="p-4">
+            <div class="text-xs text-stone-300 max-w-xs space-y-0.5">
+              ${order.items.map(i => `<div>${i.quantity}x ${i.name}</div>`).join('')}
+            </div>
+            ${order.notes ? `<div class="text-[10px] text-stone-400 italic mt-1 bg-white/5 p-1 rounded">Note: ${order.notes}</div>` : ''}
+          </td>
+          <td class="p-4 font-mono text-xs">
+            <div class="font-bold text-amber-400">LKR ${order.total.toLocaleString()}</div>
+            <div class="text-[10px] ${order.paymentStatus === 'Paid' ? 'text-emerald-400' : 'text-amber-400'}">${order.paymentStatus}</div>
+          </td>
+          <td class="p-4">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isUnderReview ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' :
+              isReady ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+              isCompleted ? 'bg-stone-800 text-stone-400' :
+              isCancelled ? 'bg-red-500/20 text-red-400' :
+              hasReq ? 'bg-amber-500/30 text-amber-300 border border-amber-500/50 animate-pulse' :
+              'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+            }">
+              ${isUnderReview ? '⏳ Under Review' : order.orderStatus}
+            </span>
+            ${hasReq ? `
+              <div class="mt-1.5 p-1.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] text-amber-300">
+                <strong>Customer Request:</strong> ${order.changeDetails}
+                <div class="flex gap-2 mt-1">
+                  <button onclick="window.OwitaApp.adminHandleChangeRequest('${order.orderId}', true)" class="px-2 py-0.5 bg-emerald-500 text-black font-bold rounded text-[9px] uppercase">Approve</button>
+                  <button onclick="window.OwitaApp.adminHandleChangeRequest('${order.orderId}', false)" class="px-2 py-0.5 bg-red-500 text-white font-bold rounded text-[9px] uppercase">Decline</button>
+                </div>
+              </div>
+            ` : ''}
+          </td>
+          <td class="p-4 text-right space-x-1 whitespace-nowrap">
+            ${isUnderReview ? `
+              <button onclick="window.OwitaApp.adminConfirmOrder('${order.orderId}')" class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 animate-pulse flex items-center gap-1.5 inline-flex">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                <span>Confirm & Start Clock</span>
+              </button>
+            ` : (!isCompleted && !isCancelled) ? `
+              <button onclick="window.OwitaApp.adminAdjustOrderTime('${order.orderId}', 5)" title="Add 5 Mins Delay" class="px-2 py-1 bg-white/5 hover:bg-white/10 rounded text-stone-300 text-[11px] font-mono border border-white/10">
+                +5m
+              </button>
+              <button onclick="window.OwitaApp.adminAdjustOrderTime('${order.orderId}', 10)" title="Add 10 Mins Delay" class="px-2 py-1 bg-white/5 hover:bg-white/10 rounded text-stone-300 text-[11px] font-mono border border-white/10">
+                +10m
+              </button>
+              <button onclick="window.OwitaApp.adminUpdateOrderStatus('${order.orderId}', 'Ready for Pickup')" class="px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 rounded text-xs font-semibold">
+                Mark Ready
+              </button>
+              <button onclick="window.OwitaApp.adminUpdateOrderStatus('${order.orderId}', 'Completed')" class="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white rounded text-xs font-semibold">
+                Complete
+              </button>
+            ` : `
+              <span class="text-xs text-stone-500">Archived</span>
+            `}
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    updateAdminAnalytics();
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function adminUpdateOrderStatus(orderId, newStatus) {
+    const order = orders.find(o => o.orderId === orderId);
+    if (!order) return;
+
+    order.orderStatus = newStatus;
+    if (newStatus === 'Ready for Pickup') {
+      order.estimatedReadyAt = new Date().toISOString();
+      soundEffects.alert();
+      showToast(`Order ${order.orderId} marked READY for Counter Pickup!`, 'success');
+    }
+
+    setStorage(STORAGE_KEYS.ORDERS, orders);
+    renderAdminOrders();
+    renderCustomerOrders();
+  }
+
+  function adminHandleChangeRequest(orderId, isApproved) {
+    const order = orders.find(o => o.orderId === orderId);
+    if (!order) return;
+
+    if (isApproved) {
+      if (order.changeDetails.includes('[CANCEL]')) {
+        order.orderStatus = 'Cancelled';
+        showToast(`Order ${orderId} cancellation APPROVED.`, 'info');
+      } else {
+        order.orderStatus = 'Preparing in Kitchen';
+        showToast(`Order ${orderId} modification APPROVED. Kitchen adjusting items.`, 'success');
+      }
+    } else {
+      order.orderStatus = 'Preparing in Kitchen';
+      showToast(`Order ${orderId} request DECLINED. Original preparation resumed.`, 'warning');
+    }
+
+    order.hasChangeRequest = false;
+    order.changeDetails = '';
+    setStorage(STORAGE_KEYS.ORDERS, orders);
+    renderAdminOrders();
+    renderCustomerOrders();
+  }
+
+  function adminAdjustOrderTime(orderId, additionalMins) {
+    const order = orders.find(o => o.orderId === orderId);
+    if (!order) return;
+
+    const currentReady = new Date(order.estimatedReadyAt).getTime();
+    order.estimatedReadyAt = new Date(currentReady + additionalMins * 60 * 1000).toISOString();
+    order.prepTimeMins += additionalMins;
+
+    setStorage(STORAGE_KEYS.ORDERS, orders);
+    renderAdminOrders();
+    renderCustomerOrders();
+    showToast(`Added ${additionalMins} mins to Order ${orderId}. Customer timer updated!`, 'warning');
+  }
+
+  // 2. USER-FRIENDLY POS (POINT OF SALE) SYSTEM
+  function renderPosTerminal() {
+    const itemsGrid = document.getElementById('posMenuItemsGrid');
+    const billItems = document.getElementById('posCurrentBillItems');
+    if (!itemsGrid) return;
+
+    // Fast 1-touch grid of dishes
+    itemsGrid.innerHTML = menuItems.map(item => {
+      const pricing = getItemPricing(item);
+      return `
+        <div onclick="window.OwitaApp.addToPosCart('${item.id}')" class="pos-item-btn p-3 rounded-2xl flex flex-col justify-between cursor-pointer group">
+          <div class="flex items-center gap-3">
+            <img src="${item.img}" alt="${item.name}" class="w-12 h-12 rounded-xl object-cover border border-white/10 shrink-0">
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-white group-hover:text-amber-400 transition-colors truncate">${item.name}</div>
+              <div class="text-[10px] text-stone-400 uppercase font-mono">${item.serves || item.category}</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+            <span class="text-xs font-mono font-bold text-amber-400">LKR ${pricing.currentPrice.toLocaleString()}</span>
+            <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center text-xs font-bold group-hover:bg-amber-500 group-hover:text-black transition-colors">+</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    renderPosBill();
+  }
+
+  function addToPosCart(dishId) {
+    const item = menuItems.find(m => m.id === dishId);
+    if (!item) return;
+
+    const pricing = getItemPricing(item);
+    const existing = posCart.find(p => p.id === dishId);
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      posCart.push({
+        id: item.id,
+        name: item.name,
+        price: pricing.currentPrice,
+        quantity: 1
+      });
+    }
+
+    soundEffects.chime();
+    renderPosBill();
+  }
+
+  function updatePosCartQuantity(dishId, delta) {
+    const item = posCart.find(p => p.id === dishId);
+    if (!item) return;
+
+    item.quantity += delta;
+    if (item.quantity <= 0) {
+      posCart = posCart.filter(p => p.id !== dishId);
+    }
+    renderPosBill();
+  }
+
+  function renderPosBill() {
+    const container = document.getElementById('posCurrentBillItems');
+    if (!container) return;
+
+    const subtotal = posCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const packagingFee = document.getElementById('posPackagingCheck')?.checked ? 150 : 0;
+    const serviceFee = document.getElementById('posServiceCheck')?.checked ? Math.round(subtotal * 0.05) : 0;
+    const total = subtotal + packagingFee + serviceFee;
+
+    if (posCart.length === 0) {
+      container.innerHTML = '<div class="py-12 text-center text-xs text-stone-500 italic">No items selected yet. Tap any item on the left to add to bill.</div>';
+    } else {
+      container.innerHTML = posCart.map(item => `
+        <div class="flex items-center justify-between p-2 rounded-xl bg-white/[0.02] border border-white/5 text-xs">
+          <div class="flex-1 truncate mr-2">
+            <div class="font-bold text-white truncate">${item.name}</div>
+            <div class="text-[10px] text-stone-400 font-mono">LKR ${item.price.toLocaleString()} each</div>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="window.OwitaApp.updatePosCartQuantity('${item.id}', -1)" class="w-6 h-6 rounded bg-white/5 text-stone-300 hover:text-white flex items-center justify-center">-</button>
+            <span class="w-6 text-center font-mono font-bold text-white">${item.quantity}</span>
+            <button onclick="window.OwitaApp.updatePosCartQuantity('${item.id}', 1)" class="w-6 h-6 rounded bg-white/5 text-stone-300 hover:text-white flex items-center justify-center">+</button>
+            <span class="w-16 text-right font-mono font-bold text-amber-400">LKR ${(item.price * item.quantity).toLocaleString()}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('posSubtotalDisplay').textContent = `LKR ${subtotal.toLocaleString()}`;
+    document.getElementById('posTotalDisplay').textContent = `LKR ${total.toLocaleString()}`;
+  }
+
+  function executePosCheckout() {
+    if (posCart.length === 0) {
+      showToast('Select at least one dish for POS sale.', 'warning');
+      return;
+    }
+
+    const subtotal = posCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const packagingFee = document.getElementById('posPackagingCheck')?.checked ? 150 : 0;
+    const serviceFee = document.getElementById('posServiceCheck')?.checked ? Math.round(subtotal * 0.05) : 0;
+    const grandTotal = subtotal + packagingFee + serviceFee;
+    const customerName = document.getElementById('posCustomerNameInput')?.value.trim() || 'Walk-in Counter Guest';
+    const paymentMethod = document.getElementById('posPaymentMethodSelect')?.value || 'Cash on Counter';
+
+    const orderId = 'OV-POS-' + Math.floor(1000 + Math.random() * 9000);
+    const newPosOrder = {
+      orderId,
+      userId: 'pos-walkin',
+      customerName,
+      customerPhone: '077 277 5132',
+      items: JSON.parse(JSON.stringify(posCart)),
+      itemCount: posCart.reduce((sum, i) => sum + i.quantity, 0),
+      subtotal,
+      packagingFee,
+      serviceFee,
+      total: grandTotal,
+      paymentMethod,
+      paymentStatus: 'Paid',
+      paymentReference: 'POS-TX-' + Date.now().toString().slice(-6),
+      orderStatus: 'Ready for Pickup',
+      isConfirmed: true,
+      prepTimeMins: 10,
+      createdAt: new Date().toISOString(),
+      confirmedAt: new Date().toISOString(),
+      estimatedReadyAt: new Date().toISOString(),
+      notes: 'Direct Counter POS Order',
+      hasChangeRequest: false,
+      changeDetails: '',
+      source: 'POS Counter'
+    };
+
+    orders.unshift(newPosOrder);
+    setStorage(STORAGE_KEYS.ORDERS, orders);
+
+    posCart = [];
+    renderPosBill();
+    soundEffects.alert();
+    showToast(`✅ POS Sale ${orderId} Logged (LKR ${grandTotal.toLocaleString()})`, 'success');
+
+    renderDailySalesTracker();
+    openReceiptModal(orderId);
+  }
+
+  // 3. DAILY SALES & PERFORMANCE TRACKER
+  function renderDailySalesTracker() {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayOrders = orders.filter(o => o.createdAt.startsWith(todayStr) && o.orderStatus !== 'Cancelled');
+
+    const totalSales = todayOrders.reduce((sum, o) => sum + o.total, 0);
+    const cashSales = todayOrders.filter(o => o.paymentMethod.toLowerCase().includes('cash')).reduce((sum, o) => sum + o.total, 0);
+    const cardSales = todayOrders.filter(o => o.paymentMethod.toLowerCase().includes('card') || o.paymentMethod.toLowerCase().includes('payhere')).reduce((sum, o) => sum + o.total, 0);
+    const qrSales = todayOrders.filter(o => o.paymentMethod.toLowerCase().includes('qr') || o.paymentMethod.toLowerCase().includes('bank')).reduce((sum, o) => sum + o.total, 0);
+
+    const onlineOrdersCount = todayOrders.filter(o => o.source !== 'POS Counter').length;
+    const posOrdersCount = todayOrders.filter(o => o.source === 'POS Counter').length;
+
+    // Item popularity calculation
+    const itemCounts = {};
+    todayOrders.forEach(o => {
+      o.items.forEach(i => {
+        itemCounts[i.name] = (itemCounts[i.name] || 0) + i.quantity;
+      });
+    });
+
+    const topItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+
+    document.getElementById('salesTodayRevenue').textContent = `LKR ${totalSales.toLocaleString()}`;
+    document.getElementById('salesTodayOrdersCount').textContent = todayOrders.length;
+    document.getElementById('salesCashTotal').textContent = `LKR ${cashSales.toLocaleString()}`;
+    document.getElementById('salesCardTotal').textContent = `LKR ${cardSales.toLocaleString()}`;
+    document.getElementById('salesQrTotal').textContent = `LKR ${qrSales.toLocaleString()}`;
+    document.getElementById('salesSplitDisplay').textContent = `${onlineOrdersCount} Online · ${posOrdersCount} Counter POS`;
+
+    const topItemsList = document.getElementById('salesTopDishesList');
+    if (topItemsList) {
+      if (topItems.length === 0) {
+        topItemsList.innerHTML = '<div class="text-xs text-stone-500 italic">No sales recorded yet today.</div>';
+      } else {
+        topItemsList.innerHTML = topItems.map(([name, count], i) => `
+          <div class="flex items-center justify-between text-xs py-1.5 border-b border-white/5">
+            <span class="text-stone-200 font-medium">#${i+1} ${name}</span>
+            <span class="font-mono text-amber-400 font-bold">${count} sold</span>
+          </div>
+        `).join('');
+      }
+    }
+  }
+
+  // 4. INVENTORY & DESCRIPTION EDITOR
+  function renderAdminMenuManager() {
+    const container = document.getElementById('adminMenuItemsList');
+    if (!container) return;
+
+    container.innerHTML = menuItems.map(item => {
+      const pricing = getItemPricing(item);
+
+      return `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 gap-3">
+          <div class="flex items-start gap-3">
+            <img src="${item.img}" alt="${item.name}" class="w-14 h-14 rounded-xl object-cover border border-white/10 shrink-0">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-white">${item.name}</span>
+                ${pricing.hasOffer ? `<span class="offer-ribbon-red px-2 py-0.5 rounded text-[9px]">${pricing.tag}</span>` : ''}
+              </div>
+              <div class="text-[10px] text-amber-500 uppercase tracking-widest font-mono">${item.category} · ${item.serves || ''}</div>
+              <p class="text-[11px] text-stone-400 line-clamp-1 mt-0.5 max-w-md">${item.description}</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5 self-end sm:self-center">
+            <div class="font-mono text-xs font-bold text-amber-400">LKR ${item.price.toLocaleString()}</div>
+            
+            <button onclick="window.OwitaApp.adminToggleStock('${item.id}')" class="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${item.inStock ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
+              ${item.inStock ? 'In Stock' : 'Sold Out'}
+            </button>
+
+            <!-- Edit Dish & Description Button -->
+            <button onclick="window.OwitaApp.adminOpenEditDishModal('${item.id}')" title="Edit Description & Price" class="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-stone-200 border border-white/10 rounded text-xs flex items-center gap-1">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>Edit Details</span>
+            </button>
+
+            <button onclick="window.OwitaApp.adminDeleteDish('${item.id}')" class="p-1.5 text-red-400 hover:bg-red-500/20 rounded">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function adminOpenEditDishModal(dishId) {
+    const item = menuItems.find(m => m.id === dishId);
+    if (!item) return;
+
+    document.getElementById('editDishId').value = item.id;
+    document.getElementById('editDishName').value = item.name;
+    document.getElementById('editDishPrice').value = item.price;
+    document.getElementById('editDishServes').value = item.serves || 'Serves 2 Persons';
+    document.getElementById('editDishDescription').value = item.description || '';
+    document.getElementById('editDishInclusions').value = (item.portionIncludes || []).join('\n');
+
+    const modal = document.getElementById('adminEditDishModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function adminCloseEditDishModal() {
+    const modal = document.getElementById('adminEditDishModal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function adminSaveDishEdits(e) {
+    if (e) e.preventDefault();
+
+    const dishId = document.getElementById('editDishId').value;
+    const item = menuItems.find(m => m.id === dishId);
+    if (!item) return;
+
+    const name = document.getElementById('editDishName').value.trim();
+    const price = parseInt(document.getElementById('editDishPrice').value, 10);
+    const serves = document.getElementById('editDishServes').value.trim();
+    const description = document.getElementById('editDishDescription').value.trim();
+    const inclusionsText = document.getElementById('editDishInclusions').value.trim();
+
+    if (!name || isNaN(price) || price <= 0) {
+      alert('Please fill out the dish name and valid price.');
+      return;
+    }
+
+    item.name = name;
+    item.price = price;
+    item.serves = serves;
+    item.description = description;
+    item.portionIncludes = inclusionsText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+    setStorage(STORAGE_KEYS.MENU, menuItems);
+    adminCloseEditDishModal();
+
+    renderAdminMenuManager();
+    renderFullMenu();
+    renderSignatureDishes();
+    renderPosTerminal();
+    renderActiveOffersSection();
+
+    showToast(`Updated details and description for "${item.name}"!`, 'success');
+  }
+
+  function adminToggleStock(itemId) {
+    const item = menuItems.find(i => i.id === itemId);
+    if (!item) return;
+
+    item.inStock = !item.inStock;
+    setStorage(STORAGE_KEYS.MENU, menuItems);
+    renderAdminMenuManager();
+    renderFullMenu();
+    renderSignatureDishes();
+    showToast(`${item.name} is now ${item.inStock ? 'In Stock' : 'Out of Stock'}.`, 'info');
+  }
+
+  function adminDeleteDish(itemId) {
+    const item = menuItems.find(i => i.id === itemId);
+    if (!item) return;
+
+    if (!confirm(`Are you sure you want to remove "${item.name}" from the menu?`)) return;
+
+    menuItems = menuItems.filter(i => i.id !== itemId);
+    setStorage(STORAGE_KEYS.MENU, menuItems);
+    renderAdminMenuManager();
+    renderFullMenu();
+    renderSignatureDishes();
+    showToast(`Removed ${item.name} from menu.`, 'warning');
+  }
+
+  function adminAddNewDish(e) {
+    if (e) e.preventDefault();
+
+    const name = document.getElementById('newDishName').value.trim();
+    const sinhala = document.getElementById('newDishSinhala').value.trim();
+    const category = document.getElementById('newDishCategory').value;
+    const price = parseInt(document.getElementById('newDishPrice').value, 10);
+    const serves = document.getElementById('newDishServes')?.value.trim() || 'Serves 2 Persons';
+    const description = document.getElementById('newDishDescription').value.trim();
+    const inclusionsText = document.getElementById('newDishInclusions')?.value.trim() || '';
+    const img = document.getElementById('newDishImg').value.trim() || 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=800&q=80';
+
+    if (!name || isNaN(price) || price <= 0) {
+      alert('Please fill out the dish name and valid price.');
+      return;
+    }
+
+    const portionIncludes = inclusionsText.length > 0 
+      ? inclusionsText.split('\n').map(l => l.trim()).filter(l => l.length > 0)
+      : [
+          'Freshly prepared upon order on hot flame wok',
+          'Generous portion for ' + serves,
+          'House-made authentic chili paste & sauce included'
+        ];
+
+    const newDish = {
+      id: 'ow-custom-' + Date.now(),
+      name,
+      sinhala,
+      category,
+      price,
+      serves,
+      portionIncludes,
+      isSignature: false,
+      isOffer: false,
+      offerDiscountPercent: 0,
+      inStock: true,
+      prepBaseMins: 10,
+      rating: 5.0,
+      reviewsCount: 1,
+      img,
+      description
+    };
+
+    menuItems.push(newDish);
+    setStorage(STORAGE_KEYS.MENU, menuItems);
+
+    document.getElementById('newDishForm').reset();
+    document.getElementById('adminNewDishModal').classList.add('hidden');
+
+    renderAdminMenuManager();
+    renderFullMenu();
+    renderPosTerminal();
+    showToast(`Added "${name}" to menu successfully!`, 'success');
+  }
+
+  // 5. PROMOTIONAL OFFERS MANAGER
+  function renderAdminOffersManager() {
+    const list = document.getElementById('adminOffersList');
+    if (!list) return;
+
+    // Populate dish dropdown
+    const select = document.getElementById('offerDishSelect');
+    if (select) {
+      select.innerHTML = menuItems.map(m => `<option value="${m.id}">${m.name} (LKR ${m.price})</option>`).join('');
+    }
+
+    if (offers.length === 0) {
+      list.innerHTML = '<div class="text-xs text-stone-500 italic p-4">No active offers. Create one above!</div>';
+      return;
+    }
+
+    list.innerHTML = offers.map(off => {
+      const item = menuItems.find(m => m.id === off.dishId);
+      const isExpired = new Date(off.expiresAt) <= new Date();
+
+      return `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-white/[0.02] border border-white/5 gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">${off.title}</span>
+              <span class="offer-ribbon-red px-2 py-0.5 rounded text-[9px] font-black">${off.tag}</span>
+              ${isExpired ? '<span class="text-[9px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded">Expired</span>' : ''}
+            </div>
+            <div class="text-xs text-amber-400 font-mono mt-0.5">${off.dishName || (item ? item.name : '')}</div>
+            <div class="text-[11px] text-stone-400 mt-1 font-mono">
+              ⏳ Expiration: ${new Date(off.expiresAt).toLocaleString()} (${formatCountdown(off.expiresAt)})
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="window.OwitaApp.adminToggleOffer('${off.id}')" class="px-3 py-1 rounded text-xs font-bold uppercase ${off.active && !isExpired ? 'bg-emerald-500/20 text-emerald-400' : 'bg-stone-800 text-stone-400'}">
+              ${off.active && !isExpired ? 'Active' : 'Inactive'}
+            </button>
+            <button onclick="window.OwitaApp.adminDeleteOffer('${off.id}')" class="p-1.5 text-red-400 hover:bg-red-500/20 rounded">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function adminCreateNewOffer(e) {
+    if (e) e.preventDefault();
+
+    const dishId = document.getElementById('offerDishSelect').value;
+    const item = menuItems.find(m => m.id === dishId);
+    if (!item) return;
+
+    const title = document.getElementById('offerTitleInput').value.trim();
+    const discountType = document.getElementById('offerTypeSelect').value; // 'percent' or 'fixed'
+    const discountValue = parseInt(document.getElementById('offerValueInput').value, 10);
+    const durationHours = parseFloat(document.getElementById('offerDurationSelect').value);
+
+    if (!title || isNaN(discountValue) || discountValue <= 0) {
+      alert('Please fill out all offer details.');
+      return;
+    }
+
+    const expiresAt = new Date(Date.now() + durationHours * 3600 * 1000).toISOString();
+    const tag = discountType === 'percent' ? `${discountValue}% OFF` : `SAVE LKR ${discountValue}`;
+
+    const newOffer = {
+      id: 'off-' + Date.now(),
+      dishId: item.id,
+      dishName: item.name,
+      title,
+      discountType,
+      discountValue,
+      tag,
+      description: item.description,
+      code: 'FLASH' + discountValue,
+      active: true,
+      expiresAt
+    };
+
+    offers.unshift(newOffer);
+    setStorage(STORAGE_KEYS.OFFERS, offers);
+
+    document.getElementById('adminOfferForm')?.reset();
+    renderAdminOffersManager();
+    renderActiveOffersSection();
     renderSignatureDishes();
     renderFullMenu();
+    updateCustomerOfferBanner();
+
+    soundEffects.alert();
+    showToast(`🔥 New Flash Offer created for "${item.name}" (${tag})!`, 'success');
+  }
+
+  function adminToggleOffer(offerId) {
+    const off = offers.find(o => o.id === offerId);
+    if (!off) return;
+
+    off.active = !off.active;
+    setStorage(STORAGE_KEYS.OFFERS, offers);
+
+    renderAdminOffersManager();
+    renderActiveOffersSection();
+    renderSignatureDishes();
+    renderFullMenu();
+    updateCustomerOfferBanner();
+  }
+
+  function adminDeleteOffer(offerId) {
+    offers = offers.filter(o => o.id !== offerId);
+    setStorage(STORAGE_KEYS.OFFERS, offers);
+
+    renderAdminOffersManager();
+    renderActiveOffersSection();
+    renderSignatureDishes();
+    renderFullMenu();
+    updateCustomerOfferBanner();
+    showToast('Offer removed.', 'info');
+  }
+
+  // Customer Top Notification Alert Bar for Active Offers
+  function updateCustomerOfferBanner() {
+    const banner = document.getElementById('customerOfferAlertBar');
+    const dishEl = document.getElementById('offerAlertDishName');
+    const timerEl = document.getElementById('offerAlertTimer');
+    if (!banner) return;
+
+    const active = offers.find(o => o.active && new Date(o.expiresAt) > new Date());
+    if (active) {
+      banner.classList.remove('hidden');
+      if (dishEl) dishEl.textContent = active.dishName || active.title;
+      if (timerEl) timerEl.textContent = 'Ends in: ' + formatCountdown(active.expiresAt);
+    } else {
+      banner.classList.add('hidden');
+    }
+  }
+
+  // --- LIVE KITCHEN TIMER & OFFER COUNTDOWN ENGINE ---
+  function updateLiveTimers() {
+    const now = Date.now();
+
+    // 1. Kitchen order timers
+    document.querySelectorAll('.live-timer-text').forEach(textEl => {
+      const readyAt = new Date(textEl.dataset.readyAt).getTime();
+      if (!readyAt || isNaN(readyAt)) {
+        textEl.textContent = 'Under Review';
+        return;
+      }
+
+      const diffMs = readyAt - now;
+
+      if (diffMs <= 0) {
+        textEl.textContent = 'READY FOR PICKUP!';
+        textEl.classList.remove('text-amber-400');
+        textEl.classList.add('text-emerald-400');
+      } else {
+        const totalSecs = Math.floor(diffMs / 1000);
+        const mins = Math.floor(totalSecs / 60);
+        const secs = totalSecs % 60;
+        textEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')} Remaining`;
+      }
+    });
+
+    document.querySelectorAll('.live-timer-bar').forEach(barEl => {
+      const createdAt = new Date(barEl.dataset.createdAt).getTime();
+      const readyAt = new Date(barEl.dataset.readyAt).getTime();
+      const totalDuration = readyAt - createdAt;
+      const elapsed = now - createdAt;
+
+      if (totalDuration > 0) {
+        const percent = Math.min(100, Math.max(5, (elapsed / totalDuration) * 100));
+        barEl.style.width = `${percent}%`;
+      }
+    });
+
+    // 2. Offer ticking countdowns
+    document.querySelectorAll('.live-offer-timer').forEach(el => {
+      const expires = el.dataset.expires;
+      if (expires) {
+        el.textContent = '⏳ Ends: ' + formatCountdown(expires);
+      }
+    });
+
+    const topBannerTimer = document.getElementById('offerAlertTimer');
+    const topActiveOffer = offers.find(o => o.active && new Date(o.expiresAt) > new Date());
+    if (topBannerTimer && topActiveOffer) {
+      topBannerTimer.textContent = 'Ends in: ' + formatCountdown(topActiveOffer.expiresAt);
+    }
+  }
+
+  setInterval(updateLiveTimers, 1000);
+
+  function updateAdminAnalytics() {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayOrders = orders.filter(o => o.createdAt.startsWith(todayStr) && o.orderStatus !== 'Cancelled');
+    const totalRev = todayOrders.reduce((sum, o) => sum + o.total, 0);
+    const pendingCount = orders.filter(o => o.orderStatus === 'Under Review' || o.orderStatus === 'Preparing in Kitchen' || o.orderStatus === 'Change Requested').length;
+
+    const revEl = document.getElementById('adminTotalRevenue');
+    const pendingEl = document.getElementById('adminPendingOrdersCount');
+    const badgeEl = document.getElementById('adminPendingOrdersBadge');
+
+    if (revEl) revEl.textContent = `LKR ${totalRev.toLocaleString()}`;
+    if (pendingEl) pendingEl.textContent = pendingCount;
+    if (badgeEl) {
+      badgeEl.textContent = pendingCount;
+      badgeEl.classList.toggle('hidden', pendingCount === 0);
+    }
+  }
+
+  // --- MULTI-USER AUTH CONTROLLER ---
+  function updateAuthUI() {
+    const userDisplay = document.getElementById('headerUserDisplay');
+    const authBtn = document.getElementById('headerAuthBtn');
+
+    if (!userDisplay) return;
+
+    if (currentUser) {
+      userDisplay.innerHTML = `
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold text-xs">
+            ${currentUser.name.charAt(0)}
+          </div>
+          <div class="hidden sm:block text-left">
+            <div class="text-xs font-bold text-white truncate max-w-[120px]">${currentUser.name}</div>
+            <div class="text-[10px] text-stone-400 capitalize">${currentUser.role}</div>
+          </div>
+          <button onclick="window.OwitaApp.signOut()" title="Sign Out" class="ml-1 text-stone-400 hover:text-white p-1">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      `;
+      if (authBtn) authBtn.classList.add('hidden');
+    } else {
+      userDisplay.innerHTML = '';
+      if (authBtn) authBtn.classList.remove('hidden');
+    }
+
+    if (window.lucide) lucide.createIcons();
+    updateCustomerOfferBanner();
+  }
+
+  function openAuthModal(defaultTab = 'signin') {
+    const modal = document.getElementById('owitaAuthModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      switchAuthTab(defaultTab);
+    }
+  }
+
+  function closeAuthModal() {
+    const modal = document.getElementById('owitaAuthModal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function switchAuthTab(tab) {
+    const signInForm = document.getElementById('authSignInForm');
+    const registerForm = document.getElementById('authRegisterForm');
+    const tabSignIn = document.getElementById('authTabSignIn');
+    const tabRegister = document.getElementById('authTabRegister');
+
+    if (tab === 'signin') {
+      signInForm?.classList.remove('hidden');
+      registerForm?.classList.add('hidden');
+      tabSignIn?.classList.add('border-amber-500', 'text-amber-400');
+      tabRegister?.classList.remove('border-amber-500', 'text-amber-400');
+    } else {
+      signInForm?.classList.add('hidden');
+      registerForm?.classList.remove('hidden');
+      tabRegister?.classList.add('border-amber-500', 'text-amber-400');
+      tabSignIn?.classList.remove('border-amber-500', 'text-amber-400');
+    }
+  }
+
+  function handleSignIn(e) {
+    if (e) e.preventDefault();
+    const email = document.getElementById('signInEmail').value.trim();
+    const password = document.getElementById('signInPassword').value;
+
+    const user = users.find(u => u.email === email && u.password === password);
+    if (!user) {
+      alert('Invalid email or password. Hint: Try nethum@example.com / password123 or manager@ovita.lk / admin');
+      return;
+    }
+
+    currentUser = user;
+    setStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
+    closeAuthModal();
+    updateAuthUI();
+    renderCustomerOrders();
+    soundEffects.chime();
+    showToast(`Welcome back, ${user.name}!`, 'success');
+
+    // Customer Offer Alert notification upon signing in
+    const activeOffer = offers.find(o => o.active && new Date(o.expiresAt) > new Date());
+    if (activeOffer) {
+      setTimeout(() => {
+        showToast(`🔥 Exclusive Flash Deal: "${activeOffer.dishName || activeOffer.title}" is ${activeOffer.tag}! Ends in ${formatCountdown(activeOffer.expiresAt)}! Hurry!`, 'alert');
+      }, 1200);
+    }
+  }
+
+  function handleRegister(e) {
+    if (e) e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const password = document.getElementById('regPassword').value;
+
+    if (!name || !email || !phone || !password) {
+      alert('Please fill out all registration fields.');
+      return;
+    }
+
+    if (users.some(u => u.email === email)) {
+      alert('An account with this email already exists.');
+      return;
+    }
+
+    const newUser = {
+      id: 'usr-' + Date.now(),
+      name,
+      email,
+      phone,
+      password,
+      role: 'customer'
+    };
+
+    users.push(newUser);
+    setStorage(STORAGE_KEYS.USERS, users);
+    currentUser = newUser;
+    setStorage(STORAGE_KEYS.CURRENT_USER, currentUser);
+
+    closeAuthModal();
+    updateAuthUI();
+    renderCustomerOrders();
+    soundEffects.chime();
+    showToast(`Account created! Welcome to Ovita, ${name}!`, 'success');
+  }
+
+  function signOut() {
+    currentUser = null;
+    setStorage(STORAGE_KEYS.CURRENT_USER, null);
+    updateAuthUI();
+    renderCustomerOrders();
+    showToast('Signed out successfully.', 'info');
+  }
+
+  function toggleRoleSwitch() {
+    activeView = activeView === 'customer' ? 'restaurant' : 'customer';
+    setStorage(STORAGE_KEYS.ACTIVE_VIEW, activeView);
+    applyActiveView();
+    soundEffects.chime();
+    showToast(`Switched view to: ${activeView.toUpperCase()}`, 'info');
+  }
+
+  function applyActiveView() {
+    const customerView = document.getElementById('customerWebsiteContainer');
+    const adminView = document.getElementById('adminPortalContainer');
+    const roleBtnText = document.getElementById('headerRoleSwitcherText');
+
+    if (activeView === 'restaurant') {
+      customerView?.classList.add('hidden');
+      adminView?.classList.remove('hidden');
+      if (roleBtnText) roleBtnText.textContent = 'Switch to Customer View';
+      setAdminTab(adminActiveTab);
+    } else {
+      customerView?.classList.remove('hidden');
+      adminView?.classList.add('hidden');
+      if (roleBtnText) roleBtnText.textContent = 'Kitchen / Admin View';
+      renderCustomerOrders();
+    }
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function openCartDrawer() {
+    const drawer = document.getElementById('cartDrawer');
+    if (drawer) {
+      drawer.classList.remove('translate-x-full');
+      document.body.style.overflow = 'hidden';
+      renderCartDrawer();
+    }
+  }
+
+  function closeCartDrawer() {
+    const drawer = document.getElementById('cartDrawer');
+    if (drawer) {
+      drawer.classList.add('translate-x-full');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function setCategory(cat) {
+    activeCategory = cat;
+    document.querySelectorAll('.category-pill').forEach(btn => {
+      if (btn.dataset.category === cat) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+    renderFullMenu();
+  }
+
+  // --- INITIALIZE APPLICATION ---
+  function init() {
+    renderActiveOffersSection();
+    renderSignatureDishes();
+    renderFullMenu();
+    renderGallery();
     updateCartBadges();
     updateAuthUI();
     applyActiveView();
-
-    
-    document.querySelectorAll('.gallery-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        setGalleryCategory(btn.dataset.galleryCategory);
-      });
-    });
+    initScrollObserver();
 
     // Event Listeners for category pills
     document.querySelectorAll('.category-pill').forEach(btn => {
@@ -1513,28 +2258,42 @@
       });
     });
 
+    // Event Listeners for gallery pills
+    document.querySelectorAll('.gallery-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setGalleryCategory(btn.dataset.galleryCategory);
+      });
+    });
+
+    // Admin Tabs
+    document.querySelectorAll('.admin-nav-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setAdminTab(btn.dataset.adminTab);
+      });
+    });
+
     // Form submits
     document.getElementById('authSignInForm')?.addEventListener('submit', handleSignIn);
     document.getElementById('authRegisterForm')?.addEventListener('submit', handleRegister);
     document.getElementById('checkoutPaymentForm')?.addEventListener('submit', executePaymentAndPlaceOrder);
     document.getElementById('newDishForm')?.addEventListener('submit', adminAddNewDish);
+    document.getElementById('editDishForm')?.addEventListener('submit', adminSaveDishEdits);
+    document.getElementById('adminOfferForm')?.addEventListener('submit', adminCreateNewOffer);
 
-    // Initial icon render
-    if (window.lucide) lucide.createIcons();
-    initScrollObserver();
-
-    // Global ESC key to close receipt & modals
+    // Global ESC key listener to close modals
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeReceiptModal();
         closeAuthModal();
         closeCheckoutModal();
         closeCartDrawer();
+        closeGalleryLightbox();
+        adminCloseEditDishModal();
       }
     });
 
-    // Close modal on backdrop click
-    ['digitalReceiptModal', 'checkoutPaymentModal', 'owitaAuthModal', 'adminNewDishModal', 'galleryLightboxModal'].forEach(id => {
+    // Close on backdrop click for all modals
+    ['digitalReceiptModal', 'checkoutPaymentModal', 'owitaAuthModal', 'adminNewDishModal', 'adminEditDishModal', 'galleryLightboxModal', 'tableReservationModal'].forEach(id => {
       const m = document.getElementById(id);
       if (m) {
         m.addEventListener('click', (e) => {
@@ -1542,6 +2301,7 @@
             if (id === 'digitalReceiptModal') closeReceiptModal();
             else if (id === 'checkoutPaymentModal') closeCheckoutModal();
             else if (id === 'owitaAuthModal') closeAuthModal();
+            else if (id === 'adminEditDishModal') adminCloseEditDishModal();
             else if (id === 'galleryLightboxModal') closeGalleryLightbox();
             else m.classList.add('hidden');
           }
@@ -1549,14 +2309,11 @@
       }
     });
 
+    if (window.lucide) lucide.createIcons();
   }
 
   // Expose public API to window for inline onclick handlers
   window.OwitaApp = {
-    setGalleryCategory,
-    openGalleryLightbox,
-    closeGalleryLightbox,
-    detectCustomerLocation,
     init,
     addToCart,
     updateCartQuantity,
@@ -1571,15 +2328,30 @@
     openAuthModal,
     closeAuthModal,
     switchAuthTab,
+    signOut,
     toggleRoleSwitch,
     setCategory,
+    setGalleryCategory,
+    openGalleryLightbox,
+    closeGalleryLightbox,
+    detectCustomerLocation,
     requestOrderChange,
+    adminConfirmOrder,
     adminUpdateOrderStatus,
     adminHandleChangeRequest,
     adminAdjustOrderTime,
+    setAdminTab,
+    addToPosCart,
+    updatePosCartQuantity,
+    executePosCheckout,
+    renderPosBill,
+    adminOpenEditDishModal,
+    adminCloseEditDishModal,
     adminToggleStock,
-    adminEditPrice,
-    adminDeleteDish
+    adminDeleteDish,
+    adminCreateNewOffer,
+    adminToggleOffer,
+    adminDeleteOffer
   };
 
   document.addEventListener('DOMContentLoaded', init);

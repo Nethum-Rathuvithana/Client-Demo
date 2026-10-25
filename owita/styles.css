@@ -56,8 +56,8 @@ body {
 .reveal-init {
   opacity: 0;
   will-change: transform, opacity;
-  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 1.35s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 1.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Items emerging smoothly from bottom */
@@ -91,14 +91,14 @@ body {
 }
 
 /* Stagger delay classes for cascading grid items */
-.stagger-1 { transition-delay: 0.06s; }
-.stagger-2 { transition-delay: 0.14s; }
-.stagger-3 { transition-delay: 0.22s; }
-.stagger-4 { transition-delay: 0.30s; }
-.stagger-5 { transition-delay: 0.38s; }
-.stagger-6 { transition-delay: 0.46s; }
-.stagger-7 { transition-delay: 0.54s; }
-.stagger-8 { transition-delay: 0.62s; }
+.stagger-1 { transition-delay: 0.10s; }
+.stagger-2 { transition-delay: 0.22s; }
+.stagger-3 { transition-delay: 0.34s; }
+.stagger-4 { transition-delay: 0.46s; }
+.stagger-5 { transition-delay: 0.58s; }
+.stagger-6 { transition-delay: 0.70s; }
+.stagger-7 { transition-delay: 0.82s; }
+.stagger-8 { transition-delay: 0.94s; }
 
 /* Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
@@ -332,4 +332,52 @@ body {
 
 .gallery-card:hover img {
   transform: scale(1.08);
+}
+
+/* ========================================================
+   RED RIBBON DISCOUNTS & OFFER TIMERS
+   ======================================================== */
+.offer-ribbon-red {
+  background: linear-gradient(135deg, #FF1744 0%, #D50000 100%);
+  color: #FFFFFF;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 18px rgba(213, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.urgency-pulse {
+  animation: urgencyGlow 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes urgencyGlow {
+  0% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(255, 23, 68, 0.4)); }
+  100% { transform: scale(1.03); filter: drop-shadow(0 0 14px rgba(255, 23, 68, 0.85)); }
+}
+
+.receipt-order-hero {
+  background: linear-gradient(135deg, rgba(229, 139, 67, 0.15) 0%, rgba(229, 139, 67, 0.04) 100%);
+  border: 1.5px dashed rgba(229, 139, 67, 0.45);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  margin: 12px 0;
+}
+
+/* POS Quick Item Button */
+.pos-item-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pos-item-btn:hover {
+  background: rgba(229, 139, 67, 0.12);
+  border-color: rgba(229, 139, 67, 0.4);
+  transform: translateY(-2px);
+}
+
+.pos-item-btn:active {
+  transform: scale(0.97);
 }

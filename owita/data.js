@@ -54,6 +54,10 @@ const DEFAULT_MENU_ITEMS = [
   {
     id: 'ow-sig-2',
     name: 'Cheese Chicken Kottu Royale',
+    originalPrice: 1950,
+    discountType: 'percent',
+    discountValue: 15,
+    offerExpiresAt: '2026-10-29T02:51:09.029Z',
     sinhala: 'චීස් චිකන් කොත්තු රෝයල්',
     category: 'kottu',
     price: 1650,
@@ -102,6 +106,10 @@ const DEFAULT_MENU_ITEMS = [
   {
     id: 'ow-sig-4',
     name: 'Ovita Mixed Sizzler Platter',
+    originalPrice: 3400,
+    discountType: 'fixed',
+    discountValue: 450,
+    offerExpiresAt: '2026-10-25T16:05:47.029Z',
     sinhala: 'ඕවිට මික්ස්ඩ් සිස්ලර් ප්ලැටර්',
     category: 'grill',
     price: 2950,
@@ -152,6 +160,10 @@ const DEFAULT_MENU_ITEMS = [
   {
     id: 'ow-rice-2',
     name: 'Hyderabadi Chicken Dum Biryani',
+    originalPrice: 2450,
+    discountType: 'percent',
+    discountValue: 10,
+    offerExpiresAt: '2026-10-29T02:51:09.029Z',
     sinhala: 'හයිද්‍රාබාදි චිකන් දම් බිරියානි',
     category: 'rice',
     price: 2200,
@@ -500,27 +512,42 @@ const DEFAULT_MENU_ITEMS = [
 const DEFAULT_OFFERS = [
   {
     id: 'off-1',
-    title: 'Rooftop Twilight Special',
-    tag: '10% OFF',
-    description: '10% off on all Cheese Kottu varieties between 5 PM and 8 PM daily.',
-    code: 'TWILIGHT10',
-    active: true
+    dishId: 'ow-sig-2',
+    dishName: 'Cheese Chicken Kottu Royale',
+    title: 'Twilight Kottu Rush — 15% OFF',
+    discountType: 'percent',
+    discountValue: 15,
+    tag: '15% OFF FLASH DEAL',
+    description: 'Double mozzarella cheese kottu royale chopped hot on tawa. Limited availability!',
+    code: 'KOTTU15',
+    active: true,
+    expiresAt: '2026-10-29T02:51:09.029Z' // 3d 15h 7m 37s
   },
   {
     id: 'off-2',
-    title: 'Family Sizzler Weekend',
-    tag: '15% OFF',
-    description: 'Order any Sizzler or Fried Rice Platter and receive 15% off.',
-    code: 'FAMILY15',
-    active: true
+    dishId: 'ow-sig-4',
+    dishName: 'Ovita Mixed Sizzler Platter',
+    title: 'Family Sizzler Mega Deal — LKR 450 OFF',
+    discountType: 'fixed',
+    discountValue: 450,
+    tag: 'SAVE LKR 450',
+    description: 'Smoking BBQ chicken, garlic butter prawns, sausages, fries and dipping sauces.',
+    code: 'SIZZLER450',
+    active: true,
+    expiresAt: '2026-10-25T16:05:47.029Z' // 4 hours flash
   },
   {
     id: 'off-3',
-    title: 'Free Falooda with Submarine',
-    tag: 'FREE DRINK',
-    description: 'Order any 12-inch Monster Submarine and receive a complimentary Royal Falooda.',
-    code: 'FALFREE',
-    active: true
+    dishId: 'ow-rice-2',
+    dishName: 'Hyderabadi Chicken Dum Biryani',
+    title: 'Weekend Biryani Special — 10% OFF',
+    discountType: 'percent',
+    discountValue: 10,
+    tag: '10% OFF',
+    description: 'Slow-cooked saffron basmati with spiced chicken quarters and boiled eggs.',
+    code: 'DUM10',
+    active: true,
+    expiresAt: '2026-10-29T02:51:09.029Z'
   }
 ];
 
@@ -561,10 +588,11 @@ const DEFAULT_SEED_ORDERS = [
     paymentMethod: 'PayHere / Card Simulator',
     paymentStatus: 'Paid',
     paymentReference: 'PAY-LK-948194',
-    orderStatus: 'Preparing in Kitchen',
+    orderStatus: 'Under Review',
+    isConfirmed: false,
     prepTimeMins: 20,
-    createdAt: new Date(Date.now() - 6 * 60 * 1000).toISOString(),
-    estimatedReadyAt: new Date(Date.now() + 14 * 60 * 1000).toISOString(),
+    createdAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
+    estimatedReadyAt: null,
     notes: 'Please add extra chili paste and less spice in kottu.',
     hasChangeRequest: false,
     changeDetails: ''

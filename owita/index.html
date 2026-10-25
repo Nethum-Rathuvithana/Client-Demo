@@ -48,6 +48,25 @@
 </head>
 <body class="bg-[#08080A] text-[#FBF8F3] min-h-screen selection:bg-amber-500 selection:text-black">
 
+  <!-- CUSTOMER ACTIVE OFFER URGENCY BAR -->
+  <div id="customerOfferAlertBar" class="hidden bg-gradient-to-r from-red-950 via-rose-900 to-amber-950 border-b border-red-500/40 py-2.5 px-4 text-xs text-white sticky top-0 z-40 shadow-xl backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-red-400 animate-ping shrink-0"></span>
+        <span class="font-bold text-amber-300">🔥 FLASH PROMO:</span>
+        <span id="offerAlertDishName" class="font-semibold text-white"></span>
+        <span class="bg-red-500 text-white font-mono text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Limited Time</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="offerAlertTimer" class="font-mono font-bold text-amber-300 bg-black/40 px-3 py-1 rounded-lg border border-amber-500/30"></span>
+        <a href="#offersSectionContainer" class="px-3 py-1 bg-amber-400 hover:bg-amber-300 text-black font-bold text-[11px] uppercase rounded-lg transition-colors">
+          Claim Deal
+        </a>
+      </div>
+    </div>
+  </div>
+
+
   <!-- TOP BAR: RESTAURANT & REPO INFO -->
   <div class="bg-[#0D0D11] border-b border-white/5 py-2 px-4 sm:px-8 text-xs text-stone-400">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
@@ -128,15 +147,22 @@
       </nav>
 
       <!-- Right Action Controls -->
-      <div class="flex items-center gap-3">
-        <!-- User Profile Button -->
-        <button onclick="window.OwitaApp.openAuthModal()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 border border-white/5 text-xs transition-colors">
+      <div class="flex items-center gap-2.5">
+        <!-- Role Switcher (Admin / POS vs Customer) -->
+        <button onclick="window.OwitaApp.toggleRoleSwitch()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-mono font-bold transition-colors">
+          <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+          <span id="headerRoleSwitcherText">Kitchen / POS Admin</span>
+        </button>
+
+        <!-- User Profile Area -->
+        <div id="headerUserDisplay" class="flex items-center"></div>
+        <button id="headerAuthBtn" onclick="window.OwitaApp.openAuthModal()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 border border-white/10 text-xs transition-colors">
           <i data-lucide="user" class="w-4 h-4 text-amber-400"></i>
-          <span class="hidden sm:inline font-medium" id="userNavBtnText">Sign In</span>
+          <span class="hidden sm:inline font-medium">Sign In</span>
         </button>
 
         <!-- Cart Button with Dynamic Count & Prep Estimate -->
-        <button onclick="window.OwitaApp.openCartDrawer()" class="relative flex items-center gap-2.5 px-4 py-2 rounded-xl amber-btn-primary text-xs uppercase tracking-wider font-bold">
+        <button onclick="window.OwitaApp.openCartDrawer()" class="relative flex items-center gap-2 px-3.5 py-2 rounded-xl amber-btn-primary text-xs uppercase tracking-wider font-bold">
           <i data-lucide="shopping-bag" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Cart</span>
           <span class="cart-count-badge w-5 h-5 rounded-full bg-black text-amber-400 font-mono text-[11px] font-bold flex items-center justify-center">
@@ -252,7 +278,30 @@
     </div>
 
     <!-- 3. SIGNATURE COLLECTION (DIRECTLY FROM REFERENCE UI) -->
-    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/5" id="signature">
+    
+    <!-- LIMITED-TIME OFFERS SECTION -->
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/5 reveal-init reveal-bottom hidden" id="offersSectionContainer">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div class="space-y-2 reveal-init reveal-left">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-mono text-xs uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-red-400 animate-ping"></span>
+            <span>Hot Promotional Specials</span>
+          </div>
+          <h2 class="font-serif-luxury text-3xl sm:text-5xl font-bold text-white tracking-tight">
+            Exclusive Limited-Time Offers
+          </h2>
+          <p class="text-xs sm:text-sm text-stone-400 max-w-xl font-light">
+            Enjoy hand-selected chef specials and family platters at discounted rates. Act fast before the countdown timer expires!
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="exclusiveOffersGrid">
+        <!-- Injected dynamically by JS -->
+      </div>
+    </section>
+
+  <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/5" id="signature">
       <div class="text-center max-w-2xl mx-auto mb-14 space-y-3 reveal-init reveal-scale">
         <div class="flex items-center justify-center gap-2 text-xs font-mono tracking-widest text-amber-500 uppercase">
           <span class="w-6 h-[1px] bg-amber-500"></span>
@@ -630,6 +679,10 @@
     <!-- ==============================================================
        RESTAURANT ADMIN MANAGEMENT PORTAL (TOGGLEABLE VIEW)
   ============================================================== -->
+  
+  <!-- ========================================== -->
+  <!-- 2. RESTAURANT ADMIN & POS BACKSTAGE PORTAL -->
+  <!-- ========================================== -->
   <div id="adminPortalContainer" class="hidden min-h-screen pb-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-8 py-10">
       
@@ -638,10 +691,10 @@
         <div>
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="text-xs font-mono text-amber-400 uppercase tracking-widest font-bold">RESTAURANT BACKSTAGE CONTROL ROOM</span>
+            <span class="text-xs font-mono text-amber-400 uppercase tracking-widest font-bold">RESTAURANT BACKSTAGE & POS CONTROL ROOM</span>
           </div>
-          <h2 class="font-serif-luxury text-3xl font-bold text-white mt-1">Ovita Kitchen & Orders Management</h2>
-          <p class="text-xs text-stone-300">Live order queue, timer extensions (+5m/+10m), customer change/cancel approvals, and menu pricing.</p>
+          <h2 class="font-serif-luxury text-3xl font-bold text-white mt-1">Ovita Kitchen & Store Management</h2>
+          <p class="text-xs text-stone-300">Live order queue, fast POS counter billing, daily sales analytics, inventory editor, and promotional offers.</p>
         </div>
 
         <div class="flex items-center gap-3">
@@ -655,74 +708,311 @@
         </div>
       </div>
 
-      <!-- Quick KPI Stats -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-        <div class="owita-card p-6 rounded-2xl">
-          <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Today's Revenue</div>
-          <div class="text-3xl font-bold font-mono text-amber-400 mt-2" id="adminStatRevenue">LKR 0</div>
-          <div class="text-[11px] text-emerald-400 mt-1">Paid orders verified</div>
+      <!-- Navigation Tabs for Admin & POS -->
+      <div class="flex flex-wrap gap-2 mb-8 border-b border-white/10 pb-4">
+        <button class="admin-nav-tab px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider border border-amber-500 text-amber-400 bg-white/[0.04] transition-all flex items-center gap-2" data-admin-tab="orders" onclick="window.OwitaApp.setAdminTab('orders')">
+          <i data-lucide="chef-hat" class="w-4 h-4"></i>
+          <span>Live Kitchen Orders</span>
+        </button>
+        <button class="admin-nav-tab px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider border border-transparent text-stone-400 hover:text-white transition-all flex items-center gap-2" data-admin-tab="pos" onclick="window.OwitaApp.setAdminTab('pos')">
+          <i data-lucide="calculator" class="w-4 h-4"></i>
+          <span>Counter POS Terminal</span>
+        </button>
+        <button class="admin-nav-tab px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider border border-transparent text-stone-400 hover:text-white transition-all flex items-center gap-2" data-admin-tab="sales" onclick="window.OwitaApp.setAdminTab('sales')">
+          <i data-lucide="trending-up" class="w-4 h-4"></i>
+          <span>Daily Sales & Analytics</span>
+        </button>
+        <button class="admin-nav-tab px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider border border-transparent text-stone-400 hover:text-white transition-all flex items-center gap-2" data-admin-tab="menu" onclick="window.OwitaApp.setAdminTab('menu')">
+          <i data-lucide="utensils" class="w-4 h-4"></i>
+          <span>Inventory & Menu Editor</span>
+        </button>
+        <button class="admin-nav-tab px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider border border-transparent text-stone-400 hover:text-white transition-all flex items-center gap-2" data-admin-tab="offers" onclick="window.OwitaApp.setAdminTab('offers')">
+          <i data-lucide="flame" class="w-4 h-4 text-red-400"></i>
+          <span>Limited-Time Offers</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: LIVE KITCHEN ORDERS -->
+      <div id="adminTabOrders" class="space-y-8">
+        <!-- Quick KPI Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div class="owita-card p-6 rounded-2xl">
+            <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Today's Revenue</div>
+            <div class="text-3xl font-bold font-mono text-amber-400 mt-2" id="adminTotalRevenue">LKR 0</div>
+            <div class="text-[11px] text-emerald-400 mt-1">Paid orders verified</div>
+          </div>
+          <div class="owita-card p-6 rounded-2xl">
+            <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Total Orders Logged</div>
+            <div class="text-3xl font-bold font-mono text-white mt-2" id="adminStatOrders">0</div>
+            <div class="text-[11px] text-stone-400 mt-1">Online & Walk-in</div>
+          </div>
+          <div class="owita-card p-6 rounded-2xl">
+            <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Active in Kitchen</div>
+            <div class="text-3xl font-bold font-mono text-amber-500 mt-2" id="adminPendingOrdersCount">0</div>
+            <div class="text-[11px] text-amber-400 mt-1">Confirmed & Ticking</div>
+          </div>
         </div>
-        <div class="owita-card p-6 rounded-2xl">
-          <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Total Orders Logged</div>
-          <div class="text-3xl font-bold font-mono text-white mt-2" id="adminStatOrders">0</div>
-          <div class="text-[11px] text-stone-400 mt-1">All customers</div>
-        </div>
-        <div class="owita-card p-6 rounded-2xl">
-          <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Active in Kitchen</div>
-          <div class="text-3xl font-bold font-mono text-amber-500 mt-2" id="adminStatKitchen">0</div>
-          <div class="text-[11px] text-amber-400 mt-1">Preparation timers ticking</div>
+
+        <!-- Orders Table -->
+        <div class="owita-card rounded-2xl overflow-hidden">
+          <div class="p-6 border-b border-white/5 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h3 class="font-serif-luxury text-2xl font-bold text-white">Live Kitchen Orders</h3>
+              <p class="text-xs text-stone-400">Real-time orders visible to restaurant. Confirm orders to start the live customer preparation timer!</p>
+            </div>
+            <button onclick="window.OwitaApp.renderAdminOrders()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-stone-300 flex items-center gap-1.5 border border-white/10">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Refresh Orders</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-white/10 text-[10px] font-mono uppercase tracking-widest text-stone-400 bg-white/[0.01]">
+                  <th class="p-4">Order ID</th>
+                  <th class="p-4">Customer</th>
+                  <th class="p-4">Ordered Dishes</th>
+                  <th class="p-4">Total (LKR)</th>
+                  <th class="p-4">Status & Action</th>
+                  <th class="p-4">Kitchen Timer</th>
+                  <th class="p-4">Controls</th>
+                </tr>
+              </thead>
+              <tbody id="adminOrdersTableBody" class="divide-y divide-white/5">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Live Kitchen Orders Queue -->
-      <div class="owita-card rounded-2xl overflow-hidden mb-12">
-        <div class="p-6 border-b border-white/5 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h3 class="font-serif-luxury text-2xl font-bold text-white">Live Kitchen Orders</h3>
-            <p class="text-xs text-stone-400">Real-time orders visible to restaurant with timer management controls.</p>
-          </div>
-          <button onclick="window.OwitaApp.renderAdminOrders()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-stone-300 flex items-center gap-1.5 border border-white/10">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-            <span>Refresh Orders</span>
-          </button>
-        </div>
+      <!-- TAB 2: LIGHTWEIGHT COUNTER POS -->
+      <div id="adminTabPos" class="hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <!-- Dish Selector Grid (2 Cols) -->
+          <div class="lg:col-span-2 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-serif-luxury text-2xl font-bold text-white">Counter POS Billing</h3>
+                <p class="text-xs text-stone-400">Click any dish to add directly to current counter ticket.</p>
+              </div>
+            </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="border-b border-white/10 text-[10px] font-mono uppercase tracking-widest text-stone-400 bg-white/[0.01]">
-                <th class="p-4">Order ID</th>
-                <th class="p-4">Customer</th>
-                <th class="p-4">Ordered Dishes</th>
-                <th class="p-4">Total (LKR)</th>
-                <th class="p-4">Status & Requests</th>
-                <th class="p-4">Kitchen Timer</th>
-                <th class="p-4">Action</th>
-              </tr>
-            </thead>
-            <tbody id="adminOrdersTableBody" class="divide-y divide-white/5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="posMenuItemsGrid">
               <!-- Rendered by JS -->
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          <!-- Active Bill Summary (1 Col) -->
+          <div class="owita-card rounded-2xl p-6 flex flex-col justify-between space-y-6 border-amber-500/20">
+            <div>
+              <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="receipt" class="w-5 h-5 text-amber-400"></i>
+                  <h4 class="font-bold text-white">Counter Ticket</h4>
+                </div>
+                <span class="text-xs font-mono text-amber-400 font-bold">WALK-IN</span>
+              </div>
+
+              <!-- Customer info -->
+              <div class="pt-4 space-y-3">
+                <div>
+                  <label class="block text-[11px] text-stone-400 mb-1">Customer Name / Table #</label>
+                  <input type="text" id="posCustomerNameInput" value="Walk-in Guest" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-stone-400 mb-1">Payment Method</label>
+                  <select id="posPaymentMethodSelect" class="w-full bg-[#16161C] border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500">
+                    <option value="Cash Counter">Cash at Counter</option>
+                    <option value="Credit/Debit Card (POS Machine)">Credit/Debit Card Machine</option>
+                    <option value="LankaQR / Direct Bank">LankaQR Transfer</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Item List -->
+              <div class="mt-4 pt-4 border-t border-white/5">
+                <div class="text-[11px] font-mono text-stone-400 uppercase tracking-wider mb-2">Ticket Items</div>
+                <div id="posCurrentBillItems" class="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scroll">
+                  <!-- Injected by JS -->
+                </div>
+              </div>
+
+              <!-- Checkboxes -->
+              <div class="mt-4 pt-4 border-t border-white/5 space-y-2 text-xs text-stone-300">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="posPackagingCheck" class="rounded accent-amber-500" onchange="window.OwitaApp.renderPosBill()">
+                  <span>Include Packaging Container (LKR 100)</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="posServiceCheck" class="rounded accent-amber-500" onchange="window.OwitaApp.renderPosBill()">
+                  <span>Include 5% Kitchen Service Charge</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Totals & Checkout Button -->
+            <div class="pt-4 border-t border-white/10 space-y-3">
+              <div class="flex justify-between text-xs text-stone-400">
+                <span>Subtotal:</span>
+                <span id="posSubtotalDisplay" class="font-mono text-white">LKR 0</span>
+              </div>
+              <div class="flex justify-between text-base font-bold">
+                <span class="text-amber-400">Total Payable:</span>
+                <span id="posTotalDisplay" class="font-mono text-amber-400">LKR 0</span>
+              </div>
+              <button onclick="window.OwitaApp.executePosCheckout()" class="w-full py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider flex items-center justify-center gap-2 shadow-lg">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                <span>Complete Sale & View Receipt</span>
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- Menu Items Management Section -->
-      <div class="owita-card rounded-2xl p-6">
-        <div class="flex items-center justify-between pb-4 border-b border-white/5 mb-6">
+      <!-- TAB 3: DAILY SALES ANALYTICS -->
+      <div id="adminTabSales" class="hidden space-y-8">
+        <div class="flex items-center justify-between">
           <div>
-            <h3 class="font-serif-luxury text-2xl font-bold text-white">Menu Pricing & Inventory</h3>
-            <p class="text-xs text-stone-400">Update prices, toggle stock availability, and manage online menu.</p>
+            <h3 class="font-serif-luxury text-2xl font-bold text-white">Today's Sales & Performance</h3>
+            <p class="text-xs text-stone-400">Daily business overview, payment breakdown, and popular dishes.</p>
           </div>
         </div>
 
-        <div class="space-y-3" id="adminMenuItemsList">
-          <!-- Rendered by JS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="owita-card p-6 rounded-2xl border-amber-500/30">
+            <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Today's Gross Sales</div>
+            <div class="text-3xl font-bold font-mono text-amber-400 mt-2" id="salesTodayRevenue">LKR 0</div>
+            <div class="text-[11px] text-stone-400 mt-1" id="salesSplitDisplay">0 Online · 0 POS</div>
+          </div>
+
+          <div class="owita-card p-6 rounded-2xl">
+            <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Total Bills Closed</div>
+            <div class="text-3xl font-bold font-mono text-white mt-2" id="salesTodayOrdersCount">0</div>
+            <div class="text-[11px] text-emerald-400 mt-1">Confirmed transactions</div>
+          </div>
+
+          <div class="owita-card p-6 rounded-2xl">
+            <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Cash Counter Total</div>
+            <div class="text-3xl font-bold font-mono text-emerald-400 mt-2" id="salesCashTotal">LKR 0</div>
+            <div class="text-[11px] text-stone-400 mt-1">Cash in register drawer</div>
+          </div>
+
+          <div class="owita-card p-6 rounded-2xl">
+            <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Card & Online Total</div>
+            <div class="text-3xl font-bold font-mono text-blue-400 mt-2" id="salesCardTotal">LKR 0</div>
+            <div class="text-[11px] text-stone-400 mt-1">Cards: <span id="salesQrTotal">LKR 0</span> (QR)</div>
+          </div>
+        </div>
+
+        <!-- Top Selling Dishes -->
+        <div class="owita-card rounded-2xl p-6">
+          <h4 class="font-serif-luxury text-xl font-bold text-white mb-4">Today's Most Popular Dishes</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4" id="salesTopDishesList">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: MENU & INVENTORY MANAGEMENT -->
+      <div id="adminTabMenu" class="hidden space-y-6">
+        <div class="owita-card rounded-2xl p-6">
+          <div class="flex flex-wrap items-center justify-between pb-4 border-b border-white/5 mb-6 gap-3">
+            <div>
+              <h3 class="font-serif-luxury text-2xl font-bold text-white">Menu Pricing & Inventory</h3>
+              <p class="text-xs text-stone-400">Edit descriptions, change prices, toggle stock availability, and manage your dishes.</p>
+            </div>
+            <button onclick="document.getElementById('adminNewDishModal').classList.remove('hidden')" class="px-4 py-2 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Add New Dish</span>
+            </button>
+          </div>
+
+          <div class="space-y-3" id="adminMenuItemsList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: LIMITED-TIME OFFERS & DISCOUNTS -->
+      <div id="adminTabOffers" class="hidden space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <!-- Create New Offer Form -->
+          <div class="owita-card rounded-2xl p-6 border-red-500/30">
+            <div class="flex items-center gap-2 pb-4 border-b border-white/10 mb-4">
+              <i data-lucide="flame" class="w-5 h-5 text-red-400"></i>
+              <h4 class="font-bold text-white">Create Limited-Time Offer</h4>
+            </div>
+
+            <form id="adminOfferForm" onsubmit="window.OwitaApp.adminCreateNewOffer(event)" class="space-y-4 text-xs">
+              <div>
+                <label class="block text-stone-400 mb-1">Select Target Dish</label>
+                <select id="offerDishSelect" required class="w-full bg-[#16161C] border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-stone-400 mb-1">Offer Title</label>
+                <input type="text" id="offerTitleInput" required placeholder="e.g. Flash 15% Off Wok Special" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-stone-400 mb-1">Discount Type</label>
+                  <select id="offerTypeSelect" class="w-full bg-[#16161C] border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+                    <option value="percent">Percentage (%)</option>
+                    <option value="fixed">Fixed Price OFF (LKR)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-stone-400 mb-1">Discount Value</label>
+                  <input type="number" id="offerValueInput" required placeholder="15" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-stone-400 mb-1">Offer Expiration Duration</label>
+                <select id="offerDurationSelect" class="w-full bg-[#16161C] border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+                  <option value="2h">2 Hours (Flash Deal)</option>
+                  <option value="6h">6 Hours (Today Only)</option>
+                  <option value="24h">24 Hours (1 Day)</option>
+                  <option value="3d">3 Days (Weekend Special)</option>
+                  <option value="7d">7 Days (Weekly Special)</option>
+                </select>
+              </div>
+
+              <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs uppercase font-bold tracking-wider shadow-lg flex items-center justify-center gap-2">
+                <i data-lucide="tag" class="w-4 h-4"></i>
+                <span>Publish Offer with Red Ribbon</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Active Offers List -->
+          <div class="lg:col-span-2 owita-card rounded-2xl p-6">
+            <div class="flex items-center justify-between pb-4 border-b border-white/5 mb-6">
+              <div>
+                <h4 class="font-serif-luxury text-2xl font-bold text-white">Active Promotional Offers</h4>
+                <p class="text-xs text-stone-400">Items currently displayed with red ribbons and live countdown timers on the homepage.</p>
+              </div>
+            </div>
+
+            <div class="space-y-3" id="adminOffersList">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
         </div>
       </div>
 
     </div>
   </div>
+
 
   <!-- FOOTER -->
   <footer class="border-t border-white/10 bg-[#060608] pt-16 pb-12 px-4 sm:px-8" id="contact">
@@ -800,7 +1090,7 @@
   ============================================================== -->
   <div id="owitaCartDrawerBackdrop" onclick="window.OwitaApp.closeCartDrawer()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden transition-opacity"></div>
   
-  <aside id="owitaCartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-[#0F0F14] border-l border-white/10 z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between shadow-2xl">
+  <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-[#0F0F14] border-l border-white/10 z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between shadow-2xl">
     
     <!-- Drawer Header -->
     <div class="p-5 border-b border-white/10 flex items-center justify-between bg-black/40">
@@ -829,7 +1119,7 @@
     </div>
 
     <!-- Empty Box -->
-    <div id="cartEmptyBox" class="p-10 text-center text-stone-400 space-y-3">
+    <div id="cartEmptyState" class="p-10 text-center text-stone-400 space-y-3">
       <i data-lucide="utensils" class="w-12 h-12 mx-auto text-stone-600 mb-2"></i>
       <p class="text-sm">Your tray is currently empty.</p>
       <button onclick="window.OwitaApp.closeCartDrawer()" class="px-5 py-2.5 rounded-xl amber-btn-primary text-xs font-bold uppercase">
@@ -842,22 +1132,22 @@
       <div class="space-y-1.5 text-xs text-stone-400">
         <div class="flex justify-between">
           <span>Subtotal:</span>
-          <span class="font-mono text-white" id="cartDrawerSubtotal">LKR 0</span>
+          <span class="font-mono text-white" id="cartSubtotalText">LKR 0</span>
         </div>
         <div class="flex justify-between">
           <span>Packaging Fee:</span>
-          <span class="font-mono text-white" id="cartDrawerPackagingFee">LKR 150</span>
+          <span class="font-mono text-white" id="cartPackagingFeeText">LKR 150</span>
         </div>
         <div class="flex justify-between">
           <span>Kitchen Service (5%):</span>
-          <span class="font-mono text-white" id="cartDrawerServiceFee">LKR 0</span>
+          <span class="font-mono text-white" id="cartServiceFeeText">LKR 0</span>
         </div>
-        <div class="text-[11px] text-amber-400/90 pt-1" id="cartDrawerPrepExplanation">
+        <div class="text-[11px] text-amber-400/90 pt-1" id="cartTimerExplanation">
           10 mins 1st item + 10 mins 2nd + 5 mins each after
         </div>
         <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
           <span class="text-amber-400">Total:</span>
-          <span class="font-mono text-amber-400" id="cartDrawerTotal">LKR 0</span>
+          <span class="font-mono text-amber-400" id="cartTotalText">LKR 0</span>
         </div>
       </div>
 
@@ -889,7 +1179,7 @@
       <div class="space-y-3">
         <div class="text-xs font-bold text-stone-300 uppercase tracking-wider flex justify-between">
           <span>Items Ordered (<span id="checkoutTotalItems">0</span>)</span>
-          <span class="text-amber-400" id="checkoutEstimatedMins">0 Mins</span>
+          <span class="text-amber-400" id="checkoutPrepDisplay">0 Mins</span>
         </div>
         <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5" id="checkoutOrderReviewItems">
           <!-- Injected dynamically -->
@@ -910,7 +1200,7 @@
           </div>
           <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
             <span class="text-amber-400">Total Payable:</span>
-            <span class="font-mono text-amber-400 text-lg" id="checkoutGrandTotal">LKR 0</span>
+            <span class="font-mono text-amber-400 text-lg" id="checkoutTotalDisplay">LKR 0</span>
           </div>
         </div>
       </div>
@@ -932,7 +1222,7 @@
           </div>
           <div class="sm:col-span-2">
             <label class="block text-stone-400 mb-1">Kitchen / Spice Special Requests</label>
-            <input type="text" id="checkoutOrderNotes" placeholder="e.g. Extra spicy, separate chili paste container" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+            <input type="text" id="checkoutSpecialNotes" placeholder="e.g. Extra spicy, separate chili paste container" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
           </div>
         </div>
 
@@ -1029,11 +1319,11 @@
       <form id="authSignInForm" class="space-y-4">
         <div>
           <label class="block text-xs text-stone-400 mb-1">Email Address</label>
-          <input type="email" id="authSignInEmail" value="customer@ovita.lk" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="email" id="signInEmail" value="customer@ovita.lk" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <div>
           <label class="block text-xs text-stone-400 mb-1">Password</label>
-          <input type="password" id="authSignInPassword" value="password123" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="password" id="signInPassword" value="password123" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <div class="text-[11px] text-stone-500">
           Demo Customer Account: <span class="text-amber-400">customer@ovita.lk</span> / <span class="text-amber-400">password123</span>
@@ -1047,19 +1337,19 @@
       <form id="authRegisterForm" class="space-y-3 hidden">
         <div>
           <label class="block text-xs text-stone-400 mb-1">Full Name</label>
-          <input type="text" id="authRegName" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="text" id="regName" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <div>
           <label class="block text-xs text-stone-400 mb-1">Mobile Phone Number</label>
-          <input type="tel" id="authRegPhone" placeholder="077 123 4567" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="tel" id="regPhone" placeholder="077 123 4567" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <div>
           <label class="block text-xs text-stone-400 mb-1">Email Address</label>
-          <input type="email" id="authRegEmail" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="email" id="regEmail" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <div>
           <label class="block text-xs text-stone-400 mb-1">Password</label>
-          <input type="password" id="authRegPassword" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="password" id="regPassword" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <button type="submit" class="w-full py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider mt-2">
           Create Customer Account
@@ -1069,9 +1359,10 @@
     </div>
   </div>
 
+  
   <!-- ADMIN ADD NEW DISH MODAL -->
   <div id="adminNewDishModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="owita-card rounded-2xl w-full max-w-lg p-6 sm:p-8 space-y-4">
+    <div class="owita-card rounded-2xl w-full max-w-lg p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll">
       <div class="flex justify-between items-center pb-3 border-b border-white/10">
         <h3 class="font-serif-luxury text-xl font-bold text-white">Add New Dish to Ovita Menu</h3>
         <button onclick="document.getElementById('adminNewDishModal').classList.add('hidden')" class="text-stone-400 hover:text-white">
@@ -1081,10 +1372,14 @@
 
       <form id="newDishForm" class="space-y-3 text-xs">
         <div>
-          <label class="block text-stone-400 mb-1">Dish Name</label>
+          <label class="block text-stone-400 mb-1">Dish Name (English)</label>
           <input type="text" id="newDishName" required placeholder="e.g. Jaffna Crab Kottu Special" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
         </div>
         <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-stone-400 mb-1">Sinhala Name</label>
+            <input type="text" id="newDishSinhala" placeholder="යාපනයේ කකුළු කොත්තු" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+          </div>
           <div>
             <label class="block text-stone-400 mb-1">Category</label>
             <select id="newDishCategory" class="w-full bg-[#16161C] border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
@@ -1096,9 +1391,15 @@
               <option value="drinks">Drinks & Desserts</option>
             </select>
           </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-stone-400 mb-1">Price (LKR)</label>
             <input type="number" id="newDishPrice" required placeholder="1850" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono">
+          </div>
+          <div>
+            <label class="block text-stone-400 mb-1">Serves Count</label>
+            <input type="text" id="newDishServes" placeholder="e.g. 2 - 3 Persons" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
           </div>
         </div>
         <div>
@@ -1107,14 +1408,90 @@
         </div>
         <div>
           <label class="block text-stone-400 mb-1">Description</label>
-          <textarea id="newDishDesc" rows="3" required placeholder="Fresh ingredients, spices, and flavors description..." class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500"></textarea>
+          <textarea id="newDishDescription" rows="2" required placeholder="Fresh ingredients, spices, and flavors description..." class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500"></textarea>
         </div>
-        <button type="submit" class="w-full py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider mt-3">
+        <div>
+          <label class="block text-stone-400 mb-1">Portion Inclusions (One per line)</label>
+          <textarea id="newDishInclusions" rows="2" placeholder="3 Chicken portions&#10;3 Fried Eggs&#10;Spicy Gravy & Chili Paste" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono"></textarea>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider mt-3 shadow-lg">
           Publish Dish to Menu
         </button>
       </form>
     </div>
   </div>
+
+
+  
+  <!-- ADMIN EDIT DISH & DESCRIPTION MODAL -->
+  <div id="adminEditDishModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="owita-card rounded-2xl w-full max-w-lg p-6 sm:p-8 space-y-4">
+      <div class="flex justify-between items-center pb-3 border-b border-white/10">
+        <h3 class="font-serif-luxury text-xl font-bold text-white">Edit Dish & Description</h3>
+        <button onclick="window.OwitaApp.adminCloseEditDishModal()" class="text-stone-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="editDishForm" onsubmit="window.OwitaApp.adminSaveDishEdits(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="editDishId">
+        
+        <div>
+          <label class="block text-stone-400 mb-1">Dish Name (English)</label>
+          <input type="text" id="editDishName" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-stone-400 mb-1">Sinhala Name</label>
+            <input type="text" id="editDishSinhala" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-stone-400 mb-1">Category</label>
+            <select id="editDishCategory" class="w-full bg-[#16161C] border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+              <option value="rice">Rice & Biryani</option>
+              <option value="kottu">Kottu Royale</option>
+              <option value="seafood">Seafood & Devilled</option>
+              <option value="meat">Wok & Szechuan</option>
+              <option value="grill">Grills & Burgers</option>
+              <option value="drinks">Drinks & Desserts</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-stone-400 mb-1">Price (LKR)</label>
+            <input type="number" id="editDishPrice" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono">
+          </div>
+          <div>
+            <label class="block text-stone-400 mb-1">Serves Count</label>
+            <input type="text" id="editDishServes" placeholder="e.g. 2 - 3 Persons" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-stone-400 mb-1">Description</label>
+          <textarea id="editDishDescription" rows="3" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-stone-400 mb-1">What's Included in Portion (One bullet item per line)</label>
+          <textarea id="editDishInclusions" rows="3" placeholder="3 Crispy Chicken Drumsticks&#10;3 Fried Eggs&#10;Chili Paste & Tomato Sauce" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono"></textarea>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="window.OwitaApp.adminCloseEditDishModal()" class="w-1/2 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
+            Cancel
+          </button>
+          <button type="submit" class="w-1/2 py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider shadow-lg">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 
   <!-- TABLE RESERVATION MODAL -->
   <div id="tableReservationModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
@@ -1160,7 +1537,7 @@
   </div>
 
   <!-- TOAST NOTIFICATION -->
-  <div id="owitaToast" class="fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#121217]/95 border border-amber-500/30 text-stone-100 shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-12 opacity-0 pointer-events-none">
+  <div id="owitaLiveToast" class="fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#121217]/95 border border-amber-500/30 text-stone-100 shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-12 opacity-0 pointer-events-none">
     <i data-lucide="check-circle" class="w-4 h-4 text-amber-400" id="owitaToastIcon"></i>
     <span class="text-xs font-medium" id="owitaToastText">Notification message</span>
   </div>
