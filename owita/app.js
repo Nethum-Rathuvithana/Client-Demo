@@ -69,6 +69,61 @@
   let cart = getStorage(STORAGE_KEYS.CART, []);
   let activeView = getStorage(STORAGE_KEYS.ACTIVE_VIEW, 'customer'); // 'customer' or 'admin'
   let activeCategory = 'all';
+  let activeGalleryCategory = 'all';
+  let customerLocation = null;
+
+  // Curated Visual Gallery
+  const GALLERY_PHOTOS = [
+    {
+      title: 'Sizzling Chicken Cheese Kottu',
+      category: 'kottu',
+      img: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?auto=format&fit=crop&w=1200&q=85',
+      caption: 'Chopped live on hot cast iron with rich mozzarella, tender chicken and spices'
+    },
+    {
+      title: 'Special Mixed Fried Rice Feast',
+      category: 'rice',
+      img: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=1200&q=85',
+      caption: 'Basmati wok-tossed with jumbo prawns, crispy drumsticks and spicy chili paste'
+    },
+    {
+      title: 'Crispy Hot Butter Cuttlefish',
+      category: 'seafood',
+      img: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=1200&q=85',
+      caption: 'Golden fried calamari rings tossed in salted garlic dairy butter & dried red chilies'
+    },
+    {
+      title: 'Two-Story Container Rooftop at Twilight',
+      category: 'rooftop',
+      img: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=85',
+      caption: 'Open-air upper deck under warm glowing Edison fairy bulbs at Nagoda Junction'
+    },
+    {
+      title: 'High-Flame Wok Master Craft',
+      category: 'rooftop',
+      img: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=85',
+      caption: 'High flame wok tossing for authentic smoky restaurant flavor'
+    },
+    {
+      title: 'Hyderabadi Chicken Dum Biryani',
+      category: 'rice',
+      img: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=1200&q=85',
+      caption: 'Aromatic saffron basmati layered with tender spiced chicken and boiled eggs'
+    },
+    {
+      title: 'Double Gourmet Beef Burger & Golden Fries',
+      category: 'grill',
+      img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1200&q=85',
+      caption: 'Flame-grilled pure beef patties, melted cheddar, pickles and salted french fries'
+    },
+    {
+      title: 'Royal Falooda with Vanilla Ice Cream',
+      category: 'drinks',
+      img: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=1200&q=85',
+      caption: 'Chilled rose milk shake, vermicelli noodles, basil seeds, jelly and vanilla scoop'
+    }
+  ];
+
 
   // --- ORDER TIMER CALCULATION FORMULA ---
   // Spec: 10 mins for 1 item, 10 more if 2 items (20 mins), and 5 mins for each item thereafter.
@@ -989,6 +1044,7 @@
     setStorage(STORAGE_KEYS.MENU, menuItems);
     renderAdminMenuManager();
     renderFullMenu();
+    renderGallery();
     renderSignatureDishes();
     showToast(`${item.name} marked ${item.inStock ? 'In Stock' : 'Out of Stock'}`);
   }
@@ -1299,12 +1355,156 @@
     });
   }
 
+  
+  // --- VISUAL GALLERY ENGINE ---
+  function renderGallery() {
+    const container = document.getElementById('galleryGrid');
+    if (!container) return;
+
+    const filtered = activeGalleryCategory === 'all'
+      ? GALLERY_PHOTOS
+      : GALLERY_PHOTOS.filter(p => p.category === activeGalleryCategory);
+
+    container.innerHTML = filtered.map((photo, idx) => `
+      <div class="gallery-card group relative h-64 border border-white/10 reveal-init reveal-bottom stagger-${(idx % 4) + 1}" onclick="window.OwitaApp.openGalleryLightbox(${idx})">
+        <img src="${photo.img}" alt="${photo.title}" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+        
+        <div class="absolute bottom-4 left-4 right-4 space-y-1">
+          <div class="text-[10px] font-mono text-amber-400 uppercase tracking-widest font-semibold flex items-center gap-1.5">
+            <i data-lucide="camera" class="w-3 h-3"></i>
+            <span>${photo.category.toUpperCase()}</span>
+          </div>
+          <h4 class="font-serif-luxury text-base font-bold text-white group-hover:text-amber-300 transition-colors">
+            ${photo.title}
+          </h4>
+          <p class="text-[11px] text-stone-300 line-clamp-1 font-light">
+            ${photo.caption}
+          </p>
+        </div>
+
+        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/70 backdrop-blur-md flex items-center justify-center text-white/80 group-hover:text-amber-400 group-hover:scale-110 transition-all border border-white/10">
+          <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+        </div>
+      </div>
+    `).join('');
+
+    if (window.lucide) lucide.createIcons();
+    initScrollObserver();
+  }
+
+  function setGalleryCategory(cat) {
+    activeGalleryCategory = cat;
+    document.querySelectorAll('.gallery-pill').forEach(btn => {
+      if (btn.dataset.galleryCategory === cat) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+    renderGallery();
+  }
+
+  function openGalleryLightbox(idx) {
+    const photo = GALLERY_PHOTOS[idx];
+    if (!photo) return;
+
+    const modal = document.getElementById('galleryLightboxModal');
+    const imgEl = document.getElementById('galleryLightboxImg');
+    const titleEl = document.getElementById('galleryLightboxTitle');
+    const captionEl = document.getElementById('galleryLightboxCaption');
+
+    if (imgEl) imgEl.src = photo.img;
+    if (titleEl) titleEl.textContent = photo.title;
+    if (captionEl) captionEl.textContent = photo.caption;
+
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function closeGalleryLightbox() {
+    const modal = document.getElementById('galleryLightboxModal');
+    if (modal) modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // --- LIVE LOCATION & HAVERSINE DISTANCE ENGINE ---
+  function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function detectCustomerLocation() {
+    const badge = document.getElementById('liveDistanceText');
+    const timeBadge = document.getElementById('liveTimeText');
+    const dirBtn = document.getElementById('googleMapsDirectionBtn');
+    const destLat = (OWITA_CONFIG.coordinates && OWITA_CONFIG.coordinates.lat) ? OWITA_CONFIG.coordinates.lat : 6.5684;
+    const destLng = (OWITA_CONFIG.coordinates && OWITA_CONFIG.coordinates.lng) ? OWITA_CONFIG.coordinates.lng : 79.9806;
+
+    if (!navigator.geolocation) {
+      showToast('Geolocation is not supported by your browser.', 'warning');
+      return;
+    }
+
+    if (badge) badge.innerHTML = '<span class="animate-pulse text-amber-400">Detecting satellite GPS coordinates...</span>';
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        customerLocation = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        };
+
+        const distKm = calculateDistanceKm(customerLocation.lat, customerLocation.lng, destLat, destLng);
+        const distFormatted = distKm < 1 ? `${Math.round(distKm * 1000)} meters` : `${distKm.toFixed(1)} km`;
+        const estDriveMins = Math.max(3, Math.round(distKm * 2.2));
+
+        if (badge) {
+          badge.innerHTML = `You are <strong class="text-amber-400 font-bold">${distFormatted}</strong> away from Ovita Nagoda Junction!`;
+        }
+        if (timeBadge) {
+          timeBadge.innerHTML = `⚡ Estimated Travel Time: <strong class="text-emerald-400 font-semibold">~${estDriveMins} mins</strong> via A2 / Matugama Rd`;
+          timeBadge.classList.remove('hidden');
+        }
+
+        if (dirBtn) {
+          dirBtn.href = `https://www.google.com/maps/dir/?api=1&origin=${customerLocation.lat},${customerLocation.lng}&destination=${destLat},${destLng}&destination_place_id=Ovita+Family+Restaurant+Nagoda+Junction+Kalutara`;
+        }
+
+        showToast(`📍 Live GPS: ${distFormatted} to Ovita Nagoda (~ ${estDriveMins} mins drive)`, 'success');
+      },
+      (err) => {
+        if (badge) {
+          badge.innerHTML = 'Location access paused. Distance defaults: ~3.2 km from Kalutara North · ~2.1 km from Katukurunda';
+        }
+        showToast('GPS access paused. Directions are pre-set for Nagoda Junction!', 'info');
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  }
+
   function init() {
     renderSignatureDishes();
     renderFullMenu();
     updateCartBadges();
     updateAuthUI();
     applyActiveView();
+
+    
+    document.querySelectorAll('.gallery-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setGalleryCategory(btn.dataset.galleryCategory);
+      });
+    });
 
     // Event Listeners for category pills
     document.querySelectorAll('.category-pill').forEach(btn => {
@@ -1334,7 +1534,7 @@
     });
 
     // Close modal on backdrop click
-    ['digitalReceiptModal', 'checkoutPaymentModal', 'owitaAuthModal', 'adminNewDishModal'].forEach(id => {
+    ['digitalReceiptModal', 'checkoutPaymentModal', 'owitaAuthModal', 'adminNewDishModal', 'galleryLightboxModal'].forEach(id => {
       const m = document.getElementById(id);
       if (m) {
         m.addEventListener('click', (e) => {
@@ -1342,6 +1542,7 @@
             if (id === 'digitalReceiptModal') closeReceiptModal();
             else if (id === 'checkoutPaymentModal') closeCheckoutModal();
             else if (id === 'owitaAuthModal') closeAuthModal();
+            else if (id === 'galleryLightboxModal') closeGalleryLightbox();
             else m.classList.add('hidden');
           }
         });
@@ -1352,6 +1553,10 @@
 
   // Expose public API to window for inline onclick handlers
   window.OwitaApp = {
+    setGalleryCategory,
+    openGalleryLightbox,
+    closeGalleryLightbox,
+    detectCustomerLocation,
     init,
     addToCart,
     updateCartQuantity,
