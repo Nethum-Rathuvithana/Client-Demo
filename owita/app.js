@@ -111,8 +111,8 @@
     if (!container) return;
 
     const signatureItems = menuItems.filter(item => item.isSignature);
-    container.innerHTML = signatureItems.map(item => `
-      <div class="owita-card rounded-2xl overflow-hidden flex flex-col justify-between group">
+    container.innerHTML = signatureItems.map((item, idx) => `
+      <div class="owita-card rounded-2xl overflow-hidden flex flex-col justify-between group reveal-init reveal-bottom stagger-${(idx % 4) + 1}">
         <div>
           <div class="relative h-56 overflow-hidden">
             <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -163,6 +163,7 @@
     `).join('');
 
     if (window.lucide) lucide.createIcons();
+    initScrollObserver();
   }
 
   function renderFullMenu() {
@@ -580,11 +581,37 @@
       </div>
     `;
 
-    document.getElementById('digitalReceiptModal').classList.remove('hidden');
+    // Add return button at bottom of receipt card
+    const backBtnDiv = document.createElement('div');
+    backBtnDiv.className = 'pt-2';
+    backBtnDiv.innerHTML = `
+      <button onclick="window.OwitaApp.closeReceiptModal()" class="w-full py-2.5 rounded-xl bg-white/5 hover:bg-amber-500/20 text-stone-300 hover:text-amber-300 text-xs font-semibold flex items-center justify-center gap-2 border border-white/10 transition-all">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        <span>Back to Menu & Orders</span>
+      </button>
+    `;
+    receiptBox.appendChild(backBtnDiv);
+
+    const modal = document.getElementById('digitalReceiptModal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      const card = modal.querySelector('.owita-card');
+      if (card) {
+        card.classList.remove('modal-animate-in');
+        void card.offsetWidth; // trigger reflow
+        card.classList.add('modal-animate-in');
+      }
+    }
+    if (window.lucide) lucide.createIcons();
   }
 
   function closeReceiptModal() {
-    document.getElementById('digitalReceiptModal').classList.add('hidden');
+    const modal = document.getElementById('digitalReceiptModal');
+    if (modal) {
+      modal.classList.add('hidden');
+    }
+    document.body.style.overflow = '';
   }
 
   // --- CUSTOMER DASHBOARD & ORDER TRACKING ---
@@ -1244,6 +1271,34 @@
   }
 
   // --- INITIALIZE APP ---
+  
+  // --- LUXURY SCROLL REVEAL OBSERVER ---
+  let scrollObserver = null;
+  function initScrollObserver() {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal-init').forEach(el => el.classList.add('reveal-active'));
+      return;
+    }
+
+    if (!scrollObserver) {
+      scrollObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-active');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
+      });
+    }
+
+    document.querySelectorAll('.reveal-init:not(.reveal-active)').forEach(el => {
+      scrollObserver.observe(el);
+    });
+  }
+
   function init() {
     renderSignatureDishes();
     renderFullMenu();
@@ -1266,6 +1321,33 @@
 
     // Initial icon render
     if (window.lucide) lucide.createIcons();
+    initScrollObserver();
+
+    // Global ESC key to close receipt & modals
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeReceiptModal();
+        closeAuthModal();
+        closeCheckoutModal();
+        closeCartDrawer();
+      }
+    });
+
+    // Close modal on backdrop click
+    ['digitalReceiptModal', 'checkoutPaymentModal', 'owitaAuthModal', 'adminNewDishModal'].forEach(id => {
+      const m = document.getElementById(id);
+      if (m) {
+        m.addEventListener('click', (e) => {
+          if (e.target === m) {
+            if (id === 'digitalReceiptModal') closeReceiptModal();
+            else if (id === 'checkoutPaymentModal') closeCheckoutModal();
+            else if (id === 'owitaAuthModal') closeAuthModal();
+            else m.classList.add('hidden');
+          }
+        });
+      }
+    });
+
   }
 
   // Expose public API to window for inline onclick handlers

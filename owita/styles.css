@@ -1,19 +1,21 @@
-/* Owita Restaurant & Cafe — Nagoda, Kalutara */
-/* Ultra-Luxury Dark Theme Culinary Design System */
+/* ========================================================
+   ඕවිට (OVITA) Family Restaurant — Nagoda Junction, Kalutara
+   Luxury Dark Culinary Design System & Scroll Animation Engine
+   ======================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 :root {
   --bg-deep: #08080A;
   --bg-surface: #101014;
-  --bg-card: rgba(22, 22, 28, 0.85);
-  --bg-card-hover: rgba(30, 30, 38, 0.95);
+  --bg-card: rgba(22, 22, 28, 0.88);
+  --bg-card-hover: rgba(30, 30, 38, 0.98);
   
   --amber-primary: #E58B43;
   --amber-glow: #F59E0B;
   --amber-dark: #C8722B;
   --amber-subtle: rgba(229, 139, 67, 0.15);
-  --amber-border: rgba(229, 139, 67, 0.25);
+  --amber-border: rgba(229, 139, 67, 0.3);
   
   --text-main: #FBF8F3;
   --text-muted: #A39D93;
@@ -25,6 +27,11 @@
   --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-mono: 'DM Mono', monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg-deep);
 }
 
 body {
@@ -42,6 +49,88 @@ body {
   font-family: var(--font-mono);
 }
 
+/* ========================================================
+   LUXURY SCROLL REVEAL ANIMATIONS
+   Items emerging from bottom + Descriptions sliding from sides
+   ======================================================== */
+.reveal-init {
+  opacity: 0;
+  will-change: transform, opacity;
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Items emerging smoothly from bottom */
+.reveal-bottom {
+  opacity: 0;
+  transform: translate3d(0, 48px, 0);
+}
+
+/* Descriptions & text sliding gracefully from the left */
+.reveal-left {
+  opacity: 0;
+  transform: translate3d(-52px, 0, 0);
+}
+
+/* Descriptions & text sliding gracefully from the right */
+.reveal-right {
+  opacity: 0;
+  transform: translate3d(52px, 0, 0);
+}
+
+/* Subtle scale zoom */
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+/* Active visible state when in viewport */
+.reveal-active {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
+}
+
+/* Stagger delay classes for cascading grid items */
+.stagger-1 { transition-delay: 0.06s; }
+.stagger-2 { transition-delay: 0.14s; }
+.stagger-3 { transition-delay: 0.22s; }
+.stagger-4 { transition-delay: 0.30s; }
+.stagger-5 { transition-delay: 0.38s; }
+.stagger-6 { transition-delay: 0.46s; }
+.stagger-7 { transition-delay: 0.54s; }
+.stagger-8 { transition-delay: 0.62s; }
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-init,
+  .reveal-bottom,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ========================================================
+   MODAL LUXURY TRANSITIONS & RECEIPT POLISH
+   ======================================================== */
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translate3d(0, 24px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+.modal-animate-in {
+  animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Glassmorphism Cards */
 .owita-card {
   background: var(--bg-card);
@@ -53,7 +142,7 @@ body {
 
 .owita-card:hover {
   border-color: var(--amber-border);
-  box-shadow: 0 16px 40px -12px rgba(229, 139, 67, 0.18);
+  box-shadow: 0 16px 40px -12px rgba(229, 139, 67, 0.22);
   transform: translateY(-4px);
 }
 
