@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A TO W — The Living Atelier | Sri Lanka</title>
+  <meta name="description" content="A Sri Lanka-focused haute couture and art-to-wear digital atelier. Connecting independent fashion designers with buyers, boutiques, and collectors.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            paper: '#F7F2E9',
+            silk: '#E9DDCA',
+            stone: {
+              DEFAULT: '#D5C8B5',
+              dark: '#B7A48D',
+              muted: '#82796E'
+            },
+            charcoal: '#292824'
+          },
+          fontFamily: {
+            serif: ['Cormorant Garamond', 'Italiana', 'Georgia', 'serif'],
+            mono: ['DM Mono', 'monospace'],
+            sans: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Italiana&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      background-color: #F7F2E9;
+      color: #292824;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-serif-luxury {
+      font-family: 'Italiana', 'Cormorant Garamond', serif;
+    }
+    .font-editorial {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-[#E9DDCA] selection:text-[#292824]">
+
+  <!-- Header -->
+  <header class="border-b border-[#292824]/10 bg-[#F7F2E9]/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="../index.html" class="flex items-center gap-2 text-xs font-mono tracking-widest text-[#82796E] hover:text-[#292824] transition-colors uppercase">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        <span>Client Demo Hub</span>
+      </a>
+
+      <div class="text-center">
+        <div class="font-serif-luxury text-2xl tracking-[0.25em] text-[#292824]">A TO W</div>
+        <div class="font-mono text-[9px] tracking-[0.3em] text-[#82796E] uppercase">Art to Wear · Sri Lanka</div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-amber-600/70 animate-pulse"></span>
+        <span class="font-mono text-[10px] tracking-wider text-[#82796E] uppercase">Project Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Hero Foundation -->
+  <main class="flex-1 flex items-center justify-center py-20 px-6">
+    <div class="max-w-3xl mx-auto text-center space-y-8">
+      
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E9DDCA]/60 border border-[#292824]/10 font-mono text-[10px] tracking-widest uppercase text-[#82796E]">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-700"></i>
+        The Living Atelier · Digital Showcase
+      </div>
+
+      <h1 class="font-editorial text-5xl sm:text-7xl font-light tracking-tight leading-[0.95] text-[#292824]">
+        Wear what has<br>
+        <em class="italic font-normal">never existed.</em>
+      </h1>
+
+      <p class="text-sm sm:text-base text-[#6E6458] font-light max-w-xl mx-auto leading-relaxed">
+        A Sri Lanka-focused fashion platform presenting fashion as art, designers as artists, and garments as individual collectible works.
+      </p>
+
+      <!-- Status Card -->
+      <div class="p-8 rounded-2xl bg-[#FFFDFA] border border-[#292824]/10 shadow-sm max-w-lg mx-auto text-left space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-[#292824]/10">
+          <span class="font-mono text-[11px] tracking-wider uppercase text-[#82796E]">Repository Setup</span>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-medium">Ready for New UI</span>
+        </div>
+
+        <p class="text-xs text-[#524B43] leading-relaxed">
+          The workspace has been initialized in your <strong>Client-Demo</strong> repository under <code class="bg-[#E9DDCA]/40 px-1.5 py-0.5 rounded font-mono text-[11px]">/a2w/</code>. Awaiting your new design specifications and dataset to build the complete experience.
+        </p>
+
+        <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
+          <a href="../index.html" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#292824] text-[#F7F2E9] hover:bg-[#3D3A34] text-xs font-mono uppercase tracking-wider text-center flex items-center justify-center gap-2 transition-all">
+            <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+            <span>View All Client Demos</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-[#292824]/10 py-6 px-6 text-center text-xs font-mono text-[#82796E]">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>A TO W — The Living Atelier · Designed for Independent Sri Lankan Makers</div>
+      <a href="../index.html" class="hover:text-[#292824] transition-colors">Client Demo Lab</a>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

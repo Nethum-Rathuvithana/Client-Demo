@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ඕවිට (OVITA) Family Restaurant — Nagoda Junction, Kalutara South | Official Online Ordering</title>
+  <meta name="description" content="Experience open-air container rooftop dining and authentic Sri Lankan & wok culinary passion at Ovita Family Restaurant, Nagoda Junction, Kalutara South. Order online with live dynamic kitchen timer & digital receipts.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            deep: '#08080A',
+            surface: '#101014',
+            card: '#16161C',
+            amber: {
+              400: '#F59E0B',
+              500: '#E58B43',
+              600: '#C8722B',
+              700: '#A1551A'
+            },
+            ovitaCyan: '#00D2D3',
+            ovitaYellow: '#FFB800',
+            ovitaRed: '#FF4757'
+          },
+          fontFamily: {
+            serif: ['Playfair Display', 'Cormorant Garamond', 'Georgia', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['DM Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#08080A] text-[#FBF8F3] min-h-screen selection:bg-amber-500 selection:text-black">
+
+  <!-- TOP BAR: RESTAURANT & REPO INFO -->
+  <div class="bg-[#0D0D11] border-b border-white/5 py-2 px-4 sm:px-8 text-xs text-stone-400">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <a href="../index.html" class="flex items-center gap-1.5 text-stone-400 hover:text-amber-400 font-mono transition-colors">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>Client Demo Hub</span>
+        </a>
+        <span class="text-stone-700">|</span>
+        <span class="flex items-center gap-1.5 text-stone-300">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-500"></i>
+          Nagoda Junction, Kalutara South
+        </span>
+      </div>
+
+      <div class="flex items-center gap-4 text-[11px] font-mono">
+        <a href="tel:0772775132" class="text-amber-400 hover:underline flex items-center gap-1">
+          <i data-lucide="phone" class="w-3 h-3"></i>
+          <span>077 277 5132</span>
+        </a>
+        <span class="text-stone-700 hidden sm:inline">|</span>
+        <button onclick="window.OwitaApp.toggleRoleSwitch()" id="viewModeToggleBtn" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all font-semibold">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Restaurant Admin Portal</span>
+          <span id="adminPendingOrdersBadge" class="w-5 h-5 rounded-full bg-amber-500 text-black text-[10px] font-bold flex items-center justify-center hidden">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION BAR (WITH AUTHENTIC RE-CREATED OVITA LOGO) -->
+  <header class="sticky top-0 z-40 bg-[#08080A]/95 backdrop-blur-md border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Authentic Logo Re-created from Signboard Photo -->
+      <a href="#top" class="flex items-center gap-3.5 group">
+        <!-- 3-Container Logo Mark -->
+        <div class="flex items-center gap-1 p-1 rounded-xl bg-black/60 border border-white/10 shadow-lg">
+          <div class="w-3.5 h-8 rounded-sm bg-[#00D2D3] flex items-center justify-center">
+            <span class="text-[7px] text-black font-bold">●</span>
+          </div>
+          <div class="w-3.5 h-9 rounded-sm bg-[#FFB800] flex items-center justify-center shadow-sm">
+            <span class="text-[7px] text-black font-bold">🍴</span>
+          </div>
+          <div class="w-3.5 h-8 rounded-sm bg-[#FF4757] flex items-center justify-center">
+            <span class="text-[7px] text-black font-bold">●</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-baseline gap-2">
+            <span class="font-serif-luxury text-2xl font-bold tracking-tight text-[#FFB800] group-hover:text-amber-400 transition-colors">
+              ඕවිට
+            </span>
+            <span class="font-serif text-xl font-bold tracking-wide text-white">
+              Family Restaurant
+            </span>
+          </div>
+          <div class="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] text-stone-400 -mt-1">
+            <span class="text-amber-400 font-bold">OVITA</span>
+            <span>·</span>
+            <span>Nagoda Junction, Kalutara South</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Center Navigation Links -->
+      <nav class="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest text-stone-300">
+        <a href="#top" class="hover:text-amber-400 transition-colors text-amber-400">Home</a>
+        <a href="#signature" class="hover:text-amber-400 transition-colors">Specials</a>
+        <a href="#menu" class="hover:text-amber-400 transition-colors">Menu</a>
+        <a href="#track" class="hover:text-amber-400 transition-colors flex items-center gap-1.5">
+          <span>Order Status</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        </a>
+        <a href="#story" class="hover:text-amber-400 transition-colors">Rooftop Venue</a>
+        <a href="#contact" class="hover:text-amber-400 transition-colors">Contact</a>
+      </nav>
+
+      <!-- Right Action Controls -->
+      <div class="flex items-center gap-3">
+        <!-- User Profile Button -->
+        <button onclick="window.OwitaApp.openAuthModal()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 border border-white/5 text-xs transition-colors">
+          <i data-lucide="user" class="w-4 h-4 text-amber-400"></i>
+          <span class="hidden sm:inline font-medium" id="userNavBtnText">Sign In</span>
+        </button>
+
+        <!-- Cart Button with Dynamic Count & Prep Estimate -->
+        <button onclick="window.OwitaApp.openCartDrawer()" class="relative flex items-center gap-2.5 px-4 py-2 rounded-xl amber-btn-primary text-xs uppercase tracking-wider font-bold">
+          <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Cart</span>
+          <span class="cart-count-badge w-5 h-5 rounded-full bg-black text-amber-400 font-mono text-[11px] font-bold flex items-center justify-center">
+            0
+          </span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==============================================================
+       MAIN CONTAINER: SWITCHES BETWEEN CUSTOMER STORE & ADMIN PORTAL
+  ============================================================== -->
+  <div id="customerWebsiteContainer">
+
+    <!-- 1. HERO SECTION (CONTAINER ROOFTOP DINING & CUISINE) -->
+    <section class="relative pt-12 pb-24 px-4 sm:px-8 max-w-7xl mx-auto overflow-hidden" id="top">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Left Hero Copy -->
+        <div class="lg:col-span-7 space-y-8 z-10">
+          <div class="flex items-center gap-2 text-xs font-mono tracking-widest text-amber-500 uppercase">
+            <span class="w-8 h-[1px] bg-amber-500"></span>
+            <span>NAGODA JUNCTION, KALUTARA SOUTH · EST. 2018</span>
+          </div>
+
+          <h1 class="font-serif-luxury text-5xl sm:text-7xl font-bold tracking-tight text-white leading-[1.05]">
+            Taste Crafted<br>
+            <span class="amber-glow-text">to Perfection</span>
+          </h1>
+
+          <p class="text-stone-300 text-sm sm:text-base leading-relaxed max-w-xl font-light">
+            Welcome to <strong class="text-amber-400 font-semibold">ඕවිට (Ovita) Family Restaurant</strong>. Sri Lanka's iconic two-story container rooftop restaurant at Nagoda Junction. Savor fresh wok-tossed fried rice, sizzling cheese kottu royale, and ocean cuttlefish under ambient warm string lights or ordered for fast counter pickup.
+          </p>
+
+          <!-- CTAs -->
+          <div class="flex flex-wrap items-center gap-4 pt-2">
+            <a href="#menu" class="px-7 py-4 rounded-xl amber-btn-primary flex items-center gap-3 text-xs uppercase tracking-wider font-bold">
+              <span>Order Online Now</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+            <button onclick="document.getElementById('tableReservationModal').classList.remove('hidden')" class="px-6 py-4 rounded-xl amber-btn-outline flex items-center gap-2 text-xs uppercase tracking-wider font-semibold">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+              <span>Reserve Rooftop Table</span>
+            </button>
+          </div>
+
+          <!-- Feature Highlights Strip -->
+          <div class="grid grid-cols-3 gap-6 pt-6 border-t border-white/10 text-stone-300">
+            <div class="space-y-1">
+              <i data-lucide="sparkles" class="w-5 h-5 text-amber-400 mb-1"></i>
+              <div class="text-xs font-bold text-white uppercase tracking-wider">Rooftop Terrace</div>
+              <div class="text-[11px] text-stone-400">Open-Air Deck & String Lights</div>
+            </div>
+            <div class="space-y-1">
+              <i data-lucide="flame" class="w-5 h-5 text-amber-400 mb-1"></i>
+              <div class="text-xs font-bold text-white uppercase tracking-wider">High Flame Wok</div>
+              <div class="text-[11px] text-stone-400">Cooked Fresh Upon Order</div>
+            </div>
+            <div class="space-y-1">
+              <i data-lucide="timer" class="w-5 h-5 text-amber-400 mb-1"></i>
+              <div class="text-xs font-bold text-white uppercase tracking-wider">Dynamic Timer</div>
+              <div class="text-[11px] text-stone-400">Live Kitchen Tracking</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Hero Visual: Circular Plated Presentation & Seal -->
+        <div class="lg:col-span-5 relative flex items-center justify-center">
+          <div class="hero-plate-container relative w-[320px] sm:w-[420px] h-[320px] sm:h-[420px]">
+            <div class="hero-plate-glow"></div>
+            
+            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85" alt="Ovita Sizzler Plated Specialty" class="w-full h-full object-cover rounded-full border-4 border-stone-800/80 shadow-2xl relative z-10">
+
+            <!-- Circular Seal Stamp with Authentic Signboard Branding -->
+            <div class="absolute -bottom-6 -right-6 sm:bottom-0 sm:right-0 z-20 w-32 h-32 rounded-full border border-amber-500/40 bg-black/90 backdrop-blur-md p-2 flex items-center justify-center shadow-xl">
+              <div class="circular-stamp text-center text-[8px] font-mono tracking-widest uppercase text-amber-400">
+                ★ EST. 2018 · OVITA FAMILY RESTAURANT · NAGODA JUNCTION ★
+              </div>
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                <span class="text-[9px] uppercase tracking-widest text-[#FFB800] font-bold">ඕවිට</span>
+                <span class="font-serif-luxury font-bold text-white text-sm">OVITA</span>
+                <span class="text-[7px] text-stone-400">Kalutara</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. KITCHEN PREPARATION TIMER GUARANTEE BANNER -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 mb-16">
+      <div class="p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+            <i data-lucide="timer" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="font-serif-luxury text-lg font-bold text-white">Live Kitchen Preparation Clock Guarantee</h3>
+            <p class="text-xs text-stone-400">
+              ⚡ 10 mins for 1 item · 20 mins for 2 items · +5 mins for each extra dish. Pickup hot at Nagoda Junction!
+            </p>
+          </div>
+        </div>
+
+        <a href="#track" class="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-amber-300 border border-amber-500/30 text-xs font-mono uppercase tracking-wider flex items-center gap-2">
+          <span>Track Order Status</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- 3. SIGNATURE COLLECTION (DIRECTLY FROM REFERENCE UI) -->
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/5" id="signature">
+      <div class="text-center max-w-2xl mx-auto mb-14 space-y-3">
+        <div class="flex items-center justify-center gap-2 text-xs font-mono tracking-widest text-amber-500 uppercase">
+          <span class="w-6 h-[1px] bg-amber-500"></span>
+          <span>CHEF'S FAVORITES</span>
+          <span class="w-6 h-[1px] bg-amber-500"></span>
+        </div>
+        <h2 class="font-serif-luxury text-4xl sm:text-5xl font-bold text-white">
+          Signature <span class="amber-glow-text">Collection</span>
+        </h2>
+        <p class="text-stone-400 text-xs sm:text-sm">
+          Handpicked favorites from our Nagoda kitchen, cooked fresh with local southern spices and served sizzling hot.
+        </p>
+      </div>
+
+      <!-- 4 Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="signatureCollectionGrid">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div class="text-center mt-12">
+        <a href="#menu" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl border border-amber-500/30 bg-white/[0.02] hover:bg-amber-500/10 text-amber-400 text-xs font-bold uppercase tracking-wider transition-all">
+          <span>View Full Menu</span>
+          <i data-lucide="arrow-down" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </section>
+
+    <!-- 4. FULL ORDERING MENU SECTION WITH CATEGORY TABS -->
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/5" id="menu">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+        <div>
+          <span class="text-xs font-mono text-amber-500 uppercase tracking-widest block mb-2">COMPLETE KITCHEN SELECTION</span>
+          <h2 class="font-serif-luxury text-3xl sm:text-4xl font-bold text-white">
+            Explore Our <span class="amber-glow-text">Culinary Menu</span>
+          </h2>
+        </div>
+
+        <!-- Category Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <button class="category-pill active px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="all">All Dishes</button>
+          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="rice">Rice & Biryani</button>
+          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="kottu">Kottu Royale</button>
+          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="seafood">Seafood & Devilled</button>
+          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="meat">Wok & Szechuan</button>
+          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="grill">Grill & Burgers</button>
+          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="drinks">Drinks & Desserts</button>
+        </div>
+      </div>
+
+      <!-- Menu Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="fullMenuGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- 5. LIVE ORDER STATUS & CUSTOMER DASHBOARD -->
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/5" id="track">
+      <div class="flex items-center justify-between gap-4 mb-8">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-mono text-amber-500 uppercase tracking-widest mb-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>CUSTOMER KITCHEN PORTAL</span>
+          </div>
+          <h2 class="font-serif-luxury text-3xl font-bold text-white">My Orders & Live Pickup Timer</h2>
+        </div>
+
+        <button onclick="window.OwitaApp.renderCustomerOrders()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-300 text-xs font-mono flex items-center gap-1.5 border border-white/10">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Refresh Status</span>
+        </button>
+      </div>
+
+      <div class="space-y-6" id="customerOrdersList">
+        <!-- Customer orders dynamically rendered with data isolation -->
+      </div>
+    </section>
+
+    <!-- 6. OUR STORY & ROOFTOP CONTAINER EXPERIENCE -->
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/5" id="story">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <div class="lg:col-span-5 space-y-6">
+          <div class="text-xs font-mono tracking-widest text-amber-500 uppercase">THE VENUE & STORY</div>
+          <h2 class="font-serif-luxury text-4xl sm:text-5xl font-bold text-white leading-tight">
+            Passion in <span class="amber-glow-text">Every Plate</span>
+          </h2>
+          <p class="text-stone-300 text-sm leading-relaxed font-light">
+            Located directly at <strong class="text-white font-medium">Nagoda Junction along the Kalutara South corridor</strong>, Ovita Family Restaurant features an iconic two-story architectural design.
+          </p>
+          <div class="space-y-3 text-xs text-stone-400 leading-relaxed font-light">
+            <div class="flex items-start gap-2.5">
+              <span class="text-amber-400 font-bold mt-0.5">✦</span>
+              <span><strong>Upper Open-Air Rooftop:</strong> Enjoy breezy evening dining under glowing Edison string bulb lights with family and friends.</span>
+            </div>
+            <div class="flex items-start gap-2.5">
+              <span class="text-amber-400 font-bold mt-0.5">✦</span>
+              <span><strong>Ground Floor Kitchen & Counter:</strong> High-speed wok station and rapid counter pickup area with dedicated parking for motorbikes and three-wheelers.</span>
+            </div>
+            <div class="flex items-start gap-2.5">
+              <span class="text-amber-400 font-bold mt-0.5">✦</span>
+              <span><strong>Direct Hot Delivery:</strong> Fast takeaway packaging engineered to keep food steaming hot until you reach home.</span>
+            </div>
+          </div>
+          <div class="font-serif-luxury text-xl italic text-amber-400">ඕවිට (OVITA) Family Restaurant</div>
+
+          <div class="grid grid-cols-3 gap-6 pt-4 border-t border-white/10">
+            <div>
+              <div class="text-3xl font-bold font-serif-luxury text-white">8+</div>
+              <div class="text-[11px] text-stone-400 uppercase tracking-wider mt-1">Years of Craft</div>
+            </div>
+            <div>
+              <div class="text-3xl font-bold font-serif-luxury text-white">50+</div>
+              <div class="text-[11px] text-stone-400 uppercase tracking-wider mt-1">Signature Dishes</div>
+            </div>
+            <div>
+              <div class="text-3xl font-bold font-serif-luxury text-white">25k+</div>
+              <div class="text-[11px] text-stone-400 uppercase tracking-wider mt-1">Happy Diners</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 grid grid-cols-2 gap-4">
+          <div class="rounded-2xl overflow-hidden h-80 sm:h-96 relative group">
+            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80" alt="Evening rooftop dining ambience" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            <div class="absolute bottom-3 left-3 bg-black/80 px-2.5 py-1 rounded text-[10px] font-mono text-amber-300">
+              Rooftop String Light Terrace
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div class="rounded-2xl overflow-hidden h-36 sm:h-44 relative">
+              <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80" alt="Chef preparing wok specialty" class="w-full h-full object-cover">
+            </div>
+            <div class="rounded-2xl overflow-hidden h-40 sm:h-48 relative">
+              <img src="https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=800&q=80" alt="Live kitchen action" class="w-full h-full object-cover">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 7. GUEST REVIEWS SECTION -->
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/5">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
+        <div>
+          <div class="text-xs font-mono tracking-widest text-amber-500 uppercase mb-2">WHAT OUR GUESTS SAY</div>
+          <h2 class="font-serif-luxury text-3xl sm:text-4xl font-bold text-white">
+            Unforgettable <span class="amber-glow-text">Experiences</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-3 bg-white/[0.03] px-4 py-2 rounded-xl border border-white/5">
+          <div class="text-amber-400 font-bold text-sm">★★★★★ 4.9</div>
+          <span class="text-stone-400 text-xs">From 1,200+ Kalutara food lovers</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="owita-card rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="text-amber-400 text-sm">★★★★★</div>
+            <span class="text-2xl font-serif text-amber-500/40">“</span>
+          </div>
+          <p class="text-xs text-stone-300 leading-relaxed font-light">
+            The Cheese Chicken Kottu is legendary! It was hot, loaded with mozzarella and the portion was generous enough for two. Order was ready on the counter exactly as the timer promised.
+          </p>
+          <div class="pt-4 border-t border-white/5">
+            <div class="text-xs font-bold text-white">Supun Madushanka</div>
+            <div class="text-[10px] text-stone-500">Nagoda, Kalutara</div>
+          </div>
+        </div>
+
+        <div class="owita-card rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="text-amber-400 text-sm">★★★★★</div>
+            <span class="text-2xl font-serif text-amber-500/40">“</span>
+          </div>
+          <p class="text-xs text-stone-300 leading-relaxed font-light">
+            Best Hot Butter Cuttlefish on the Matugama road corridor! Crisp batter, genuine fresh cuttlefish, and the special chili paste kicks it to another level. We order every Friday.
+          </p>
+          <div class="pt-4 border-t border-white/5">
+            <div class="text-xs font-bold text-white">Dr. H. Jayawardena</div>
+            <div class="text-[10px] text-stone-500">Kalutara South</div>
+          </div>
+        </div>
+
+        <div class="owita-card rounded-2xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="text-amber-400 text-sm">★★★★★</div>
+            <span class="text-2xl font-serif text-amber-500/40">“</span>
+          </div>
+          <p class="text-xs text-stone-300 leading-relaxed font-light">
+            Sitting on the rooftop terrace under the warm lights while having the mixed grill platter is such a great vibe. Online ordering and pickup works seamlessly!
+          </p>
+          <div class="pt-4 border-t border-white/5">
+            <div class="text-xs font-bold text-white">Anuki Fernando</div>
+            <div class="text-[10px] text-stone-500">Payagala</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ==============================================================
+       RESTAURANT ADMIN MANAGEMENT PORTAL (TOGGLEABLE VIEW)
+  ============================================================== -->
+  <div id="adminPortalContainer" class="hidden min-h-screen pb-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 py-10">
+      
+      <!-- Admin Top Banner -->
+      <div class="flex flex-wrap items-center justify-between gap-4 p-6 rounded-2xl bg-amber-500/10 border border-amber-500/30 mb-8">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs font-mono text-amber-400 uppercase tracking-widest font-bold">RESTAURANT BACKSTAGE CONTROL ROOM</span>
+          </div>
+          <h2 class="font-serif-luxury text-3xl font-bold text-white mt-1">Ovita Kitchen & Orders Management</h2>
+          <p class="text-xs text-stone-300">Live order queue, timer extensions (+5m/+10m), customer change/cancel approvals, and menu pricing.</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="document.getElementById('adminNewDishModal').classList.remove('hidden')" class="px-4 py-2.5 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Add New Dish</span>
+          </button>
+          <button onclick="window.OwitaApp.toggleRoleSwitch()" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono uppercase tracking-wider">
+            Exit Admin View
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick KPI Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        <div class="owita-card p-6 rounded-2xl">
+          <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Today's Revenue</div>
+          <div class="text-3xl font-bold font-mono text-amber-400 mt-2" id="adminStatRevenue">LKR 0</div>
+          <div class="text-[11px] text-emerald-400 mt-1">Paid orders verified</div>
+        </div>
+        <div class="owita-card p-6 rounded-2xl">
+          <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Total Orders Logged</div>
+          <div class="text-3xl font-bold font-mono text-white mt-2" id="adminStatOrders">0</div>
+          <div class="text-[11px] text-stone-400 mt-1">All customers</div>
+        </div>
+        <div class="owita-card p-6 rounded-2xl">
+          <div class="text-xs font-mono text-stone-400 uppercase tracking-wider">Active in Kitchen</div>
+          <div class="text-3xl font-bold font-mono text-amber-500 mt-2" id="adminStatKitchen">0</div>
+          <div class="text-[11px] text-amber-400 mt-1">Preparation timers ticking</div>
+        </div>
+      </div>
+
+      <!-- Live Kitchen Orders Queue -->
+      <div class="owita-card rounded-2xl overflow-hidden mb-12">
+        <div class="p-6 border-b border-white/5 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 class="font-serif-luxury text-2xl font-bold text-white">Live Kitchen Orders</h3>
+            <p class="text-xs text-stone-400">Real-time orders visible to restaurant with timer management controls.</p>
+          </div>
+          <button onclick="window.OwitaApp.renderAdminOrders()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-stone-300 flex items-center gap-1.5 border border-white/10">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Refresh Orders</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-white/10 text-[10px] font-mono uppercase tracking-widest text-stone-400 bg-white/[0.01]">
+                <th class="p-4">Order ID</th>
+                <th class="p-4">Customer</th>
+                <th class="p-4">Ordered Dishes</th>
+                <th class="p-4">Total (LKR)</th>
+                <th class="p-4">Status & Requests</th>
+                <th class="p-4">Kitchen Timer</th>
+                <th class="p-4">Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminOrdersTableBody" class="divide-y divide-white/5">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Menu Items Management Section -->
+      <div class="owita-card rounded-2xl p-6">
+        <div class="flex items-center justify-between pb-4 border-b border-white/5 mb-6">
+          <div>
+            <h3 class="font-serif-luxury text-2xl font-bold text-white">Menu Pricing & Inventory</h3>
+            <p class="text-xs text-stone-400">Update prices, toggle stock availability, and manage online menu.</p>
+          </div>
+        </div>
+
+        <div class="space-y-3" id="adminMenuItemsList">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-white/10 bg-[#060608] pt-16 pb-12 px-4 sm:px-8" id="contact">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-white/5">
+      
+      <!-- Brand Info -->
+      <div class="space-y-4">
+        <div class="flex items-baseline gap-2">
+          <span class="font-serif-luxury text-2xl font-bold text-[#FFB800]">ඕවිට</span>
+          <span class="font-serif text-xl font-bold text-white">Family Restaurant</span>
+        </div>
+        <div class="text-[11px] font-mono uppercase tracking-widest text-amber-500">OVITA · Nagoda Junction, Kalutara South</div>
+        <p class="text-xs text-stone-400 leading-relaxed font-light">
+          Open-air container rooftop dining and authentic wok cuisine at Nagoda Junction. Fresh ingredients, sizzled upon order.
+        </p>
+        <div class="flex gap-3 text-stone-400">
+          <a href="#" class="w-8 h-8 rounded-full bg-white/5 hover:bg-amber-500 hover:text-black flex items-center justify-center transition-colors"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+          <a href="#" class="w-8 h-8 rounded-full bg-white/5 hover:bg-amber-500 hover:text-black flex items-center justify-center transition-colors"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+          <a href="tel:0772775132" class="w-8 h-8 rounded-full bg-white/5 hover:bg-amber-500 hover:text-black flex items-center justify-center transition-colors"><i data-lucide="phone" class="w-4 h-4"></i></a>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="space-y-3 text-xs">
+        <div class="font-mono text-amber-400 uppercase tracking-widest text-[11px] font-bold">Quick Links</div>
+        <div class="flex flex-col gap-2 text-stone-400">
+          <a href="#top" class="hover:text-white transition-colors">Home</a>
+          <a href="#signature" class="hover:text-white transition-colors">Signature Collection</a>
+          <a href="#menu" class="hover:text-white transition-colors">Full Food Menu</a>
+          <a href="#track" class="hover:text-white transition-colors">Track Active Order</a>
+          <a href="#story" class="hover:text-white transition-colors">Rooftop Experience</a>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="space-y-3 text-xs text-stone-400">
+        <div class="font-mono text-amber-400 uppercase tracking-widest text-[11px] font-bold">Contact Us</div>
+        <div class="flex items-start gap-2">
+          <i data-lucide="map-pin" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+          <span>Nagoda Junction, Kalutara South, Western Province, Sri Lanka</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="phone" class="w-4 h-4 text-amber-500 shrink-0"></i>
+          <span class="font-mono">077 277 5132</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="clock" class="w-4 h-4 text-amber-500 shrink-0"></i>
+          <span>Mon – Sun: 10:30 AM – 11:00 PM</span>
+        </div>
+      </div>
+
+      <!-- Newsletter -->
+      <div class="space-y-3 text-xs">
+        <div class="font-mono text-amber-400 uppercase tracking-widest text-[11px] font-bold">Ovita Newsletter</div>
+        <p class="text-stone-400">Get weekend family combo updates and special kottu offers.</p>
+        <form onsubmit="event.preventDefault(); window.OwitaApp.showToast ? window.OwitaApp.showToast('Subscribed to Ovita food notes!') : alert('Subscribed!'); this.reset();" class="flex gap-2">
+          <input type="email" placeholder="Enter your email" required class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-stone-500 focus:outline-none focus:border-amber-500">
+          <button type="submit" class="px-4 py-2 rounded-xl amber-btn-primary text-xs font-bold uppercase">Join</button>
+        </form>
+      </div>
+
+    </div>
+
+    <div class="max-w-7xl mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between text-[11px] text-stone-500 gap-4">
+      <div>© 2026 ඕවිට (Ovita) Family Restaurant · Nagoda Junction, Kalutara South. All rights reserved.</div>
+      <div class="flex gap-6">
+        <a href="../index.html" class="hover:text-amber-400">Client Demo Hub</a>
+        <a href="#" onclick="window.OwitaApp.toggleRoleSwitch(); return false;" class="text-amber-500 hover:underline">Kitchen Manager Access</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==============================================================
+       CART SLIDE-OVER DRAWER
+  ============================================================== -->
+  <div id="owitaCartDrawerBackdrop" onclick="window.OwitaApp.closeCartDrawer()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden transition-opacity"></div>
+  
+  <aside id="owitaCartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-[#0F0F14] border-l border-white/10 z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between shadow-2xl">
+    
+    <!-- Drawer Header -->
+    <div class="p-5 border-b border-white/10 flex items-center justify-between bg-black/40">
+      <div class="flex items-center gap-2.5">
+        <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-500"></i>
+        <h3 class="font-serif-luxury text-xl font-bold text-white">Your Order</h3>
+        <span class="cart-count-badge px-2 py-0.5 rounded-full bg-amber-500 text-black text-xs font-mono font-bold">0</span>
+      </div>
+      <button onclick="window.OwitaApp.closeCartDrawer()" class="p-1 text-stone-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Preparation Time Preview Notice -->
+    <div class="px-5 py-3 bg-amber-500/10 border-b border-amber-500/20 text-xs flex items-center justify-between">
+      <span class="text-stone-300 flex items-center gap-1.5 font-medium">
+        <i data-lucide="timer" class="w-4 h-4 text-amber-400"></i>
+        <span>Est. Prep Time:</span>
+      </span>
+      <span class="cart-prep-estimate-time font-mono font-bold text-amber-400">0 Mins</span>
+    </div>
+
+    <!-- Items List -->
+    <div class="flex-1 overflow-y-auto p-5 space-y-3" id="cartDrawerItems">
+      <!-- Items dynamically injected -->
+    </div>
+
+    <!-- Empty Box -->
+    <div id="cartEmptyBox" class="p-10 text-center text-stone-400 space-y-3">
+      <i data-lucide="utensils" class="w-12 h-12 mx-auto text-stone-600 mb-2"></i>
+      <p class="text-sm">Your tray is currently empty.</p>
+      <button onclick="window.OwitaApp.closeCartDrawer()" class="px-5 py-2.5 rounded-xl amber-btn-primary text-xs font-bold uppercase">
+        Explore Menu
+      </button>
+    </div>
+
+    <!-- Drawer Summary & Checkout -->
+    <div id="cartSummaryBox" class="p-5 bg-black/60 border-t border-white/10 space-y-3 hidden">
+      <div class="space-y-1.5 text-xs text-stone-400">
+        <div class="flex justify-between">
+          <span>Subtotal:</span>
+          <span class="font-mono text-white" id="cartDrawerSubtotal">LKR 0</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Packaging Fee:</span>
+          <span class="font-mono text-white" id="cartDrawerPackagingFee">LKR 150</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Kitchen Service (5%):</span>
+          <span class="font-mono text-white" id="cartDrawerServiceFee">LKR 0</span>
+        </div>
+        <div class="text-[11px] text-amber-400/90 pt-1" id="cartDrawerPrepExplanation">
+          10 mins 1st item + 10 mins 2nd + 5 mins each after
+        </div>
+        <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
+          <span class="text-amber-400">Total:</span>
+          <span class="font-mono text-amber-400" id="cartDrawerTotal">LKR 0</span>
+        </div>
+      </div>
+
+      <button onclick="window.OwitaApp.proceedToCheckout()" class="w-full py-3.5 rounded-xl amber-btn-primary flex items-center justify-center gap-2 text-xs uppercase font-bold tracking-wider">
+        <span>Confirm Order & Pay</span>
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ==============================================================
+       CHECKOUT & PAYMENT MODAL
+  ============================================================== -->
+  <div id="checkoutPaymentModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="owita-card rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+        <div>
+          <span class="text-[10px] font-mono text-amber-500 uppercase tracking-widest">ORDER REVIEW & PAYMENT</span>
+          <h3 class="font-serif-luxury text-2xl font-bold text-white">Confirm Your Nagoda Pickup</h3>
+        </div>
+        <button onclick="window.OwitaApp.closeCheckoutModal()" class="text-stone-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Itemized Order Review -->
+      <div class="space-y-3">
+        <div class="text-xs font-bold text-stone-300 uppercase tracking-wider flex justify-between">
+          <span>Items Ordered (<span id="checkoutTotalItems">0</span>)</span>
+          <span class="text-amber-400" id="checkoutEstimatedMins">0 Mins</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5" id="checkoutOrderReviewItems">
+          <!-- Injected dynamically -->
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1.5 text-xs">
+          <div class="flex justify-between text-stone-400">
+            <span>Subtotal:</span>
+            <span class="font-mono text-white" id="checkoutSubtotal">LKR 0</span>
+          </div>
+          <div class="flex justify-between text-stone-400">
+            <span>Packaging & Food Boxes:</span>
+            <span class="font-mono text-white" id="checkoutPackagingFee">LKR 150</span>
+          </div>
+          <div class="flex justify-between text-stone-400">
+            <span>Service Fee:</span>
+            <span class="font-mono text-white" id="checkoutServiceFee">LKR 0</span>
+          </div>
+          <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
+            <span class="text-amber-400">Total Payable:</span>
+            <span class="font-mono text-amber-400 text-lg" id="checkoutGrandTotal">LKR 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Details Confirmation -->
+      <form id="checkoutPaymentForm" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div>
+            <label class="block text-stone-400 mb-1">Your Name</label>
+            <input type="text" id="checkoutCustomerName" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-stone-400 mb-1">Contact Phone (for pickup alert)</label>
+            <input type="tel" id="checkoutCustomerPhone" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-stone-400 mb-1">Email (for digital receipt)</label>
+            <input type="email" id="checkoutCustomerEmail" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-stone-400 mb-1">Kitchen / Spice Special Requests</label>
+            <input type="text" id="checkoutOrderNotes" placeholder="e.g. Extra spicy, separate chili paste container" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+          </div>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div class="space-y-2 pt-2">
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">Choose Payment Method</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500 cursor-pointer">
+              <input type="radio" name="paymentMethod" value="Credit / Debit Card (Online)" checked class="accent-amber-500">
+              <span class="font-medium text-white">Card (PayHere)</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500 cursor-pointer">
+              <input type="radio" name="paymentMethod" value="Online Banking / LankaQR" class="accent-amber-500">
+              <span class="font-medium text-white">LankaQR / Transfer</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500 cursor-pointer">
+              <input type="radio" name="paymentMethod" value="Pay at Counter" class="accent-amber-500">
+              <span class="font-medium text-white">Cash at Counter</span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-4 rounded-xl amber-btn-primary flex items-center justify-center gap-2 text-xs uppercase font-bold tracking-wider mt-4">
+          <i data-lucide="lock" class="w-4 h-4"></i>
+          <span>Pay & Confirm Kitchen Order</span>
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- DIGITAL RECEIPT MODAL -->
+  <div id="digitalReceiptModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="owita-card rounded-2xl w-full max-w-md p-6 sm:p-8 space-y-4">
+      <div class="flex justify-between items-center pb-2">
+        <span class="text-xs font-mono text-emerald-400 font-bold uppercase">Payment Verified</span>
+        <button onclick="window.OwitaApp.closeReceiptModal()" class="text-stone-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="digitalReceiptContent" class="space-y-3 bg-[#0B0B0E] p-5 rounded-xl border border-white/5">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button onclick="window.print()" class="flex-1 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Print Receipt</span>
+        </button>
+        <button onclick="window.OwitaApp.closeReceiptModal(); location.hash='#track';" class="flex-1 py-2.5 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+          <span>Track Live Status</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTHENTICATION MODAL -->
+  <div id="owitaAuthModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="owita-card rounded-2xl w-full max-w-md p-6 sm:p-8 space-y-6">
+      
+      <div class="flex items-center justify-between">
+        <div class="font-serif-luxury text-2xl font-bold text-white">Ovita Customer Login</div>
+        <button onclick="window.OwitaApp.closeAuthModal()" class="text-stone-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex border-b border-white/10">
+        <button onclick="window.OwitaApp.switchAuthTab('signin')" id="authTabSignIn" class="flex-1 py-2 font-bold text-xs uppercase tracking-wider border-b-2 border-amber-500 text-amber-400">
+          Sign In
+        </button>
+        <button onclick="window.OwitaApp.switchAuthTab('register')" id="authTabRegister" class="flex-1 py-2 font-bold text-xs uppercase tracking-wider text-stone-400 hover:text-white">
+          Create Account
+        </button>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="authSignInForm" class="space-y-4">
+        <div>
+          <label class="block text-xs text-stone-400 mb-1">Email Address</label>
+          <input type="email" id="authSignInEmail" value="customer@ovita.lk" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:border-amber-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs text-stone-400 mb-1">Password</label>
+          <input type="password" id="authSignInPassword" value="password123" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:border-amber-500 outline-none">
+        </div>
+        <div class="text-[11px] text-stone-500">
+          Demo Customer Account: <span class="text-amber-400">customer@ovita.lk</span> / <span class="text-amber-400">password123</span>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider">
+          Sign In
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="authRegisterForm" class="space-y-3 hidden">
+        <div>
+          <label class="block text-xs text-stone-400 mb-1">Full Name</label>
+          <input type="text" id="authRegName" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs text-stone-400 mb-1">Mobile Phone Number</label>
+          <input type="tel" id="authRegPhone" placeholder="077 123 4567" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs text-stone-400 mb-1">Email Address</label>
+          <input type="email" id="authRegEmail" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs text-stone-400 mb-1">Password</label>
+          <input type="password" id="authRegPassword" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider mt-2">
+          Create Customer Account
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ADMIN ADD NEW DISH MODAL -->
+  <div id="adminNewDishModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="owita-card rounded-2xl w-full max-w-lg p-6 sm:p-8 space-y-4">
+      <div class="flex justify-between items-center pb-3 border-b border-white/10">
+        <h3 class="font-serif-luxury text-xl font-bold text-white">Add New Dish to Ovita Menu</h3>
+        <button onclick="document.getElementById('adminNewDishModal').classList.add('hidden')" class="text-stone-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="newDishForm" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-stone-400 mb-1">Dish Name</label>
+          <input type="text" id="newDishName" required placeholder="e.g. Jaffna Crab Kottu Special" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-stone-400 mb-1">Category</label>
+            <select id="newDishCategory" class="w-full bg-[#16161C] border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+              <option value="rice">Rice & Biryani</option>
+              <option value="kottu">Kottu Royale</option>
+              <option value="seafood">Seafood & Devilled</option>
+              <option value="meat">Wok & Szechuan</option>
+              <option value="grill">Grills & Burgers</option>
+              <option value="drinks">Drinks & Desserts</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-stone-400 mb-1">Price (LKR)</label>
+            <input type="number" id="newDishPrice" required placeholder="1850" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block text-stone-400 mb-1">Image URL</label>
+          <input type="url" id="newDishImg" placeholder="https://images.unsplash.com/photo-..." class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-stone-400 mb-1">Description</label>
+          <textarea id="newDishDesc" rows="3" required placeholder="Fresh ingredients, spices, and flavors description..." class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500"></textarea>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider mt-3">
+          Publish Dish to Menu
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TABLE RESERVATION MODAL -->
+  <div id="tableReservationModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="owita-card rounded-2xl w-full max-w-md p-6 sm:p-8 space-y-4">
+      <div class="flex justify-between items-center pb-3 border-b border-white/10">
+        <div>
+          <div class="text-[10px] font-mono text-amber-500 uppercase">Two-Story Container Rooftop</div>
+          <h3 class="font-serif-luxury text-2xl font-bold text-white">Reserve a Table</h3>
+        </div>
+        <button onclick="document.getElementById('tableReservationModal').classList.add('hidden')" class="text-stone-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="event.preventDefault(); document.getElementById('tableReservationModal').classList.add('hidden'); window.OwitaApp.showToast ? window.OwitaApp.showToast('Table reservation submitted! Our manager will call you.') : alert('Reserved!');" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-stone-400 mb-1">Your Name</label>
+          <input type="text" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-stone-400 mb-1">Phone Number</label>
+          <input type="tel" required placeholder="077 277 5132" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-stone-400 mb-1">Date</label>
+            <input type="date" required class="w-full bg-[#16161C] border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-stone-400 mb-1">Seating Area</label>
+            <select class="w-full bg-[#16161C] border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+              <option>Upper Rooftop Deck (Open-Air)</option>
+              <option>Ground Floor (AC Dining)</option>
+              <option>Outdoor Garden Table</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider mt-2">
+          Confirm Reservation Request
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="owitaToast" class="fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-[#121217]/95 border border-amber-500/30 text-stone-100 shadow-2xl backdrop-blur-md transition-all duration-300 transform translate-y-12 opacity-0 pointer-events-none">
+    <i data-lucide="check-circle" class="w-4 h-4 text-amber-400" id="owitaToastIcon"></i>
+    <span class="text-xs font-medium" id="owitaToastText">Notification message</span>
+  </div>
+
+  <!-- Core Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

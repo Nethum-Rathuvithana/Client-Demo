@@ -1,0 +1,188 @@
+/* Owita Restaurant & Cafe — Nagoda, Kalutara */
+/* Ultra-Luxury Dark Theme Culinary Design System */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg-deep: #08080A;
+  --bg-surface: #101014;
+  --bg-card: rgba(22, 22, 28, 0.85);
+  --bg-card-hover: rgba(30, 30, 38, 0.95);
+  
+  --amber-primary: #E58B43;
+  --amber-glow: #F59E0B;
+  --amber-dark: #C8722B;
+  --amber-subtle: rgba(229, 139, 67, 0.15);
+  --amber-border: rgba(229, 139, 67, 0.25);
+  
+  --text-main: #FBF8F3;
+  --text-muted: #A39D93;
+  --text-dim: #716C63;
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-card: rgba(255, 255, 255, 0.06);
+
+  --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+body {
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+.font-serif-luxury {
+  font-family: var(--font-serif);
+}
+
+.font-mono-code {
+  font-family: var(--font-mono);
+}
+
+/* Glassmorphism Cards */
+.owita-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.owita-card:hover {
+  border-color: var(--amber-border);
+  box-shadow: 0 16px 40px -12px rgba(229, 139, 67, 0.18);
+  transform: translateY(-4px);
+}
+
+/* Amber Glow Accents */
+.amber-glow-text {
+  background: linear-gradient(135deg, #FFF1DF 0%, #E58B43 60%, #C8722B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.amber-btn-primary {
+  background: linear-gradient(135deg, #E58B43 0%, #C8722B 100%);
+  color: #0A0A0C;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px -2px rgba(229, 139, 67, 0.35);
+}
+
+.amber-btn-primary:hover {
+  background: linear-gradient(135deg, #F59E0B 0%, #E58B43 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(229, 139, 67, 0.5);
+}
+
+.amber-btn-outline {
+  border: 1px solid var(--amber-border);
+  color: var(--amber-primary);
+  background: rgba(229, 139, 67, 0.05);
+  transition: all 0.3s ease;
+}
+
+.amber-btn-outline:hover {
+  background: var(--amber-primary);
+  color: #0A0A0C;
+  border-color: var(--amber-primary);
+}
+
+/* Overhead Hero Plate Animation */
+.hero-plate-container {
+  position: relative;
+  border-radius: 50%;
+  box-shadow: 0 0 100px 10px rgba(229, 139, 67, 0.15),
+              0 30px 80px rgba(0, 0, 0, 0.85);
+}
+
+.hero-plate-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(229, 139, 67, 0.25) 0%, transparent 70%);
+  filter: blur(25px);
+  animation: pulseGlow 6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(0.95); opacity: 0.6; }
+  100% { transform: scale(1.08); opacity: 1; }
+}
+
+/* Circular Seal Stamp */
+.circular-stamp {
+  animation: rotateStamp 40s linear infinite;
+}
+
+@keyframes rotateStamp {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Category Filter Tabs */
+.category-pill {
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  transition: all 0.25s ease;
+}
+
+.category-pill:hover {
+  border-color: var(--amber-border);
+  color: var(--text-main);
+  background: rgba(229, 139, 67, 0.08);
+}
+
+.category-pill.active {
+  background: var(--amber-primary);
+  color: #0A0A0C;
+  border-color: var(--amber-primary);
+  font-weight: 600;
+}
+
+/* Kitchen Timer Bar */
+.kitchen-timer-meter {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.kitchen-timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10B981, #F59E0B, #E58B43);
+  border-radius: 999px;
+  transition: width 1s linear;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0B0E;
+}
+::-webkit-scrollbar-thumb {
+  background: #262630;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #E58B43;
+}
+
+/* Pulse badges */
+.live-pulse {
+  animation: liveBadge 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes liveBadge {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.15); }
+}
