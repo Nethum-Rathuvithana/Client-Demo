@@ -308,8 +308,14 @@
                 ${offer.description || item.description}
               </p>
 
-              <!-- Point-wise Inclusions -->
-              <div class="portion-inclusions-box mt-3 space-y-1.5">
+              <div class="text-[10px] text-amber-400/90 font-mono flex items-center gap-1 group-hover:opacity-0 transition-opacity">
+                <i data-lucide="info" class="w-3 h-3"></i>
+                <span>Hover card to view portion contents</span>
+              </div>
+
+              <!-- HOVER INCLUSIONS EXPANSION -->
+              <div class="dish-hover-panel">
+                <div class="portion-inclusions-box mt-2 p-3 rounded-xl bg-black/95 border border-amber-500/40 shadow-2xl space-y-2">
                 <div class="flex items-center justify-between text-[11px] font-mono text-amber-400 uppercase tracking-wider border-b border-white/5 pb-1 font-semibold">
                   <span class="flex items-center gap-1"><i data-lucide="utensils" class="w-3 h-3 text-amber-400"></i> Portion Inclusions</span>
                   <span class="text-[10px] text-stone-400 font-normal">${item.serves || ''}</span>
@@ -322,6 +328,7 @@
                     </li>
                   `).join('')}
                 </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -353,7 +360,7 @@
   }
 
   // --- RENDER SIGNATURE COLLECTION ---
-  function renderSignatureDishes() {
+    function renderSignatureDishes() {
     const container = document.getElementById('signatureCollectionGrid');
     if (!container) return;
 
@@ -380,54 +387,66 @@
                   🔥 ${pricing.tag}
                 </div>
               ` : `
-                <div class="absolute top-3 right-3 bg-amber-500/90 text-black px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                  ${item.serves || 'Portion'}
+                <div class="absolute top-3 right-3 bg-amber-500 text-black px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  ${item.serves || 'Signature'}
                 </div>
               `}
 
-              <!-- Live timer for active offer -->
               ${pricing.hasOffer ? `
-                <div class="absolute bottom-3 left-3 bg-black/85 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-mono font-bold text-red-400 border border-red-500/30 live-offer-timer" data-expires="${pricing.expiresAt}">
+                <div class="absolute bottom-2 left-3 bg-black/85 backdrop-blur-md px-2.5 py-0.5 rounded text-[9px] font-mono font-bold text-red-400 border border-red-500/30 live-offer-timer" data-expires="${pricing.expiresAt}">
                   ⏳ Ends: ${formatCountdown(pricing.expiresAt)}
                 </div>
               ` : ''}
-
-              <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-semibold text-amber-400 flex items-center gap-1">
-                <span>★</span>
-                <span>${item.rating}</span>
-              </div>
             </div>
 
             <div class="p-5 space-y-2">
-              <h3 class="font-serif-luxury text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
-                ${item.name}
-              </h3>
-              ${item.sinhala ? `<div class="text-[11px] text-amber-500/80 font-medium">${item.sinhala}</div>` : ''}
-              <p class="text-xs text-stone-400 line-clamp-2 leading-relaxed">
+              <div class="flex items-start justify-between gap-2">
+                <h4 class="font-serif-luxury text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
+                  ${item.name}
+                </h4>
+                <div class="text-xs font-semibold text-amber-400 bg-black/60 px-2 py-0.5 rounded border border-amber-500/20 shrink-0">
+                  ★ ${item.rating || '4.9'}
+                </div>
+              </div>
+              ${item.sinhala ? `<div class="text-xs text-amber-500 font-medium">${item.sinhala}</div>` : ''}
+              
+              <p class="text-xs text-stone-400 line-clamp-1 leading-relaxed font-light">
                 ${item.description}
               </p>
+              
+              <div class="text-[10px] text-amber-400/90 font-mono flex items-center gap-1 group-hover:opacity-0 transition-opacity">
+                <i data-lucide="info" class="w-3 h-3"></i>
+                <span>Hover card to view portion contents</span>
+              </div>
 
-              <!-- POINT-WISE INCLUSIONS BREAKDOWN -->
-              <div class="portion-inclusions-box mt-3 space-y-1.5">
-                <div class="flex items-center justify-between text-[11px] font-mono text-amber-400 uppercase tracking-wider border-b border-white/5 pb-1 font-semibold">
-                  <span class="flex items-center gap-1"><i data-lucide="utensils" class="w-3 h-3 text-amber-400"></i> What's Included</span>
-                  <span class="text-[10px] text-stone-400 font-normal">${item.serves || ''}</span>
+              <!-- HOVER REVEAL INCLUSIONS & FULL CHEF DESCRIPTION -->
+              <div class="dish-hover-panel">
+                <div class="p-3 rounded-xl bg-black/95 border border-amber-500/40 shadow-2xl space-y-2 text-xs">
+                  <p class="text-[11px] text-stone-200 leading-relaxed font-light italic">
+                    "${item.description}"
+                  </p>
+                  <div class="border-t border-white/10 pt-2">
+                    <div class="text-[10px] font-mono text-amber-400 uppercase tracking-widest font-bold flex items-center justify-between mb-1">
+                      <span>✦ WHAT'S INCLUDED:</span>
+                      <span class="text-amber-300 font-normal">${item.serves || ''}</span>
+                    </div>
+                    <ul class="space-y-1">
+                      ${(item.portionIncludes || []).map(inc => `
+                        <li class="flex items-start gap-1.5 text-[11px] text-stone-200">
+                          <span class="text-amber-400 font-bold shrink-0">✔</span>
+                          <span>${inc}</span>
+                        </li>
+                      `).join('')}
+                    </ul>
+                  </div>
                 </div>
-                <ul class="text-[11px] text-stone-300 space-y-1 pt-0.5">
-                  ${(item.portionIncludes || []).map(inc => `
-                    <li class="flex items-start gap-1.5 leading-snug">
-                      <span class="text-amber-400 font-bold">✦</span>
-                      <span>${inc}</span>
-                    </li>
-                  `).join('')}
-                </ul>
               </div>
             </div>
           </div>
 
-          <div class="p-5 pt-0 flex items-center justify-between border-t border-white/5 mt-3">
+          <div class="p-5 pt-0 flex items-center justify-between border-t border-white/5 mt-2">
             <div>
-              <div class="text-[10px] text-stone-500 uppercase tracking-widest font-mono">Price</div>
+              <div class="text-[10px] font-mono text-stone-400 uppercase">Special Price</div>
               <div class="flex items-baseline gap-2">
                 <span class="text-lg font-bold font-mono ${pricing.hasOffer ? 'text-red-400' : 'text-amber-400'}">
                   LKR ${pricing.currentPrice.toLocaleString()}
@@ -440,8 +459,8 @@
               </div>
             </div>
 
-            <button onclick="window.OwitaApp.addToCart('${item.id}')" class="px-4 py-2.5 rounded-xl amber-btn-primary flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-              <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+            <button onclick="window.OwitaApp.addToCart('${item.id}')" class="px-4 py-2.5 rounded-xl amber-btn-primary flex items-center gap-2 text-xs font-bold uppercase tracking-wider shadow-lg">
+              <i data-lucide="plus" class="w-4 h-4"></i>
               <span>Add to Cart</span>
             </button>
           </div>
@@ -453,7 +472,6 @@
     initScrollObserver();
   }
 
-  // --- RENDER FULL MENU ---
   function renderFullMenu() {
     const container = document.getElementById('fullMenuGrid');
     if (!container) return;
@@ -515,30 +533,43 @@
               </div>
             </div>
 
-            <div class="p-4 space-y-2">
+            <div class="p-4 space-y-1.5">
               <h4 class="font-serif-luxury text-lg font-bold text-white group-hover:text-amber-400 transition-colors">
                 ${item.name}
               </h4>
-              ${item.sinhala ? `<div class="text-[10px] text-amber-500/80">${item.sinhala}</div>` : ''}
-              <p class="text-xs text-stone-400 line-clamp-2 leading-relaxed font-light">
+              ${item.sinhala ? `<div class="text-[10px] text-amber-500/80 font-medium">${item.sinhala}</div>` : ''}
+              <p class="text-xs text-stone-400 line-clamp-1 leading-relaxed font-light">
                 ${item.description}
               </p>
 
-              <!-- Point-wise Inclusions -->
-              <div class="portion-inclusions-box mt-2 space-y-1.5">
-                <div class="flex items-center justify-between text-[10px] font-mono text-amber-400 uppercase tracking-wider border-b border-white/5 pb-1 font-semibold">
-                  <span class="flex items-center gap-1"><i data-lucide="utensils" class="w-3 h-3 text-amber-400"></i> Portion Details</span>
-                  <span class="text-[10px] text-stone-400 font-normal">${item.serves || ''}</span>
-                </div>
-                <ul class="text-[11px] text-stone-300 space-y-1 pt-0.5">
-                  ${(item.portionIncludes || []).map(inc => `
-                    <li class="flex items-start gap-1.5 leading-snug">
-                      <span class="text-amber-400 font-bold">✦</span>
-                      <span>${inc}</span>
-                    </li>
-                  `).join('')}
-                </ul>
+              <div class="text-[10px] text-amber-400/90 font-mono flex items-center gap-1 group-hover:opacity-0 transition-opacity">
+                <i data-lucide="info" class="w-3 h-3"></i>
+                <span>Hover card to view portion contents</span>
               </div>
+
+              <!-- HOVER REVEAL INCLUSIONS & FULL CHEF DESCRIPTION -->
+              <div class="dish-hover-panel">
+                <div class="p-3 rounded-xl bg-black/95 border border-amber-500/40 shadow-2xl space-y-2 text-xs">
+                  <p class="text-[11px] text-stone-200 leading-relaxed font-light italic">
+                    "${item.description}"
+                  </p>
+                  <div class="border-t border-white/10 pt-2">
+                    <div class="text-[10px] font-mono text-amber-400 uppercase tracking-widest font-bold flex items-center justify-between mb-1">
+                      <span>✦ WHAT'S INCLUDED:</span>
+                      <span class="text-amber-300 font-normal">${item.serves || ''}</span>
+                    </div>
+                    <ul class="space-y-1">
+                      ${(item.portionIncludes || []).map(inc => `
+                        <li class="flex items-start gap-1.5 text-[11px] text-stone-200">
+                          <span class="text-amber-400 font-bold shrink-0">✔</span>
+                          <span>${inc}</span>
+                        </li>
+                      `).join('')}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -569,35 +600,19 @@
     initScrollObserver();
   }
 
-  // --- RENDER VISUAL GALLERY ---
-  function renderGallery() {
+function renderGallery() {
     const container = document.getElementById('galleryGrid');
     if (!container) return;
 
-    const filtered = activeGalleryCategory === 'all'
-      ? GALLERY_PHOTOS
-      : GALLERY_PHOTOS.filter(p => p.category === activeGalleryCategory);
-
-    container.innerHTML = filtered.map((photo, idx) => `
-      <div class="gallery-card group relative h-64 border border-white/10 reveal-init reveal-bottom stagger-${(idx % 4) + 1}" onclick="window.OwitaApp.openGalleryLightbox(${idx})">
-        <img src="${photo.img}" alt="${photo.title}" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+    // Clean, direct gallery showcase without clutter
+    container.innerHTML = GALLERY_PHOTOS.map((photo, idx) => `
+      <div class="gallery-card group relative h-64 rounded-2xl overflow-hidden border border-white/10 reveal-init reveal-bottom stagger-${(idx % 4) + 1} shadow-lg cursor-pointer" onclick="window.OwitaApp.openGalleryLightbox(${idx})">
+        <img src="${photo.img}" alt="${photo.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
         
         <div class="absolute bottom-4 left-4 right-4 space-y-1">
-          <div class="text-[10px] font-mono text-amber-400 uppercase tracking-widest font-semibold flex items-center gap-1.5">
-            <i data-lucide="camera" class="w-3 h-3"></i>
-            <span>${photo.category.toUpperCase()}</span>
-          </div>
-          <h4 class="font-serif-luxury text-base font-bold text-white group-hover:text-amber-300 transition-colors">
-            ${photo.title}
-          </h4>
-          <p class="text-[11px] text-stone-300 line-clamp-1 font-light">
-            ${photo.caption}
-          </p>
-        </div>
-
-        <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/70 backdrop-blur-md flex items-center justify-center text-white/80 group-hover:text-amber-400 group-hover:scale-110 transition-all border border-white/10">
-          <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+          <h4 class="font-serif-luxury text-base font-bold text-white group-hover:text-amber-400 transition-colors">${photo.title}</h4>
+          <p class="text-[11px] text-stone-300 font-light line-clamp-1">${photo.caption}</p>
         </div>
       </div>
     `).join('');
@@ -606,7 +621,7 @@
     initScrollObserver();
   }
 
-  function setGalleryCategory(cat) {
+function setGalleryCategory(cat) {
     activeGalleryCategory = cat;
     document.querySelectorAll('.gallery-pill').forEach(btn => {
       if (btn.dataset.galleryCategory === cat) {
@@ -1219,11 +1234,8 @@
               </div>
 
               <div class="flex gap-2">
-                <button onclick="window.OwitaApp.requestOrderChange('${order.orderId}', 'change')" ${isChangeRequested ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-300 text-xs font-semibold ${isChangeRequested ? 'opacity-40 cursor-not-allowed' : ''}">
-                  Modify Items
-                </button>
-                <button onclick="window.OwitaApp.requestOrderChange('${order.orderId}', 'cancel')" ${isChangeRequested ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-semibold ${isChangeRequested ? 'opacity-40 cursor-not-allowed' : ''}">
-                  Request Cancel
+                <button onclick="window.OwitaApp.requestOrderCancellation('${order.orderId}')"" ${isChangeRequested ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-semibold ${isChangeRequested ? 'opacity-40 cursor-not-allowed' : ''}">
+                  Cancel Order (Request Refund)
                 </button>
               </div>
             </div>
@@ -1237,30 +1249,39 @@
     initScrollObserver();
   }
 
-  function requestOrderChange(orderId, actionType) {
+    function requestOrderCancellation(orderId) {
     const order = orders.find(o => o.orderId === orderId);
     if (!order) return;
 
-    const reason = prompt(actionType === 'cancel' 
-      ? 'Reason for order cancellation (requires restaurant review):'
-      : 'What changes would you like to make to your order?');
+    if (order.orderStatus === 'Cancelled') {
+      showToast('This order is already cancelled.', 'info');
+      return;
+    }
 
-    if (!reason) return;
+    const confirmed = confirm(
+      'Request cancellation for Order #' + order.orderId + '?\n\n' +
+      'Note: If accepted by the restaurant, a full refund of LKR ' + order.total.toLocaleString() + 
+      ' will be returned to your ' + order.paymentMethod + '.'
+    );
+    if (!confirmed) return;
 
-    order.hasChangeRequest = true;
-    order.changeDetails = `[${actionType.toUpperCase()}] ${reason}`;
-    order.orderStatus = actionType === 'cancel' ? 'Cancellation Requested' : 'Change Requested';
+    const reason = prompt('Please enter a brief reason for cancellation:');
+    if (reason === null) return;
+
+    order.changeRequest = {
+      type: 'cancel',
+      status: 'pending',
+      reason: reason.trim() || 'Customer requested order cancellation & refund',
+      requestedAt: new Date().toISOString()
+    };
 
     setStorage(STORAGE_KEYS.ORDERS, orders);
     renderCustomerOrders();
     renderAdminOrders();
-    soundEffects.chime();
-    showToast('Your request has been submitted to Ovita kitchen team for approval.', 'warning');
+    showToast('Cancellation & refund request submitted to restaurant manager.', 'warning');
   }
 
-  // --- ADMIN CONFIRM ORDER (STARTS PREP CLOCK & NOTIFIES CUSTOMER) ---
-  // Spec: "and when admin confirms it give a notification saying will be reay in ...time..."
-  function adminConfirmOrder(orderId) {
+function adminConfirmOrder(orderId) {
     const order = orders.find(o => o.orderId === orderId);
     if (!order) return;
 
@@ -1413,31 +1434,28 @@
     renderCustomerOrders();
   }
 
-  function adminHandleChangeRequest(orderId, isApproved) {
+    function adminHandleChangeRequest(orderId, approve) {
     const order = orders.find(o => o.orderId === orderId);
-    if (!order) return;
+    if (!order || !order.changeRequest) return;
 
-    if (isApproved) {
-      if (order.changeDetails.includes('[CANCEL]')) {
-        order.orderStatus = 'Cancelled';
-        showToast(`Order ${orderId} cancellation APPROVED.`, 'info');
-      } else {
-        order.orderStatus = 'Preparing in Kitchen';
-        showToast(`Order ${orderId} modification APPROVED. Kitchen adjusting items.`, 'success');
-      }
+    if (approve) {
+      order.changeRequest.status = 'approved';
+      order.orderStatus = 'Cancelled';
+      order.isConfirmed = false;
+      order.refundStatus = 'Refund Issued: LKR ' + order.total.toLocaleString() + ' via ' + order.paymentMethod;
+      showToast('Order #' + order.orderId + ' cancelled. Full refund of LKR ' + order.total.toLocaleString() + ' issued to customer.', 'success');
     } else {
-      order.orderStatus = 'Preparing in Kitchen';
-      showToast(`Order ${orderId} request DECLINED. Original preparation resumed.`, 'warning');
+      order.changeRequest.status = 'declined';
+      showToast('Cancellation declined for Order #' + order.orderId + '. Food is being prepared.', 'info');
     }
 
-    order.hasChangeRequest = false;
-    order.changeDetails = '';
     setStorage(STORAGE_KEYS.ORDERS, orders);
     renderAdminOrders();
     renderCustomerOrders();
+    renderDailySalesTracker();
   }
 
-  function adminAdjustOrderTime(orderId, additionalMins) {
+function adminAdjustOrderTime(orderId, additionalMins) {
     const order = orders.find(o => o.orderId === orderId);
     if (!order) return;
 
@@ -2191,39 +2209,57 @@
     showToast(`Switched view to: ${activeView.toUpperCase()}`, 'info');
   }
 
-  function applyActiveView() {
+    function applyActiveView() {
     const customerView = document.getElementById('customerWebsiteContainer');
     const adminView = document.getElementById('adminPortalContainer');
+    const customerNav = document.getElementById('customerNavbar');
     const roleBtnText = document.getElementById('headerRoleSwitcherText');
 
     if (activeView === 'restaurant') {
-      customerView?.classList.add('hidden');
-      adminView?.classList.remove('hidden');
+      // Admin Backstage: Hide entire customer website, navbar, footer, map, and gallery
+      if (customerView) customerView.classList.add('hidden');
+      if (customerNav) customerNav.classList.add('hidden');
+      if (adminView) adminView.classList.remove('hidden');
       if (roleBtnText) roleBtnText.textContent = 'Switch to Customer View';
       setAdminTab(adminActiveTab);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      customerView?.classList.remove('hidden');
-      adminView?.classList.add('hidden');
-      if (roleBtnText) roleBtnText.textContent = 'Kitchen / Admin View';
+      // Customer View: Show customer sections and navigation
+      if (customerView) customerView.classList.remove('hidden');
+      if (customerNav) customerNav.classList.remove('hidden');
+      if (adminView) adminView.classList.add('hidden');
+      if (roleBtnText) roleBtnText.textContent = 'Kitchen / POS Admin';
       renderCustomerOrders();
     }
 
     if (window.lucide) lucide.createIcons();
   }
 
-  function openCartDrawer() {
-    const drawer = document.getElementById('cartDrawer');
+function openCartDrawer() {
+    const drawer = document.getElementById('cartDrawer') || document.getElementById('owitaCartDrawer');
+    const backdrop = document.getElementById('owitaCartDrawerBackdrop');
     if (drawer) {
       drawer.classList.remove('translate-x-full');
+      drawer.classList.add('translate-x-0', 'open');
+      if (backdrop) {
+        backdrop.classList.remove('hidden');
+        backdrop.classList.add('open');
+      }
       document.body.style.overflow = 'hidden';
       renderCartDrawer();
     }
   }
 
   function closeCartDrawer() {
-    const drawer = document.getElementById('cartDrawer');
+    const drawer = document.getElementById('cartDrawer') || document.getElementById('owitaCartDrawer');
+    const backdrop = document.getElementById('owitaCartDrawerBackdrop');
     if (drawer) {
+      drawer.classList.remove('translate-x-0', 'open');
       drawer.classList.add('translate-x-full');
+      if (backdrop) {
+        backdrop.classList.remove('open');
+        backdrop.classList.add('hidden');
+      }
       document.body.style.overflow = '';
     }
   }
@@ -2335,7 +2371,7 @@
     openGalleryLightbox,
     closeGalleryLightbox,
     detectCustomerLocation,
-    requestOrderChange,
+    requestOrderCancellation,
     adminConfirmOrder,
     adminUpdateOrderStatus,
     adminHandleChangeRequest,

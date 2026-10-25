@@ -134,7 +134,7 @@
       </a>
 
       <!-- Center Navigation Links -->
-      <nav class="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest text-stone-300">
+      <nav id="customerNavbar" class="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest text-stone-300">
         <a href="#top" class="hover:text-amber-400 transition-colors text-amber-400">Home</a>
         <a href="#signature" class="hover:text-amber-400 transition-colors">Specials</a>
         <a href="#menu" class="hover:text-amber-400 transition-colors">Menu</a>
@@ -340,15 +340,7 @@
         </div>
 
         <!-- Category Pills -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none reveal-init reveal-right">
-          <button class="category-pill active px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="all">All Dishes</button>
-          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="rice">Rice & Biryani</button>
-          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="kottu">Kottu Royale</button>
-          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="seafood">Seafood & Devilled</button>
-          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="meat">Wok & Szechuan</button>
-          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="grill">Grill & Burgers</button>
-          <button class="category-pill px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider shrink-0" data-category="drinks">Drinks & Desserts</button>
-        </div>
+        
       </div>
 
       <!-- Menu Grid -->
@@ -524,27 +516,6 @@
           </p>
         </div>
 
-        <!-- Gallery Filter Pills -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none reveal-init reveal-right">
-          <button class="gallery-pill category-pill active px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap" data-gallery-category="all">
-            All Photos
-          </button>
-          <button class="gallery-pill category-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap" data-gallery-category="kottu">
-            Kottu & Wok
-          </button>
-          <button class="gallery-pill category-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap" data-gallery-category="rice">
-            Rice & Biryani
-          </button>
-          <button class="gallery-pill category-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap" data-gallery-category="rooftop">
-            Rooftop Vibe
-          </button>
-          <button class="gallery-pill category-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap" data-gallery-category="seafood">
-            Seafood & Grill
-          </button>
-          <button class="gallery-pill category-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap" data-gallery-category="drinks">
-            Drinks & Desserts
-          </button>
-        </div>
       </div>
 
       <!-- Dynamic Gallery Grid -->
@@ -587,7 +558,7 @@
             <div class="flex items-center justify-between pb-3 border-b border-white/5">
               <span class="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                Satellite Distance Engine
+                Live Road Distance Calculator
               </span>
               <span class="text-[10px] text-stone-400 font-mono">GPS Haversine</span>
             </div>
@@ -607,7 +578,7 @@
                 <span>Detect My Live GPS Distance</span>
               </button>
 
-              <a id="googleMapsDirectionBtn" href="https://www.google.com/maps/dir/?api=1&destination=6.5684,79.9806&destination_place_id=Ovita+Family+Restaurant+Nagoda+Junction+Kalutara" target="_blank" rel="noopener" class="w-full py-3.5 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg">
+              <a id="googleMapsDirectionBtn" href="https://www.google.com/maps/dir/?api=1&destination=Ovita+Family+Restaurant,+Nagoda+Junction,+Kalutara,+Sri+Lanka" target="_blank" rel="noopener" class="w-full py-3.5 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg">
                 <i data-lucide="navigation" class="w-4 h-4"></i>
                 <span>Get Directions in Google Maps</span>
               </a>
@@ -647,10 +618,10 @@
         <div class="lg:col-span-7 reveal-init reveal-right">
           <div class="rounded-3xl overflow-hidden border border-white/10 relative h-[420px] sm:h-[480px] shadow-2xl bg-[#0B0B0E]">
             <iframe 
-              src="https://maps.google.com/maps?q=6.5684,79.9806&hl=en&z=15&output=embed" 
+              src="https://maps.google.com/maps?q=Ovita+Family+Restaurant,+Nagoda+Junction,+Kalutara,+Sri+Lanka&hl=en&z=16&output=embed" 
               width="100%" 
               height="100%" 
-              style="border:0; filter: invert(90%) hue-rotate(180deg) contrast(1.1);" 
+              style="border:0;" 
               allowfullscreen="" 
               loading="lazy">
             </iframe>
@@ -676,7 +647,79 @@
       </div>
     </section>
 
-    <!-- ==============================================================
+    <!-- FOOTER -->
+  <footer class="border-t border-white/10 bg-[#060608] pt-16 pb-12 px-4 sm:px-8" id="contact">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-white/5 reveal-init reveal-bottom">
+      
+      <!-- Brand Info -->
+      <div class="space-y-4">
+        <div class="flex items-baseline gap-2">
+          <span class="font-serif-luxury text-2xl font-bold text-[#FFB800]">ඕවිට</span>
+          <span class="font-serif text-xl font-bold text-white">Family Restaurant</span>
+        </div>
+        <div class="text-[11px] font-mono uppercase tracking-widest text-amber-500">OVITA · Nagoda Junction, Kalutara South</div>
+        <p class="text-xs text-stone-400 leading-relaxed font-light">
+          Open-air container rooftop dining and authentic wok cuisine at Nagoda Junction. Fresh ingredients, sizzled upon order.
+        </p>
+        <div class="flex gap-3 text-stone-400">
+          <a href="#" class="w-8 h-8 rounded-full bg-white/5 hover:bg-amber-500 hover:text-black flex items-center justify-center transition-colors"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+          <a href="#" class="w-8 h-8 rounded-full bg-white/5 hover:bg-amber-500 hover:text-black flex items-center justify-center transition-colors"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+          <a href="tel:0772775132" class="w-8 h-8 rounded-full bg-white/5 hover:bg-amber-500 hover:text-black flex items-center justify-center transition-colors"><i data-lucide="phone" class="w-4 h-4"></i></a>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="space-y-3 text-xs">
+        <div class="font-mono text-amber-400 uppercase tracking-widest text-[11px] font-bold">Quick Links</div>
+        <div class="flex flex-col gap-2 text-stone-400">
+          <a href="#top" class="hover:text-white transition-colors">Home</a>
+          <a href="#signature" class="hover:text-white transition-colors">Signature Collection</a>
+          <a href="#menu" class="hover:text-white transition-colors">Full Food Menu</a>
+          <a href="#track" class="hover:text-white transition-colors">Track Active Order</a>
+          <a href="#story" class="hover:text-white transition-colors">Rooftop Experience</a>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="space-y-3 text-xs text-stone-400">
+        <div class="font-mono text-amber-400 uppercase tracking-widest text-[11px] font-bold">Contact Us</div>
+        <div class="flex items-start gap-2">
+          <i data-lucide="map-pin" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+          <span>Nagoda Junction, Kalutara South, Western Province, Sri Lanka</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="phone" class="w-4 h-4 text-amber-500 shrink-0"></i>
+          <span class="font-mono">077 277 5132</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i data-lucide="clock" class="w-4 h-4 text-amber-500 shrink-0"></i>
+          <span>Mon – Sun: 10:30 AM – 11:00 PM</span>
+        </div>
+      </div>
+
+      <!-- Newsletter -->
+      <div class="space-y-3 text-xs">
+        <div class="font-mono text-amber-400 uppercase tracking-widest text-[11px] font-bold">Ovita Newsletter</div>
+        <p class="text-stone-400">Get weekend family combo updates and special kottu offers.</p>
+        <form onsubmit="event.preventDefault(); window.OwitaApp.showToast ? window.OwitaApp.showToast('Subscribed to Ovita food notes!') : alert('Subscribed!'); this.reset();" class="flex gap-2">
+          <input type="email" placeholder="Enter your email" required class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-stone-500 focus:outline-none focus:border-amber-500">
+          <button type="submit" class="px-4 py-2 rounded-xl amber-btn-primary text-xs font-bold uppercase">Join</button>
+        </form>
+      </div>
+
+    </div>
+
+    <div class="max-w-7xl mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between text-[11px] text-stone-500 gap-4">
+      <div>© 2026 ඕවිට (Ovita) Family Restaurant · Nagoda Junction, Kalutara South. All rights reserved.</div>
+      <div class="flex gap-6">
+        <a href="../index.html" class="hover:text-amber-400">Client Demo Hub</a>
+        <a href="#" onclick="window.OwitaApp.toggleRoleSwitch(); return false;" class="text-amber-500 hover:underline">Kitchen Manager Access</a>
+      </div>
+    </div>
+  </footer>
+  </div><!-- END customerWebsiteContainer -->
+
+  <!-- ==============================================================
        RESTAURANT ADMIN MANAGEMENT PORTAL (TOGGLEABLE VIEW)
   ============================================================== -->
   
@@ -1014,76 +1057,9 @@
   </div>
 
 
-  <!-- FOOTER -->
-  <footer class="border-t border-white/10 bg-[#060608] pt-16 pb-12 px-4 sm:px-8" id="contact">
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-white/5 reveal-init reveal-bottom">
-      
-      <!-- Brand Info -->
-      <div class="space-y-4">
-        <div class="flex items-baseline gap-2">
-          <span class="font-serif-luxury text-2xl font-bold text-[#FFB800]">ඕවිට</span>
-          <span class="font-serif text-xl font-bold text-white">Family Restaurant</span>
-        </div>
-        <div class="text-[11px] font-mono uppercase tracking-widest text-amber-500">OVITA · Nagoda Junction, Kalutara South</div>
-        <p class="text-xs text-stone-400 leading-relaxed font-light">
-          Open-air container rooftop dining and authentic wok cuisine at Nagoda Junction. Fresh ingredients, sizzled upon order.
-        </p>
-        <div class="flex gap-3 text-stone-400">
-          <a href="#" class="w-8 h-8 rounded-full bg-white/5 hover:bg-amber-500 hover:text-black flex items-center justify-center transition-colors"><i data-lucide="facebook" class="w-4 h-4"></i></a>
-          <a href="#" class="w-8 h-8 rounded-full bg-white/5 hover:bg-amber-500 hover:text-black flex items-center justify-center transition-colors"><i data-lucide="instagram" class="w-4 h-4"></i></a>
-          <a href="tel:0772775132" class="w-8 h-8 rounded-full bg-white/5 hover:bg-amber-500 hover:text-black flex items-center justify-center transition-colors"><i data-lucide="phone" class="w-4 h-4"></i></a>
-        </div>
-      </div>
+  
 
-      <!-- Quick Links -->
-      <div class="space-y-3 text-xs">
-        <div class="font-mono text-amber-400 uppercase tracking-widest text-[11px] font-bold">Quick Links</div>
-        <div class="flex flex-col gap-2 text-stone-400">
-          <a href="#top" class="hover:text-white transition-colors">Home</a>
-          <a href="#signature" class="hover:text-white transition-colors">Signature Collection</a>
-          <a href="#menu" class="hover:text-white transition-colors">Full Food Menu</a>
-          <a href="#track" class="hover:text-white transition-colors">Track Active Order</a>
-          <a href="#story" class="hover:text-white transition-colors">Rooftop Experience</a>
-        </div>
-      </div>
 
-      <!-- Contact Info -->
-      <div class="space-y-3 text-xs text-stone-400">
-        <div class="font-mono text-amber-400 uppercase tracking-widest text-[11px] font-bold">Contact Us</div>
-        <div class="flex items-start gap-2">
-          <i data-lucide="map-pin" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
-          <span>Nagoda Junction, Kalutara South, Western Province, Sri Lanka</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <i data-lucide="phone" class="w-4 h-4 text-amber-500 shrink-0"></i>
-          <span class="font-mono">077 277 5132</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <i data-lucide="clock" class="w-4 h-4 text-amber-500 shrink-0"></i>
-          <span>Mon – Sun: 10:30 AM – 11:00 PM</span>
-        </div>
-      </div>
-
-      <!-- Newsletter -->
-      <div class="space-y-3 text-xs">
-        <div class="font-mono text-amber-400 uppercase tracking-widest text-[11px] font-bold">Ovita Newsletter</div>
-        <p class="text-stone-400">Get weekend family combo updates and special kottu offers.</p>
-        <form onsubmit="event.preventDefault(); window.OwitaApp.showToast ? window.OwitaApp.showToast('Subscribed to Ovita food notes!') : alert('Subscribed!'); this.reset();" class="flex gap-2">
-          <input type="email" placeholder="Enter your email" required class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-stone-500 focus:outline-none focus:border-amber-500">
-          <button type="submit" class="px-4 py-2 rounded-xl amber-btn-primary text-xs font-bold uppercase">Join</button>
-        </form>
-      </div>
-
-    </div>
-
-    <div class="max-w-7xl mx-auto pt-8 flex flex-col sm:flex-row items-center justify-between text-[11px] text-stone-500 gap-4">
-      <div>© 2026 ඕවිට (Ovita) Family Restaurant · Nagoda Junction, Kalutara South. All rights reserved.</div>
-      <div class="flex gap-6">
-        <a href="../index.html" class="hover:text-amber-400">Client Demo Hub</a>
-        <a href="#" onclick="window.OwitaApp.toggleRoleSwitch(); return false;" class="text-amber-500 hover:underline">Kitchen Manager Access</a>
-      </div>
-    </div>
-  </footer>
 
   <!-- ==============================================================
        CART SLIDE-OVER DRAWER
