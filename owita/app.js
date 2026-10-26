@@ -495,13 +495,13 @@
       const pricing = getItemPricing(item);
 
       return `
-        <div class="owita-card menu-item-card rounded-2xl overflow-hidden flex flex-col justify-between group reveal-init reveal-bottom stagger-${(idx % 6) + 1} ${!item.inStock ? 'opacity-60 grayscale' : ''}">
+        <div id="menu-card-${item.id}" onclick="window.OwitaApp.onMenuCardClick('${item.id}', event)" class="menu-item-card rounded-2xl overflow-hidden flex flex-col justify-between group reveal-init reveal-bottom stagger-${(idx % 6) + 1} ${!item.inStock ? 'opacity-60 grayscale' : ''}">
           <div>
-            <div class="relative h-48 overflow-hidden">
-              <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-              <div class="absolute inset-0 bg-gradient-to-t from-[#101014] via-black/20 to-transparent"></div>
+            <div class="relative h-48 overflow-hidden bg-stone-100">
+              <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
               
-              <div class="absolute top-3 left-3 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-full border border-amber-500/30 text-[10px] font-semibold text-amber-400">
+              <div class="absolute top-3 left-3 flex items-center gap-1.5 bg-black/80 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-amber-400">
                 <i data-lucide="clock" class="w-3 h-3"></i>
                 <span>~10 Mins Prep</span>
               </div>
@@ -511,85 +511,47 @@
                   🔥 ${pricing.tag}
                 </div>
               ` : `
-                <div class="absolute top-3 right-3 bg-amber-500/90 text-black px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-stone-900 border border-black/5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
                   ${item.serves || 'Portion'}
                 </div>
               `}
 
               ${!item.inStock ? `
-                <div class="absolute inset-0 bg-black/70 flex items-center justify-center text-xs font-bold uppercase tracking-widest text-red-400">
+                <div class="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center text-xs font-bold uppercase tracking-widest text-red-500">
                   Sold Out
                 </div>
               ` : ''}
 
-              ${pricing.hasOffer ? `
-                <div class="absolute bottom-2 left-3 bg-black/85 backdrop-blur-md px-2 py-0.5 rounded text-[9px] font-mono font-bold text-red-400 border border-red-500/30 live-offer-timer" data-expires="${pricing.expiresAt}">
-                  ⏳ Ends: ${formatCountdown(pricing.expiresAt)}
-                </div>
-              ` : ''}
+              <div class="absolute bottom-2.5 left-3 bg-black/75 backdrop-blur-sm px-2 py-0.5 rounded-md text-xs font-semibold text-amber-400 flex items-center gap-1">
+                <span>★</span>
+                <span>${item.rating || '4.8'}</span>
+              </div>
 
-              <div class="absolute bottom-2.5 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-semibold text-amber-400">
-                ★ ${item.rating || '4.8'}
+              <div class="absolute bottom-2.5 right-3 bg-white/95 text-stone-900 font-mono font-bold text-xs px-2.5 py-0.5 rounded-md shadow-sm">
+                LKR ${pricing.finalPrice.toLocaleString()}
               </div>
             </div>
 
-            <div class="p-4 space-y-1.5">
-              <h4 class="font-serif-luxury text-lg font-bold text-white group-hover:text-amber-400 transition-colors">
+            <div class="p-4 space-y-1">
+              <h4 class="font-serif-luxury text-base font-bold text-stone-900 group-hover:text-[#FF7A00] transition-colors leading-snug">
                 ${item.name}
               </h4>
-              ${item.sinhala ? `<div class="text-[10px] text-amber-500/80 font-medium">${item.sinhala}</div>` : ''}
-              <p class="text-xs text-stone-400 line-clamp-1 leading-relaxed font-light">
-                ${item.description}
-              </p>
-
-              <div class="text-[10px] text-amber-400/90 font-mono flex items-center gap-1 group-hover:opacity-0 transition-opacity">
-                <i data-lucide="info" class="w-3 h-3"></i>
-                <span>Hover card to view portion contents</span>
+              ${item.sinhala ? `<div class="text-[10px] text-stone-400 font-medium">${item.sinhala}</div>` : ''}
+              
+              <div class="pt-2 flex items-center justify-between text-[11px] text-stone-500 font-medium">
+                <span class="flex items-center gap-1 text-[#FF7A00] hover:underline">
+                  <i data-lucide="sparkles" class="w-3 h-3"></i>
+                  <span>Inspect in Showcase</span>
+                </span>
+                <span class="text-stone-400 font-mono text-[10px]">${item.category.toUpperCase()}</span>
               </div>
-
-              <!-- HOVER REVEAL INCLUSIONS & FULL CHEF DESCRIPTION -->
-              <div class="dish-hover-panel">
-                <div class="p-3 rounded-xl bg-black/95 border border-amber-500/40 shadow-2xl space-y-2 text-xs">
-                  <p class="text-[11px] text-stone-200 leading-relaxed font-light italic">
-                    "${item.description}"
-                  </p>
-                  <div class="border-t border-white/10 pt-2">
-                    <div class="text-[10px] font-mono text-amber-400 uppercase tracking-widest font-bold flex items-center justify-between mb-1">
-                      <span>✦ WHAT'S INCLUDED:</span>
-                      <span class="text-amber-300 font-normal">${item.serves || ''}</span>
-                    </div>
-                    <ul class="space-y-1">
-                      ${(item.portionIncludes || []).map(inc => `
-                        <li class="flex items-start gap-1.5 text-[11px] text-stone-200">
-                          <span class="text-amber-400 font-bold shrink-0">✔</span>
-                          <span>${inc}</span>
-                        </li>
-                      `).join('')}
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
             </div>
           </div>
 
-          <div class="p-4 pt-0 flex items-center justify-between border-t border-white/5 mt-2">
-            <div>
-              <div class="flex items-baseline gap-2">
-                <span class="text-base font-bold font-mono ${pricing.hasOffer ? 'text-red-400' : 'text-amber-400'}">
-                  LKR ${pricing.currentPrice.toLocaleString()}
-                </span>
-                ${pricing.hasOffer ? `
-                  <span class="text-xs font-mono text-stone-500 line-through">
-                    LKR ${pricing.originalPrice.toLocaleString()}
-                  </span>
-                ` : ''}
-              </div>
-            </div>
-
-            <button onclick="window.OwitaApp.addToCart('${item.id}')" ${!item.inStock ? 'disabled' : ''} class="px-3.5 py-2 rounded-xl amber-btn-primary flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider ${!item.inStock ? 'opacity-40 cursor-not-allowed' : ''}">
+          <div class="p-4 pt-0">
+            <button onclick="event.stopPropagation(); window.OwitaApp.addToCart('${item.id}')" ${!item.inStock ? 'disabled' : ''} class="w-full py-2.5 rounded-xl amber-btn-primary flex items-center justify-center gap-2 text-xs uppercase font-bold tracking-wider">
               <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              <span>Add</span>
+              <span>Add to Cart</span>
             </button>
           </div>
         </div>
@@ -597,7 +559,10 @@
     }).join('');
 
     if (window.lucide) lucide.createIcons();
-    initScrollObserver();
+    if (window.OwitaSlider && window.OwitaSlider.syncWithFullMenu) {
+      const activeDish = window.HERO_SLIDER_DISHES ? window.HERO_SLIDER_DISHES[0] : null;
+      if (activeDish) window.OwitaSlider.syncWithFullMenu(activeDish.id);
+    }
   }
 
 function renderGallery() {
@@ -2350,6 +2315,16 @@ function openCartDrawer() {
 
   // Expose public API to window for inline onclick handlers
   window.OwitaApp = {
+    onMenuCardClick: function(dishId, event) {
+      if (window.OwitaSlider && window.OwitaSlider.goToDishId) {
+        window.OwitaSlider.goToDishId(dishId);
+      }
+      // Smoothly scroll up toward the interactive showcase so the user sees the plate animation & full details
+      const showcaseEl = document.getElementById('interactiveOrderShowcase');
+      if (showcaseEl) {
+        showcaseEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    },
     init,
     addToCart,
     updateCartQuantity,

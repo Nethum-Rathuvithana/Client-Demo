@@ -1,28 +1,43 @@
 /* ========================================================
    ඕවිට (OVITA) Family Restaurant — Nagoda Junction, Kalutara
-   Luxury Dark Culinary Design System & Scroll Animation Engine
+   Luxury White + Black + Yellow/Orange Culinary Design System
    ======================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@200;300;800;900&family=Mulish:wght@400;600;700;800&display=swap');
 
 :root {
-  --bg-deep: #08080A;
-  --bg-surface: #101014;
-  --bg-card: rgba(22, 22, 28, 0.88);
-  --bg-card-hover: rgba(30, 30, 38, 0.98);
+  /* Primary Page Background: Pure Crisp White */
+  --bg-deep: #FFFFFF;
+  --bg-surface: #F8F9FA;
+  --bg-surface-warm: #FAF8F5;
+  --bg-surface-dark: #111116;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FFFFFF;
   
-  --amber-primary: #E58B43;
-  --amber-glow: #F59E0B;
-  --amber-dark: #C8722B;
-  --amber-subtle: rgba(229, 139, 67, 0.15);
-  --amber-border: rgba(229, 139, 67, 0.3);
+  /* Theme Accents: Black, Golden Yellow, Warm Orange */
+  --theme-black: #111116;
+  --theme-charcoal: #1E1F24;
+  --theme-yellow: #FFB800;
+  --theme-yellow-glow: #F59E0B;
+  --theme-orange: #FF7A00;
+  --theme-orange-deep: #E05300;
   
-  --text-main: #FBF8F3;
-  --text-muted: #A39D93;
-  --text-dim: #716C63;
+  --amber-primary: #FF7A00;
+  --amber-glow: #FFB800;
+  --amber-dark: #E05300;
+  --amber-subtle: rgba(255, 122, 0, 0.08);
+  --amber-border: rgba(255, 122, 0, 0.35);
   
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-card: rgba(255, 255, 255, 0.06);
+  /* Text & Typography: High-contrast black & charcoal */
+  --text-main: #141418;
+  --text-body: #374151;
+  --text-muted: #6B7280;
+  --text-dim: #9CA3AF;
+  
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-card: rgba(0, 0, 0, 0.08);
+  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.07), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 20px 45px -15px rgba(255, 122, 0, 0.22), 0 6px 18px -4px rgba(0, 0, 0, 0.06);
 
   --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', sans-serif;
@@ -31,11 +46,12 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: var(--bg-deep);
+  background-color: #FFFFFF;
+  color: var(--text-main);
 }
 
 body {
-  background-color: var(--bg-deep);
+  background-color: #FFFFFF;
   color: var(--text-main);
   font-family: var(--font-sans);
   overflow-x: hidden;
@@ -49,205 +65,151 @@ body {
   font-family: var(--font-mono);
 }
 
-/* ========================================================
-   LUXURY SCROLL REVEAL ANIMATIONS
-   Items emerging from bottom + Descriptions sliding from sides
-   ======================================================== */
-.reveal-init {
-  opacity: 0;
-  will-change: transform, opacity;
-  transition: opacity 1.35s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 1.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Items emerging smoothly from bottom */
-.reveal-bottom {
-  opacity: 0;
-  transform: translate3d(0, 48px, 0);
-}
-
-/* Descriptions & text sliding gracefully from the left */
-.reveal-left {
-  opacity: 0;
-  transform: translate3d(-52px, 0, 0);
-}
-
-/* Descriptions & text sliding gracefully from the right */
-.reveal-right {
-  opacity: 0;
-  transform: translate3d(52px, 0, 0);
-}
-
-/* Subtle scale zoom */
-.reveal-scale {
-  opacity: 0;
-  transform: scale(0.92);
-}
-
-/* Active visible state when in viewport */
-.reveal-active {
-  opacity: 1 !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
-}
-
-/* Stagger delay classes for cascading grid items */
-.stagger-1 { transition-delay: 0.10s; }
-.stagger-2 { transition-delay: 0.22s; }
-.stagger-3 { transition-delay: 0.34s; }
-.stagger-4 { transition-delay: 0.46s; }
-.stagger-5 { transition-delay: 0.58s; }
-.stagger-6 { transition-delay: 0.70s; }
-.stagger-7 { transition-delay: 0.82s; }
-.stagger-8 { transition-delay: 0.94s; }
-
-/* Respect prefers-reduced-motion */
-@media (prefers-reduced-motion: reduce) {
-  .reveal-init,
-  .reveal-bottom,
-  .reveal-left,
-  .reveal-right,
-  .reveal-scale {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-}
-
-/* ========================================================
-   MODAL LUXURY TRANSITIONS & RECEIPT POLISH
-   ======================================================== */
-@keyframes modalSlideUp {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translate3d(0, 24px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-}
-
-.modal-animate-in {
-  animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Glassmorphism Cards */
+/* Base Card & Container Elements */
 .owita-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: var(--card-shadow);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .owita-card:hover {
-  border-color: var(--amber-border);
-  box-shadow: 0 16px 40px -12px rgba(229, 139, 67, 0.22);
+  border-color: rgba(255, 122, 0, 0.4);
+  box-shadow: var(--card-shadow-hover);
   transform: translateY(-4px);
 }
 
-/* Amber Glow Accents */
-.amber-glow-text {
-  background: linear-gradient(135deg, #FFF1DF 0%, #E58B43 60%, #C8722B 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Distinct Highlight for Menu Card Synced with Showcase */
+.menu-item-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+  cursor: pointer;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
+.menu-item-card:hover {
+  transform: translateY(-4px);
+  border-color: #FFB800;
+  box-shadow: 0 16px 36px -10px rgba(255, 184, 0, 0.25);
+}
+
+.menu-card-highlighted {
+  border: 2.5px solid #FF7A00 !important;
+  box-shadow: 0 0 0 4px rgba(255, 122, 0, 0.18), 0 20px 45px -10px rgba(255, 122, 0, 0.35) !important;
+  transform: translateY(-6px) scale(1.02) !important;
+  position: relative;
+  z-index: 10;
+}
+
+.menu-card-highlighted::after {
+  content: '★ ACTIVE SELECTION';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #FFB800, #FF7A00);
+  color: #111116;
+  font-family: 'DM Mono', monospace;
+  font-weight: 800;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(255, 122, 0, 0.4);
+  z-index: 30;
+  pointer-events: none;
+}
+
+/* Primary Amber / Orange Gradient Buttons */
 .amber-btn-primary {
-  background: linear-gradient(135deg, #E58B43 0%, #C8722B 100%);
-  color: #0A0A0C;
-  font-weight: 600;
+  background: linear-gradient(135deg, #FFB800 0%, #FF7A00 100%);
+  color: #111116;
+  font-weight: 700;
+  box-shadow: 0 8px 24px -6px rgba(255, 122, 0, 0.35);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 20px -2px rgba(229, 139, 67, 0.35);
+  border: none;
 }
 
 .amber-btn-primary:hover {
-  background: linear-gradient(135deg, #F59E0B 0%, #E58B43 100%);
+  background: linear-gradient(135deg, #FFC72C 0%, #FF8A1A 100%);
+  box-shadow: 0 12px 30px -6px rgba(255, 122, 0, 0.5);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(229, 139, 67, 0.5);
+  color: #000000;
+}
+
+.black-btn-primary {
+  background: #111116;
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.black-btn-primary:hover {
+  background: #FF7A00;
+  color: #111116;
+  transform: translateY(-2px);
 }
 
 .amber-btn-outline {
-  border: 1px solid var(--amber-border);
-  color: var(--amber-primary);
-  background: rgba(229, 139, 67, 0.05);
+  border: 1.5px solid rgba(255, 122, 0, 0.4);
+  background: rgba(255, 122, 0, 0.04);
+  color: #FF7A00;
   transition: all 0.3s ease;
 }
 
 .amber-btn-outline:hover {
-  background: var(--amber-primary);
-  color: #0A0A0C;
-  border-color: var(--amber-primary);
+  border-color: #FF7A00;
+  background: #FF7A00;
+  color: #111116;
 }
 
-/* Overhead Hero Plate Animation */
-.hero-plate-container {
+/* Luxury Glowing Text */
+.amber-glow-text {
+  background: linear-gradient(135deg, #FF7A00 0%, #FFB800 60%, #FF7A00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Windowed Showcase Container Styling */
+.showcase-window-wrapper {
   position: relative;
-  border-radius: 50%;
-  box-shadow: 0 0 100px 10px rgba(229, 139, 67, 0.15),
-              0 30px 80px rgba(0, 0, 0, 0.85);
+  max-width: 1360px;
+  margin: 0 auto;
 }
 
-.hero-plate-glow {
+/* Warm Light Emanating From Below */
+.showcase-underglow {
   position: absolute;
-  inset: -20px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(229, 139, 67, 0.25) 0%, transparent 70%);
-  filter: blur(25px);
-  animation: pulseGlow 6s ease-in-out infinite alternate;
+  bottom: -45px;
+  left: 8%;
+  right: 8%;
+  height: 140px;
+  background: radial-gradient(ellipse at center bottom, rgba(255, 122, 0, 0.45) 0%, rgba(255, 184, 0, 0.3) 40%, rgba(255, 87, 34, 0.15) 60%, transparent 80%);
+  filter: blur(40px);
   pointer-events: none;
+  z-index: 1;
 }
 
-@keyframes pulseGlow {
-  0% { transform: scale(0.95); opacity: 0.6; }
-  100% { transform: scale(1.08); opacity: 1; }
-}
-
-/* Circular Seal Stamp */
-.circular-stamp {
-  animation: rotateStamp 40s linear infinite;
-}
-
-@keyframes rotateStamp {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* Category Filter Tabs */
-.category-pill {
-  border: 1px solid var(--border-subtle);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-muted);
-  transition: all 0.25s ease;
-}
-
-.category-pill:hover {
-  border-color: var(--amber-border);
-  color: var(--text-main);
-  background: rgba(229, 139, 67, 0.08);
-}
-
-.category-pill.active {
-  background: var(--amber-primary);
-  color: #0A0A0C;
-  border-color: var(--amber-primary);
-  font-weight: 600;
-}
-
-/* Kitchen Timer Bar */
-.kitchen-timer-meter {
-  height: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
-  overflow: hidden;
+.showcase-window-frame {
   position: relative;
+  z-index: 5;
+  background: #F8F8FC;
+  border-radius: 32px;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 25px 70px -15px rgba(20, 20, 40, 0.12), 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
-.kitchen-timer-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #10B981, #F59E0B, #E58B43);
-  border-radius: 999px;
-  transition: width 1s linear;
+/* Ambient bottom illumination inside the showcase window */
+.showcase-inner-bottom-light {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 220px;
+  background: linear-gradient(to top, rgba(255, 140, 0, 0.15) 0%, rgba(255, 184, 0, 0.06) 45%, transparent 100%);
+  pointer-events: none;
+  z-index: 15;
 }
 
 /* Custom Scrollbar */
@@ -256,187 +218,12 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0B0B0E;
+  background: #F1F1F5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #262630;
+  background: #D1D5DB;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #E58B43;
-}
-
-/* Pulse badges */
-.live-pulse {
-  animation: liveBadge 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes liveBadge {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.15); }
-}
-
-/* ========================================================
-   HOVER ITEM EXPANSION & PORTION INCLUSIONS
-   ======================================================== */
-.menu-item-card {
-  position: relative;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
-              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  transform-origin: center center;
-}
-
-@media (min-width: 768px) {
-  .menu-item-card:hover {
-    transform: scale(1.05) translateY(-8px);
-    z-index: 35;
-    box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.95), 
-                0 0 35px rgba(229, 139, 67, 0.35);
-    border-color: rgba(229, 139, 67, 0.7);
-  }
-}
-
-.portion-inclusions-box {
-  background: rgba(12, 12, 16, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 10px 12px;
-  transition: all 0.35s ease;
-}
-
-.menu-item-card:hover .portion-inclusions-box {
-  border-color: rgba(229, 139, 67, 0.5);
-  background: rgba(20, 20, 28, 0.96);
-  box-shadow: inset 0 0 16px rgba(229, 139, 67, 0.12);
-}
-
-/* Gallery Hover & Lightbox */
-.gallery-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.gallery-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(229, 139, 67, 0.25);
-  border-color: rgba(229, 139, 67, 0.5);
-}
-
-.gallery-card img {
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.gallery-card:hover img {
-  transform: scale(1.08);
-}
-
-/* ========================================================
-   RED RIBBON DISCOUNTS & OFFER TIMERS
-   ======================================================== */
-.offer-ribbon-red {
-  background: linear-gradient(135deg, #FF1744 0%, #D50000 100%);
-  color: #FFFFFF;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  box-shadow: 0 4px 18px rgba(213, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.urgency-pulse {
-  animation: urgencyGlow 1.8s ease-in-out infinite alternate;
-}
-
-@keyframes urgencyGlow {
-  0% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(255, 23, 68, 0.4)); }
-  100% { transform: scale(1.03); filter: drop-shadow(0 0 14px rgba(255, 23, 68, 0.85)); }
-}
-
-.receipt-order-hero {
-  background: linear-gradient(135deg, rgba(229, 139, 67, 0.15) 0%, rgba(229, 139, 67, 0.04) 100%);
-  border: 1.5px dashed rgba(229, 139, 67, 0.45);
-  border-radius: 14px;
-  padding: 12px;
-  text-align: center;
-  margin: 12px 0;
-}
-
-/* POS Quick Item Button */
-.pos-item-btn {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.pos-item-btn:hover {
-  background: rgba(229, 139, 67, 0.12);
-  border-color: rgba(229, 139, 67, 0.4);
-  transform: translateY(-2px);
-}
-
-.pos-item-btn:active {
-  transform: scale(0.97);
-}
-
-
-/* ==============================================================
-   CART DRAWER & BACKDROP FIX
-============================================================== */
-#cartDrawer {
-  z-index: 1000 !important;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-#cartDrawer.open {
-  transform: translateX(0) !important;
-}
-
-#owitaCartDrawerBackdrop {
-  z-index: 999 !important;
-}
-
-#owitaCartDrawerBackdrop.open {
-  display: block !important;
-  opacity: 1 !important;
-}
-
-/* ==============================================================
-   PROMINENT HOVER DISH EXPANSION & INCLUSIONS REVEAL
-============================================================== */
-.menu-item-card {
-  position: relative;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  transform-origin: center center;
-}
-
-.menu-item-card:hover {
-  transform: scale(1.08) translateY(-10px) !important;
-  z-index: 50 !important;
-  box-shadow: 0 30px 70px -10px rgba(0, 0, 0, 0.95),
-              0 0 45px rgba(229, 139, 67, 0.45) !important;
-  border-color: rgba(229, 139, 67, 0.85) !important;
-}
-
-.dish-hover-panel {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transform: translateY(8px);
-  transition: max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.35s ease,
-              transform 0.35s ease;
-  margin-top: 0;
-}
-
-.menu-item-card:hover .dish-hover-panel {
-  max-height: 400px !important;
-  opacity: 1 !important;
-  transform: translateY(0) !important;
-  margin-top: 8px;
+  background: #FF7A00;
 }

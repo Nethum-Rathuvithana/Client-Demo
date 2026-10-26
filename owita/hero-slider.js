@@ -1,6 +1,7 @@
 /**
  * "Most Loved Dish" Food Hero Slider Animation Controller
- * Uses GSAP 3 Core for 60fps plate orbit swap, opposing mask wipes, color tweens, and intro
+ * Uses GSAP 3 Core for 60fps plate orbit swap, opposing mask wipes, color tweens
+ * Synchronized with the Full Menu below (highlight active card + two-way sync)
  */
 
 (function () {
@@ -10,12 +11,13 @@
   let currentIndex = 0;
   let isAnimating = false;
   let autoplayTimer = null;
-  const AUTOPLAY_DELAY = 4500;
+  const AUTOPLAY_DELAY = 5000;
   let currentTab = 'overview';
 
   // DOM Elements
   const heroEl = document.getElementById('mostLovedHero');
-  const plateStage = document.querySelector('.slider-plate-stage');
+  if (!heroEl) return;
+
   const currentOrbit = document.querySelector('.current-orbit');
   const nextOrbit = document.querySelector('.next-orbit');
   const currentPlateImg = document.querySelector('.current-plate');
@@ -24,6 +26,8 @@
   const eyebrowEl = document.querySelector('.title-eyebrow');
   const line1El = document.querySelector('.title-line1');
   const line2El = document.querySelector('.title-line2');
+  const priceTagEl = document.querySelector('.slider-price-tag');
+  const servesPillEl = document.querySelector('.slider-serves-pill');
 
   const ratingBadgeEl = document.querySelector('.rating-badge');
   const ratingNumEl = document.querySelector('.rating-number');
@@ -40,12 +44,10 @@
   const thumbItems = document.querySelectorAll('.thumb-item');
   const activeTile = document.querySelector('.strip-active-tile');
 
-  // Preload all plate images for instant transitions
-  dishes.forEach(d => {
+  // Preload first batch of plate images
+  dishes.slice(0, 6).forEach(d => {
     const img = new Image();
     img.src = d.img;
-    const thumb = new Image();
-    thumb.src = d.thumb;
   });
 
   // Helper: Position active tile over thumb item
@@ -56,7 +58,7 @@
     if (!track) return;
     const trackRect = track.getBoundingClientRect();
     const thumbRect = targetThumb.getBoundingClientRect();
-    const leftOffset = thumbRect.left - trackRect.left - 8;
+    const leftOffset = thumbRect.left - trackRect.left - 6;
 
     if (immediate || typeof gsap === 'undefined') {
       activeTile.style.transform = 'translateX(' + leftOffset + 'px)';
@@ -75,10 +77,39 @@
     pagerDots.forEach((d, i) => {
       d.classList.toggle('active', i === index);
     });
+
+    // Scroll thumbnail into view within track wrapper if needed
+    const wrapper = document.querySelector('.strip-track-wrapper');
+    if (wrapper) {
+      const scrollPos = targetThumb.offsetLeft - wrapper.offsetWidth / 2 + targetThumb.offsetWidth / 2;
+      wrapper.scrollTo({ left: Math.max(0, scrollPos), behavior: 'smooth' });
+    }
   }
 
-  // --- SLIDE CHANGE TRANSITION TIMELINE (§6 Study 05_transition_sequence.jpg) ---
-  function goToSlide(newIndex, direction = 1) {
+  // --- TWO-WAY SYNC: HIGHLIGHT CORRESPONDING MENU CARD BELOW ---
+  function syncWithFullMenu(dishId) {
+    if (!dishId) return;
+
+    // Remove highlight from all menu cards
+    document.querySelectorAll('.menu-item-card').forEach(card => {
+      card.classList.remove('menu-card-highlighted');
+    });
+
+    // Find and highlight matching card
+    const targetCard = document.getElementById('menu-card-' + dishId);
+    if (targetCard) {
+      targetCard.classList.add('menu-card-highlighted');
+      // Gentle scroll into view without jarring screen
+      const rect = targetCard.getBoundingClientRect();
+      const inViewport = (rect.top >= 100 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) - 50);
+      if (!inViewport && window.scrollY > 400) {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }
+
+  // --- SLIDE CHANGE TRANSITION TIMELINE ---
+  function goToSlide(newIndex, direction = 1, triggerSync = true) {
     if (newIndex === currentIndex || isAnimating || !window.gsap) return;
     isAnimating = true;
 
@@ -86,32 +117,28 @@
     const nextDish = dishes[newIndex];
     const isForward = direction >= 0;
 
-    // Check reduced motion preference
+    // Reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
-      gsap.to([heroEl], {
-        opacity: 0.3,
-        duration: 0.15,
-        onComplete: () => {
-          currentPlateImg.src = nextDish.img;
-          eyebrowEl.textContent = '#' + nextDish.rank + ' Most loved dish';
-          line1El.textContent = nextDish.line1;
-          line2El.textContent = nextDish.line2;
-          ratingNumEl.textContent = nextDish.rating;
-          chefNameEl.textContent = nextDish.chef;
-          chefSubEl.textContent = nextDish.chefSub;
-          descEl.textContent = nextDish.desc;
-          likesCountEl.textContent = nextDish.likes;
-          ratingBadgeEl.style.backgroundColor = nextDish.badge;
-          bandPrimary.style.backgroundColor = nextDish.band;
-          bandSecondary.style.backgroundColor = nextDish.band;
-          renderIngredients(nextDish.ingredients);
-          currentIndex = newIndex;
-          updateActiveThumbnailTile(newIndex);
-          gsap.to(heroEl, { opacity: 1, duration: 0.15 });
-          isAnimating = false;
-        }
-      });
+      currentPlateImg.src = nextDish.img;
+      eyebrowEl.textContent = '#' + nextDish.rank + ' ' + (nextDish.category ? nextDish.category.toUpperCase() : 'SPECIAL');
+      line1El.textContent = nextDish.line1;
+      line2El.textContent = nextDish.line2;
+      if (priceTagEl) priceTagEl.textContent = nextDish.priceFormatted;
+      if (servesPillEl) servesPillEl.textContent = nextDish.serves;
+      ratingNumEl.textContent = nextDish.rating;
+      chefNameEl.textContent = nextDish.chef;
+      chefSubEl.textContent = nextDish.chefSub;
+      descEl.textContent = nextDish.desc;
+      likesCountEl.textContent = nextDish.likes;
+      ratingBadgeEl.style.backgroundColor = nextDish.badge;
+      bandPrimary.style.backgroundColor = nextDish.band;
+      bandSecondary.style.backgroundColor = nextDish.band;
+      renderIngredients(nextDish.ingredients);
+      currentIndex = newIndex;
+      updateActiveThumbnailTile(newIndex);
+      if (triggerSync) syncWithFullMenu(nextDish.id);
+      isAnimating = false;
       return;
     }
 
@@ -121,33 +148,31 @@
 
     const tl = gsap.timeline({
       onComplete: () => {
-        // Swap active references
         currentPlateImg.src = nextDish.img;
         currentPlateImg.alt = nextDish.line1 + ' ' + nextDish.line2;
 
         gsap.set(currentOrbit, { rotation: 0, opacity: 1 });
-        gsap.set(currentPlateImg, { rotation: 0, scale: 1, filter: 'drop-shadow(0 40px 60px rgba(40, 44, 70, 0.35))' });
+        gsap.set(currentPlateImg, { rotation: 0, scale: 1, filter: 'drop-shadow(0 35px 50px rgba(40, 30, 20, 0.28))' });
         gsap.set(nextOrbit, { rotation: isForward ? 45 : -45, opacity: 0 });
         gsap.set(nextPlateImg, { rotation: 0 });
 
         currentIndex = newIndex;
         isAnimating = false;
+        if (triggerSync) syncWithFullMenu(nextDish.id);
         resetAutoplay();
       }
     });
 
-    // A. Plate "orbit swap" (§6A)
-    // Outgoing plate: rotates 0° -> -45° (or +45° if backwards) leaving through left edge
+    // A. Plate "orbit swap"
     const outOrbitAngle = isForward ? -45 : 45;
     const outSpinAngle = isForward ? -150 : 150;
     const inStartAngle = isForward ? 45 : -45;
     const inSpinStart = isForward ? 200 : -200;
 
-    // Reset next orbit to entry position with opacity 1
     gsap.set(nextOrbit, { rotation: inStartAngle, opacity: 1 });
-    gsap.set(nextPlateImg, { rotation: inSpinStart, scale: 0.92, filter: 'blur(6px) drop-shadow(0 40px 60px rgba(40, 44, 70, 0.35))' });
+    gsap.set(nextPlateImg, { rotation: inSpinStart, scale: 0.92, filter: 'blur(6px) drop-shadow(0 35px 50px rgba(40, 30, 20, 0.28))' });
 
-    // Outgoing Plate Animation (0 -> 0.75s, power2.in)
+    // Outgoing Plate Animation (0 -> 0.75s)
     tl.to(currentOrbit, {
       rotation: outOrbitAngle,
       duration: 0.75,
@@ -156,12 +181,12 @@
 
     tl.to(currentPlateImg, {
       rotation: outSpinAngle,
-      filter: 'blur(6px) drop-shadow(0 40px 60px rgba(40, 44, 70, 0.35))',
+      filter: 'blur(6px) drop-shadow(0 35px 50px rgba(40, 30, 20, 0.28))',
       duration: 0.75,
       ease: 'power2.in'
     }, 0);
 
-    // Incoming Plate Animation (0.30 -> 1.15s, power3.out — overlapping frames 6-8)
+    // Incoming Plate Animation (0.30 -> 1.15s)
     tl.to(nextOrbit, {
       rotation: 0,
       duration: 0.85,
@@ -171,71 +196,35 @@
     tl.to(nextPlateImg, {
       rotation: 0,
       scale: 1,
-      filter: 'blur(0px) drop-shadow(0 40px 60px rgba(40, 44, 70, 0.35))',
+      filter: 'blur(0px) drop-shadow(0 35px 50px rgba(40, 30, 20, 0.28))',
       duration: 0.85,
       ease: 'power3.out'
     }, 0.30);
 
-    // B. Title Mask Wipes (opposing directions, §6B)
-    // Wipe Out: (0 -> 0.40s)
-    // Eyebrow wipes out right-to-left: inset(0 100% 0 0)
-    tl.to(eyebrowEl, {
-      clipPath: 'inset(0 100% 0 0)',
-      duration: 0.35,
-      ease: 'power2.in'
-    }, 0);
-
-    // Line 1 wipes out from the left: inset(0 0 0 100%)
-    tl.to(line1El, {
-      clipPath: 'inset(0 0 0 100%)',
-      duration: 0.40,
-      ease: 'power2.in'
-    }, 0.04);
-
-    // Line 2 wipes out from the right: inset(0 100% 0 0)
-    tl.to(line2El, {
-      clipPath: 'inset(0 100% 0 0)',
-      duration: 0.40,
-      ease: 'power2.in'
-    }, 0.08);
+    // B. Title Mask Wipes
+    tl.to(eyebrowEl, { clipPath: 'inset(0 100% 0 0)', duration: 0.35, ease: 'power2.in' }, 0);
+    tl.to(line1El, { clipPath: 'inset(0 0 0 100%)', duration: 0.40, ease: 'power2.in' }, 0.04);
+    tl.to(line2El, { clipPath: 'inset(0 100% 0 0)', duration: 0.40, ease: 'power2.in' }, 0.08);
 
     // Content Swap at mid-point (0.45s)
     tl.call(() => {
-      eyebrowEl.textContent = '#' + nextDish.rank + ' Most loved dish';
+      eyebrowEl.textContent = '#' + nextDish.rank + ' ' + (nextDish.category ? nextDish.category.toUpperCase() : 'SPECIAL');
       line1El.textContent = nextDish.line1;
       line2El.textContent = nextDish.line2;
+      if (priceTagEl) priceTagEl.textContent = nextDish.priceFormatted;
+      if (servesPillEl) servesPillEl.textContent = nextDish.serves;
 
-      // Set initial clip paths for wipe-in
       gsap.set(line1El, { clipPath: 'inset(0 0 0 100%)' });
       gsap.set(line2El, { clipPath: 'inset(0 100% 0 0)', x: 12 });
       gsap.set(eyebrowEl, { clipPath: 'inset(0 100% 0 0)' });
     }, null, 0.45);
 
-    // Wipe In: (0.75 -> 1.25s)
-    // Line 1 reveals from right edge leftward: inset(0 0 0 100%) -> inset(0 0 0 0)
-    tl.to(line1El, {
-      clipPath: 'inset(0 0 0 0%)',
-      duration: 0.50,
-      ease: 'expo.out'
-    }, 0.75);
+    // Wipe In (0.75 -> 1.25s)
+    tl.to(line1El, { clipPath: 'inset(0 0 0 0%)', duration: 0.50, ease: 'expo.out' }, 0.75);
+    tl.to(line2El, { clipPath: 'inset(0 0% 0 0)', x: 0, duration: 0.50, ease: 'expo.out' }, 0.80);
+    tl.to(eyebrowEl, { clipPath: 'inset(0 0% 0 0)', duration: 0.45, ease: 'expo.out' }, 0.85);
 
-    // Line 2 reveals from left edge rightward: inset(0 100% 0 0) -> inset(0 0 0 0) + x: 12 -> 0
-    tl.to(line2El, {
-      clipPath: 'inset(0 0% 0 0)',
-      x: 0,
-      duration: 0.50,
-      ease: 'expo.out'
-    }, 0.80);
-
-    // Eyebrow reveals left-to-right
-    tl.to(eyebrowEl, {
-      clipPath: 'inset(0 0% 0 0)',
-      duration: 0.45,
-      ease: 'expo.out'
-    }, 0.85);
-
-    // C. Info Card Transitions (§6C)
-    // Text fade out (0 -> 0.25s)
+    // C. Info Card Transitions
     tl.to([ratingNumEl, chefNameEl, chefSubEl, descEl, likesCountEl], {
       opacity: 0,
       y: -6,
@@ -243,7 +232,6 @@
       ease: 'power1.in'
     }, 0);
 
-    // Swap text content at 0.35s
     tl.call(() => {
       ratingNumEl.textContent = nextDish.rating;
       chefNameEl.textContent = nextDish.chef;
@@ -253,21 +241,18 @@
       renderIngredients(nextDish.ingredients);
     }, null, 0.35);
 
-    // Badge color tween (0.30 -> 0.80s)
     tl.to(ratingBadgeEl, {
       backgroundColor: nextDish.badge,
       duration: 0.50,
       ease: 'power2.out'
     }, 0.30);
 
-    // Background bands color crossfade (0.20 -> 0.90s)
     tl.to([bandPrimary, bandSecondary], {
       backgroundColor: nextDish.band,
       duration: 0.70,
       ease: 'power2.out'
     }, 0.20);
 
-    // Info card text fade in (0.85 -> 1.25s)
     tl.fromTo([ratingNumEl, chefNameEl, chefSubEl, descEl, likesCountEl], {
       opacity: 0,
       y: 8
@@ -279,16 +264,27 @@
       ease: 'power2.out'
     }, 0.85);
 
-    // D. Pager & Thumbnail Active Indicator slide (0.30 -> 0.75s)
+    // Thumbnail strip active tile update
     updateActiveThumbnailTile(newIndex);
+  }
+
+  // Go to dish by ID (called when clicking a menu card below)
+  function goToDishId(dishId) {
+    const idx = dishes.findIndex(d => d.id === dishId);
+    if (idx !== -1) {
+      const dir = idx >= currentIndex ? 1 : -1;
+      goToSlide(idx, dir, false);
+      // Highlight card immediately
+      syncWithFullMenu(dishId);
+    }
   }
 
   // --- INGREDIENTS TAB RENDERER ---
   function renderIngredients(ingredients) {
     if (!ingredientsListEl) return;
     ingredientsListEl.innerHTML = `
-      <div style="font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--slider-ink); margin-bottom: 6px;">
-        Core Ingredients
+      <div style="font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #111116; margin-bottom: 6px;">
+        Portion Contents & Recipe
       </div>
       <ul style="padding-left: 14px; margin: 0; display: grid; grid-template-columns: 1fr; gap: 4px;">
         ${ingredients.map(ing => `<li>${ing}</li>`).join('')}
@@ -318,74 +314,42 @@
     }
   }
 
-  // --- PAGE LOAD INTRO ANIMATION (§7 Study 06_page_load_intro.jpg) ---
+  // --- PAGE LOAD INTRO ANIMATION ---
   function playIntroAnimation() {
     if (typeof gsap === 'undefined') return;
 
     const initialDish = dishes[0];
     currentPlateImg.src = initialDish.img;
     currentPlateImg.alt = initialDish.line1 + ' ' + initialDish.line2;
+    if (priceTagEl) priceTagEl.textContent = initialDish.priceFormatted;
+    if (servesPillEl) servesPillEl.textContent = initialDish.serves;
     renderIngredients(initialDish.ingredients);
     updateActiveThumbnailTile(0, true);
+    syncWithFullMenu(initialDish.id);
 
-    // Initial state matching 06_page_load_intro.jpg
+    // Initial state
     gsap.set(heroEl, { opacity: 0 });
-    gsap.set([eyebrowEl, line1El, line2El], { opacity: 0, filter: 'blur(10px)' });
-    gsap.set(currentOrbit, { rotation: -60, x: -100, y: -100 });
-    gsap.set(currentPlateImg, { rotation: 360, filter: 'blur(8px) drop-shadow(0 40px 60px rgba(40,44,70,.35))' });
+    gsap.set([eyebrowEl, line1El, line2El], { opacity: 0, filter: 'blur(8px)' });
+    gsap.set(currentOrbit, { rotation: -60, x: -80, y: -80 });
+    gsap.set(currentPlateImg, { rotation: 360, filter: 'blur(8px) drop-shadow(0 35px 50px rgba(40,30,20,.28))' });
     gsap.set('.slider-info-card', { opacity: 0, y: 24 });
-    gsap.set('.slider-action-row, .slider-thumbnails-strip, .slider-pager-nav, .slider-top-bar, .slider-scroll-cue', { opacity: 0 });
+    gsap.set('.slider-action-row, .slider-thumbnails-strip, .slider-pager-nav, .slider-top-bar, .slider-dish-meta', { opacity: 0 });
 
     const introTl = gsap.timeline({ delay: 0.1 });
 
-    // 1. 0 -> 0.4s: Page fades in from blank #F2F2F6
-    introTl.to(heroEl, {
-      opacity: 1,
-      duration: 0.4,
-      ease: 'power1.out'
-    });
-
-    // 2. 0.2 -> 0.9s: Eyebrow + title lines fade in with blur(10px) -> 0
-    introTl.to([eyebrowEl, line1El, line2El], {
-      opacity: 1,
-      filter: 'blur(0px)',
-      duration: 0.7,
-      ease: 'power2.out'
-    }, 0.2);
-
-    // 3. 0.4 -> 1.4s: Plate rolls in from top-left spinning 360 -> 0
-    introTl.to(currentOrbit, {
-      rotation: 0,
-      x: 0,
-      y: 0,
-      duration: 1.0,
-      ease: 'power3.out'
-    }, 0.4);
-
-    introTl.to(currentPlateImg, {
-      rotation: 0,
-      filter: 'blur(0px) drop-shadow(0 40px 60px rgba(40, 44, 70, 0.35))',
-      duration: 1.0,
-      ease: 'power3.out'
-    }, 0.4);
-
-    // 4. 0.9 -> 1.5s: Info card slides up (y: 24 -> 0)
-    introTl.to('.slider-info-card', {
-      opacity: 1,
-      y: 0,
-      duration: 0.6,
-      ease: 'power2.out'
-    }, 0.9);
-
-    // 5. 1.0 -> 1.6s: Action row, thumbnails, pager, top bar stagger in
-    introTl.to('.slider-top-bar, .slider-pager-nav, .slider-action-row, .slider-thumbnails-strip, .slider-scroll-cue', {
+    introTl.to(heroEl, { opacity: 1, duration: 0.4, ease: 'power1.out' });
+    introTl.to([eyebrowEl, line1El, line2El], { opacity: 1, filter: 'blur(0px)', duration: 0.7, ease: 'power2.out' }, 0.2);
+    introTl.to(currentOrbit, { rotation: 0, x: 0, y: 0, duration: 1.0, ease: 'power3.out' }, 0.35);
+    introTl.to(currentPlateImg, { rotation: 0, filter: 'blur(0px) drop-shadow(0 35px 50px rgba(40, 30, 20, 0.28))', duration: 1.0, ease: 'power3.out' }, 0.35);
+    introTl.to('.slider-info-card', { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.75);
+    introTl.to('.slider-top-bar, .slider-pager-nav, .slider-dish-meta, .slider-action-row, .slider-thumbnails-strip', {
       opacity: 1,
       duration: 0.6,
       stagger: 0.08,
       ease: 'power2.out'
-    }, 1.0);
+    }, 0.85);
 
-    // Floating idle breath animation for plate (§8: y +/- 4px, 6s yoyo)
+    // Floating idle breath
     gsap.to(currentPlateImg, {
       y: -4,
       duration: 3,
@@ -396,7 +360,7 @@
     });
   }
 
-  // --- AUTOPLAY & IDLE RESUME (§8) ---
+  // Autoplay
   function startAutoplay() {
     stopAutoplay();
     autoplayTimer = setInterval(() => {
@@ -417,27 +381,25 @@
     startAutoplay();
   }
 
-  // --- ACTIONS ---
-  function orderFood() {
-    // Smooth scroll down to Ovita's online menu
-    const menuSection = document.getElementById('menu');
-    if (menuSection) {
-      menuSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  }
-
-  function playVideo() {
+  // Add current showcase dish to cart
+  function addCurrentDishToCart() {
     const dish = dishes[currentIndex];
-    if (window.OwitaApp && window.OwitaApp.showToast) {
-      window.OwitaApp.showToast('Playing culinary preparation video for ' + dish.line1 + ' ' + dish.line2, 'info');
-    } else {
-      alert('Playing chef video for ' + dish.line1 + ' ' + dish.line2);
+    if (window.OwitaApp && window.OwitaApp.addToCart) {
+      window.OwitaApp.addToCart(dish.id);
     }
   }
 
-  // --- EVENT LISTENERS (§8) ---
+  // Scroll smoothly down to the full menu grid
+  function scrollToFullMenu() {
+    const menuEl = document.getElementById('menu');
+    if (menuEl) {
+      menuEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  // Initialize event listeners
   function initEvents() {
-    // Thumbnail Clicks (direction-aware)
+    // Thumbnails
     thumbItems.forEach((thumb, idx) => {
       thumb.addEventListener('click', () => {
         const dir = idx >= currentIndex ? 1 : -1;
@@ -445,7 +407,7 @@
       });
     });
 
-    // Pager Dots
+    // Pager dots
     pagerDots.forEach((dotWrap, idx) => {
       dotWrap.addEventListener('click', () => {
         const dir = idx >= currentIndex ? 1 : -1;
@@ -469,14 +431,15 @@
       });
     }
 
-    // Action buttons
-    const orderBtn = document.getElementById('heroOrderBtn');
+    // Showcase Add to Cart button
+    const orderBtn = document.getElementById('showcaseOrderBtn');
     if (orderBtn) {
-      orderBtn.addEventListener('click', orderFood);
+      orderBtn.addEventListener('click', addCurrentDishToCart);
     }
-    const playBtn = document.querySelector('.action-play');
-    if (playBtn) {
-      playBtn.addEventListener('click', playVideo);
+
+    const scrollMenuBtn = document.getElementById('showcaseScrollMenuBtn');
+    if (scrollMenuBtn) {
+      scrollMenuBtn.addEventListener('click', scrollToFullMenu);
     }
 
     // Keyboard Arrow Keys
@@ -493,12 +456,9 @@
       }
     });
 
-    // Mouse wheel / trackpad (debounced 900ms)
-    let wheelTimeout = null;
+    // Wheel debounce
     let lastWheelTime = 0;
     heroEl.addEventListener('wheel', (e) => {
-      // Only capture when hero is at top of screen
-      if (window.scrollY > 50) return;
       const now = Date.now();
       if (Math.abs(e.deltaX) > 25 || (e.shiftKey && Math.abs(e.deltaY) > 25)) {
         e.preventDefault();
@@ -513,7 +473,7 @@
       }
     }, { passive: false });
 
-    // Touch swipe (50px threshold)
+    // Touch swipe
     let touchStartX = 0;
     let touchStartY = 0;
     heroEl.addEventListener('touchstart', (e) => {
@@ -535,14 +495,14 @@
       }
     }, { passive: true });
 
-    // Card Tabs Click
+    // Card tabs
     document.querySelectorAll('.card-tab').forEach(tabBtn => {
       tabBtn.addEventListener('click', () => {
         switchCardTab(tabBtn.dataset.tab);
       });
     });
 
-    // Pause autoplay on card or thumbnails hover
+    // Hover pause
     const cardEl = document.querySelector('.slider-info-card');
     const stripEl = document.querySelector('.slider-thumbnails-strip');
     [cardEl, stripEl].forEach(el => {
@@ -551,13 +511,12 @@
       el.addEventListener('mouseleave', resetAutoplay);
     });
 
-    // Window resize: re-position active thumbnail tile
+    // Resize
     window.addEventListener('resize', () => {
       updateActiveThumbnailTile(currentIndex, true);
     });
   }
 
-  // Initialize
   function init() {
     initEvents();
     playIntroAnimation();
@@ -568,12 +527,13 @@
   window.OwitaSlider = {
     init,
     goToSlide,
-    orderFood,
-    playVideo,
-    switchCardTab
+    goToDishId,
+    addCurrentDishToCart,
+    scrollToFullMenu,
+    switchCardTab,
+    syncWithFullMenu
   };
 
-  // Auto-init when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
