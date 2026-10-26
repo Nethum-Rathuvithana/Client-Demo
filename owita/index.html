@@ -43,10 +43,165 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Outfit & Mulish Fonts for Most Loved Dish Hero Slider (§1) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Outfit:wght@200;300;800;900&display=swap" rel="stylesheet">
+  <!-- GSAP 3 Core & CustomEase for 60fps Orchestrated Hero Slider (§1) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+  <!-- Hero Slider Stylesheet -->
+  <link rel="stylesheet" href="hero-slider.css">
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-[#08080A] text-[#FBF8F3] min-h-screen selection:bg-amber-500 selection:text-black">
+
+  <!-- ==============================================================
+       "MOST LOVED DISH" FOOD HERO SLIDER — PIXEL-FAITHFUL RECREATION (§4)
+  ============================================================== -->
+  <section id="mostLovedHero" aria-label="Most Loved Dish Showcase">
+    <!-- Diagonal Pastel Background Bands (§4) -->
+    <div class="slider-diagonal-band band-primary"></div>
+    <div class="slider-diagonal-band band-secondary"></div>
+
+    <!-- Top Bar (§4: Minimal brand wordmark and Magnifier search icon) -->
+    <div class="slider-top-bar">
+      <div class="slider-brand-slot">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#4A5170]"></span>
+        <span>OVITA · MOST LOVED DISHES</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button class="slider-search-btn" title="Search Dishes" aria-label="Search Dishes" onclick="const s = document.getElementById('menuSearchInput'); if(s) { s.scrollIntoView({behavior:'smooth'}); s.focus(); }">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Left Vertical Pager (§4: left: 2.2vw, vertically centered ≈ 50vh) -->
+    <div class="slider-pager-nav" aria-label="Slide Indicator">
+      <button class="pager-dot-wrap active" data-index="0" aria-label="Slide 1: Lotek Perkedel">
+        <span class="pager-dot"></span>
+      </button>
+      <button class="pager-dot-wrap" data-index="1" aria-label="Slide 2: Lamb Steak Potato">
+        <span class="pager-dot"></span>
+      </button>
+      <button class="pager-dot-wrap" data-index="2" aria-label="Slide 3: Martabak Pak Adin">
+        <span class="pager-dot"></span>
+      </button>
+      <button class="pager-dot-wrap" data-index="3" aria-label="Slide 4: Urap Asli Wonogiri">
+        <span class="pager-dot"></span>
+      </button>
+    </div>
+
+    <!-- Hero Plate Stage (Orbit Pivot far lower-right, §6A) -->
+    <div class="slider-plate-stage">
+      <div class="plate-orbit current-orbit">
+        <img src="dishes/lotek-perkedel.png" alt="Lotek Perkedel" class="plate-img current-plate" id="currentPlateImg">
+      </div>
+      <div class="plate-orbit next-orbit" style="opacity: 0;">
+        <img src="dishes/lamb-steak-potato.png" alt="Next Dish" class="plate-img next-plate" id="nextPlateImg">
+      </div>
+    </div>
+
+    <!-- Title Block (§4: left edge ≈ 41vw, centered around 45vh) -->
+    <div class="slider-title-block">
+      <div class="title-eyebrow-wrapper">
+        <div class="title-eyebrow">#1 Most loved dish</div>
+      </div>
+      <div class="title-line1-wrapper">
+        <h1 class="title-line1">LOTEK</h1>
+      </div>
+      <div class="title-line2-wrapper">
+        <h2 class="title-line2">PERKEDEL</h2>
+      </div>
+
+      <!-- Action Links Row (§4: 36px below line 2) -->
+      <div class="slider-action-row">
+        <button class="action-btn action-play" aria-label="Play Preparation Video">
+          <span class="action-icon">▶</span>
+          <span>Play video</span>
+        </button>
+        <button class="action-btn action-order" id="heroOrderBtn" aria-label="Order Food">
+          <span class="action-icon">⏏</span>
+          <span>Order food</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Info Card (§4: right: 3vw, top: 30vh, width: 18vw) -->
+    <div class="slider-info-card">
+      <div class="card-tabs-row">
+        <button class="card-tab active" data-tab="overview">Overview</button>
+        <button class="card-tab" data-tab="ingredients">Ingredients</button>
+        <div class="card-tab-indicator"></div>
+      </div>
+
+      <div class="card-body-content">
+        <div class="rating-badge-wrap">
+          <div class="rating-badge">
+            <span class="rating-number">4.9</span>
+            <span class="rating-star">★</span>
+          </div>
+        </div>
+
+        <div class="card-chef-info">
+          <h3 class="chef-name">Chef Feny</h3>
+          <p class="chef-subtitle">Dapur Lotek Bu Feny</p>
+        </div>
+
+        <p class="card-description">
+          Kau tanyakan aku resep ini, aku jawab dengan senyum. Perkedel hangat, lotek segar, cocok buat makan siang.
+        </p>
+
+        <div class="card-ingredients-list hidden"></div>
+      </div>
+
+      <div class="card-footer-row">
+        <div class="likes-block">
+          <span class="thumbs-up-icon">👍</span>
+          <span class="likes-count">26 likes</span>
+        </div>
+        <button class="thumbs-down-btn" title="Leave feedback" aria-label="Dislike feedback">
+          <span>👎</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Thumbnail Strip (§4: bottom: 2.5vh, left: 10vw) -->
+    <div class="slider-thumbnails-strip">
+      <button class="strip-nav-btn strip-prev" aria-label="Previous Dish">‹</button>
+      <div class="strip-track">
+        <div class="strip-active-tile"></div>
+        <button class="thumb-item active" data-index="0" aria-label="Dish 1: Lotek Perkedel">
+          <img src="dishes/thumb-lotek-perkedel.png" alt="Lotek Perkedel Thumbnail">
+        </button>
+        <button class="thumb-item" data-index="1" aria-label="Dish 2: Lamb Steak Potato">
+          <img src="dishes/thumb-lamb-steak-potato.png" alt="Lamb Steak Potato Thumbnail">
+        </button>
+        <button class="thumb-item" data-index="2" aria-label="Dish 3: Martabak Pak Adin">
+          <img src="dishes/thumb-martabak-pak-adin.png" alt="Martabak Pak Adin Thumbnail">
+        </button>
+        <button class="thumb-item" data-index="3" aria-label="Dish 4: Urap Asli Wonogiri">
+          <img src="dishes/thumb-urap-asli-wonogiri.png" alt="Urap Asli Wonogiri Thumbnail">
+        </button>
+      </div>
+      <button class="strip-nav-btn strip-next" aria-label="Next Dish">›</button>
+    </div>
+
+    <!-- Scroll Down Cue to Full Ovita Online Menu & Live Kitchen Clock -->
+    <a href="#menu" class="slider-scroll-cue" aria-label="Explore Ovita Menu">
+      <span style="font-family:'Mulish',sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--slider-ink-muted);">Order from Ovita Menu</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--slider-ink-muted);">
+        <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+      </svg>
+    </a>
+  </section>
+
 
   <!-- CUSTOMER ACTIVE OFFER URGENCY BAR -->
   <div id="customerOfferAlertBar" class="hidden bg-gradient-to-r from-red-950 via-rose-900 to-amber-950 border-b border-red-500/40 py-2.5 px-4 text-xs text-white sticky top-0 z-40 shadow-xl backdrop-blur-md">
@@ -1517,6 +1672,10 @@
     <i data-lucide="check-circle" class="w-4 h-4 text-amber-400" id="owitaToastIcon"></i>
     <span class="text-xs font-medium" id="owitaToastText">Notification message</span>
   </div>
+
+  <!-- Hero Slider Scripts (§1) -->
+  <script src="hero-slider-data.js"></script>
+  <script src="hero-slider.js"></script>
 
   <!-- Core Scripts -->
   <script src="data.js"></script>

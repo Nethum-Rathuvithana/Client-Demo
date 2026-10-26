@@ -1,0 +1,621 @@
+/* ==============================================================
+   "MOST LOVED DISH" FOOD HERO SLIDER — PIXEL-FAITHFUL RECREATION
+   Design Tokens & Visual Architecture (§3 & §4)
+============================================================== */
+
+:root {
+  --slider-bg:            #ECECF3;
+  --slider-bg-2:          #F4F4F8;
+  --slider-ink-strong:    #4A5170;  /* ultra-bold title line 2 */
+  --slider-ink-thin:      #3B3F4E;  /* thin title line 1 */
+  --slider-ink:           #2B2F3A;  /* labels, chef name, rating */
+  --slider-ink-muted:     #9A9EAD;  /* buttons text, subtitles */
+  --slider-ink-faint:     #B9BCC8;  /* description text */
+  --slider-card:          #FFFFFF;
+  --slider-card-shadow:   0 30px 60px -20px rgba(60, 64, 100, 0.15);
+  --slider-plate-shadow:  drop-shadow(0 40px 60px rgba(40, 44, 70, 0.35));
+  --slider-radius-card:   22px;
+  --slider-radius-badge:  14px;
+  --slider-ease-out:      cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Master Hero Container (Full-Viewport 100vw x 100vh) */
+#mostLovedHero {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  min-height: 680px;
+  max-width: 100%;
+  overflow: hidden;
+  user-select: none;
+  background: linear-gradient(110deg, var(--slider-bg) 0%, var(--slider-bg) 45%, var(--slider-bg-2) 100%);
+  font-family: 'Mulish', sans-serif;
+  color: var(--slider-ink);
+  z-index: 30;
+}
+
+/* Diagonal Pastel Background Bands (§4) */
+.slider-diagonal-band {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  transform: rotate(-38deg);
+  transform-origin: center top;
+  border-radius: 140px;
+  filter: blur(2px);
+  will-change: background-color;
+  transition: background-color 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.band-primary {
+  top: -25vh;
+  left: 45vw;
+  width: 23vw;
+  height: 160vh;
+  background-color: #F9DDE3;
+  opacity: 0.85;
+}
+
+.band-secondary {
+  top: -25vh;
+  left: 64vw;
+  width: 14vw;
+  height: 160vh;
+  background-color: #F9DDE3;
+  opacity: 0.35;
+}
+
+/* Top Bar (Absolute, Magnifier at right 3.5vw, top 6vh) */
+.slider-top-bar {
+  position: absolute;
+  top: 5.5vh;
+  left: 3.5vw;
+  right: 3.5vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 40;
+}
+
+.slider-brand-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Mulish', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--slider-ink-muted);
+}
+
+.slider-search-btn {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slider-ink);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.slider-search-btn:hover {
+  transform: scale(1.12);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Left Vertical Pager (§4: left: 2.2vw, vertically centered ≈ 50vh) */
+.slider-pager-nav {
+  position: absolute;
+  left: 2.2vw;
+  top: 50vh;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 40;
+}
+
+.pager-dot-wrap {
+  width: 16px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.pager-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: var(--slider-ink-muted);
+  transition: all 0.35s var(--slider-ease-out);
+  pointer-events: none;
+}
+
+.pager-dot-wrap.active .pager-dot {
+  width: 2px;
+  height: 18px;
+  border-radius: 2px;
+  background-color: var(--slider-ink);
+}
+
+/* Plate Stage (Center ≈ x 21vw, y 49vh. Diameter ≈ 31vw) */
+.slider-plate-stage {
+  position: absolute;
+  left: 21vw;
+  top: 49vh;
+  transform: translate(-50%, -50%);
+  width: 31vw;
+  height: 31vw;
+  min-width: 380px;
+  min-height: 380px;
+  max-width: 500px;
+  max-height: 500px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* Orbit Pivot (§6: Pivot is lower-right: ≈ 45vw right and 60vh below plate center) */
+.plate-orbit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: calc(50% + 45vw) calc(50% + 60vh);
+  will-change: transform;
+}
+
+.plate-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: var(--slider-plate-shadow);
+  will-change: transform, filter;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+/* Title Block (§4: left edge at ≈ 41vw, vertically centered around 45vh) */
+.slider-title-block {
+  position: absolute;
+  left: 41vw;
+  top: 45vh;
+  transform: translateY(-50%);
+  z-index: 25;
+  max-width: 40vw;
+}
+
+/* Mask Wipe Overflows (§6B) */
+.title-eyebrow-wrapper,
+.title-line1-wrapper,
+.title-line2-wrapper {
+  overflow: hidden;
+  display: block;
+}
+
+.title-eyebrow {
+  font-family: 'Mulish', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--slider-ink);
+  letter-spacing: 0.02em;
+  margin-bottom: 16px;
+  will-change: clip-path, transform, opacity;
+}
+
+/* Line 1 (thin) vs Line 2 (ultra-bold) */
+.title-line1 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 200;
+  text-transform: uppercase;
+  font-size: clamp(52px, 5.8vw, 92px);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  color: var(--slider-ink-thin);
+  margin: 0;
+  padding: 0;
+  will-change: clip-path, transform, opacity;
+}
+
+.title-line2 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(52px, 5.8vw, 92px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--slider-ink-strong);
+  margin: 0;
+  padding: 0;
+  will-change: clip-path, transform, opacity;
+}
+
+/* Action Links Row (36px below line 2) */
+.slider-action-row {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+  margin-top: 36px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: none;
+  font-family: 'Mulish', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--slider-ink-muted);
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.25s ease;
+}
+
+.action-btn:hover {
+  color: var(--slider-ink);
+}
+
+.action-btn:hover .action-icon {
+  transform: translateX(2px);
+}
+
+.action-icon {
+  font-size: 11px;
+  transition: transform 0.25s ease;
+}
+
+/* Info Card (right side, absolute: right 3vw, top 30vh, width ≈ 18vw (min 260px)) */
+.slider-info-card {
+  position: absolute;
+  right: 3vw;
+  top: 30vh;
+  width: 18vw;
+  min-width: 260px;
+  max-width: 310px;
+  bottom: 7.5vh;
+  background: var(--slider-card);
+  border-radius: var(--slider-radius-card);
+  box-shadow: var(--slider-card-shadow);
+  padding: 28px 26px;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Card Tabs */
+.card-tabs-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.card-tab {
+  background: transparent;
+  border: none;
+  font-family: 'Mulish', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--slider-ink-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.25s ease;
+}
+
+.card-tab.active {
+  color: var(--slider-ink);
+}
+
+.card-tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 54px;
+  height: 2px;
+  background-color: var(--slider-ink);
+  transition: transform 0.3s var(--slider-ease-out), width 0.3s var(--slider-ease-out);
+}
+
+/* Rating Badge & Card Body */
+.card-body-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.rating-badge-wrap {
+  margin-bottom: 18px;
+}
+
+.rating-badge {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--slider-radius-badge);
+  background-color: #F7B98F;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: background-color 0.5s ease;
+}
+
+.rating-number {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--slider-ink);
+  letter-spacing: -0.02em;
+  transform: translateX(2px);
+}
+
+.rating-star {
+  font-size: 10px;
+  color: var(--slider-ink);
+  margin-top: 2px;
+}
+
+/* Chef Info & Description */
+.card-chef-info {
+  margin-bottom: 12px;
+}
+
+.chef-name {
+  font-family: 'Mulish', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--slider-ink);
+  margin: 0;
+}
+
+.chef-subtitle {
+  font-family: 'Mulish', sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--slider-ink-muted);
+  margin: 3px 0 0 0;
+}
+
+.card-description {
+  font-family: 'Mulish', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--slider-ink-faint);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-ingredients-list {
+  font-family: 'Mulish', sans-serif;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--slider-ink);
+}
+
+/* Card Bottom */
+.card-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.likes-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.thumbs-up-icon {
+  color: #4B57A6;
+  font-size: 15px;
+}
+
+.likes-count {
+  font-family: 'Mulish', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--slider-ink-muted);
+}
+
+.thumbs-down-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--slider-ink-muted);
+  font-size: 14px;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.thumbs-down-btn:hover {
+  transform: scale(1.15);
+}
+
+/* Thumbnail Strip (bottom: 2.5vh, x ≈ 12vw to 66vw) */
+.slider-thumbnails-strip {
+  position: absolute;
+  bottom: 2.5vh;
+  left: 10vw;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 35;
+}
+
+.strip-nav-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--slider-ink-muted);
+  cursor: pointer;
+  padding: 8px;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.strip-nav-btn:hover {
+  color: var(--slider-ink);
+  transform: scale(1.2);
+}
+
+.strip-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4vw;
+  padding: 8px;
+}
+
+/* Sliding active tile behind active thumbnail (72 x 72px, radius 16px) */
+.strip-active-tile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 8px 24px -4px rgba(60, 64, 100, 0.12);
+  pointer-events: none;
+  transition: transform 0.45s var(--slider-ease-out);
+  z-index: 1;
+}
+
+.thumb-item {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  margin: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  transition: transform 0.2s ease;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumb-item:hover {
+  transform: scale(1.08);
+}
+
+.thumb-item img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(40, 44, 70, 0.25));
+}
+
+/* Scroll Down Cue */
+.slider-scroll-cue {
+  position: absolute;
+  bottom: 2.5vh;
+  right: 23vw;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.25s ease;
+  z-index: 35;
+  text-decoration: none;
+}
+
+.slider-scroll-cue:hover {
+  opacity: 1;
+}
+
+/* Responsive adjustments (§10) */
+@media (max-width: 1199px) {
+  .slider-plate-stage {
+    left: 24vw;
+    width: 38vw;
+    height: 38vw;
+  }
+  .slider-title-block {
+    left: 45vw;
+  }
+  .slider-info-card {
+    width: 240px;
+    min-width: 240px;
+    bottom: 12vh;
+  }
+}
+
+@media (max-width: 768px) {
+  #mostLovedHero {
+    height: auto;
+    min-height: 100vh;
+    padding-bottom: 110px;
+  }
+  .slider-plate-stage {
+    position: relative;
+    left: 50%;
+    top: 20vh;
+    transform: translate(-50%, 0);
+    width: 72vw;
+    height: 72vw;
+    min-width: auto;
+    min-height: auto;
+  }
+  .slider-title-block {
+    position: relative;
+    left: 50%;
+    top: auto;
+    transform: translateX(-50%);
+    text-align: center;
+    max-width: 90vw;
+    margin-top: 16px;
+  }
+  .slider-action-row {
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .slider-info-card {
+    position: relative;
+    right: auto;
+    top: auto;
+    width: calc(100% - 32px);
+    max-width: none;
+    margin: 24px auto 0;
+  }
+  .slider-thumbnails-strip {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 12px;
+  }
+  .slider-pager-nav,
+  .slider-scroll-cue {
+    display: none;
+  }
+}
