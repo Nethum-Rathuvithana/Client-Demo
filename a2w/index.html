@@ -1,129 +1,249 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A TO W — The Living Atelier | Sri Lanka</title>
-  <meta name="description" content="A Sri Lanka-focused haute couture and art-to-wear digital atelier. Connecting independent fashion designers with buyers, boutiques, and collectors.">
+  <title>The Unusual — Experimental Runway Showcase | A to W</title>
+  <meta name="description" content="A full-screen, scroll-driven runway showcase featuring experimental, non-commercial designs that redefine wearable art.">
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            paper: '#F7F2E9',
-            silk: '#E9DDCA',
-            stone: {
-              DEFAULT: '#D5C8B5',
-              dark: '#B7A48D',
-              muted: '#82796E'
-            },
-            charcoal: '#292824'
-          },
-          fontFamily: {
-            serif: ['Cormorant Garamond', 'Italiana', 'Georgia', 'serif'],
-            mono: ['DM Mono', 'monospace'],
-            sans: ['Plus Jakarta Sans', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- Google Fonts & Lucide Icons -->
+  <!-- Google Fonts: Playfair Display, Cormorant Garamond, DM Mono, Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Italiana&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Mono:wght@300;400;500&family=Inter:wght@200;300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <style>
-    body {
-      background-color: #F7F2E9;
-      color: #292824;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-    .font-serif-luxury {
-      font-family: 'Italiana', 'Cormorant Garamond', serif;
-    }
-    .font-editorial {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-    }
-  </style>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./styles.css">
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-[#E9DDCA] selection:text-[#292824]">
+<body>
 
-  <!-- Header -->
-  <header class="border-b border-[#292824]/10 bg-[#F7F2E9]/90 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="../index.html" class="flex items-center gap-2 text-xs font-mono tracking-widest text-[#82796E] hover:text-[#292824] transition-colors uppercase">
-        <i data-lucide="arrow-left" class="w-4 h-4"></i>
-        <span>Client Demo Hub</span>
-      </a>
+  <!-- Minimalist Custom Runway Cursor -->
+  <div id="customCursor" class="custom-cursor">
+    <span id="cursorText" class="cursor-text">Scroll</span>
+  </div>
 
-      <div class="text-center">
-        <div class="font-serif-luxury text-2xl tracking-[0.25em] text-[#292824]">A TO W</div>
-        <div class="font-mono text-[9px] tracking-[0.3em] text-[#82796E] uppercase">Art to Wear · Sri Lanka</div>
-      </div>
+  <!-- Tactile 5% Film Grain Overlay -->
+  <div class="film-grain"></div>
 
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-amber-600/70 animate-pulse"></span>
-        <span class="font-mono text-[10px] tracking-wider text-[#82796E] uppercase">Project Ready</span>
-      </div>
-    </div>
-  </header>
+  <!-- Intro Curtain-Open Animation -->
+  <div id="introCurtain" class="intro-curtain">
+    <div class="curtain-panel curtain-left"></div>
+    <div class="curtain-panel curtain-right"></div>
+    <div class="intro-curtain-title">THE UNUSUAL</div>
+  </div>
 
-  <!-- Main Hero Foundation -->
-  <main class="flex-1 flex items-center justify-center py-20 px-6">
-    <div class="max-w-3xl mx-auto text-center space-y-8">
-      
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E9DDCA]/60 border border-[#292824]/10 font-mono text-[10px] tracking-widest uppercase text-[#82796E]">
-        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-700"></i>
-        The Living Atelier · Digital Showcase
-      </div>
+  <!-- Invisible Focus Line Reference Marker at ~40vh -->
+  <div class="focus-line-marker"></div>
 
-      <h1 class="font-editorial text-5xl sm:text-7xl font-light tracking-tight leading-[0.95] text-[#292824]">
-        Wear what has<br>
-        <em class="italic font-normal">never existed.</em>
-      </h1>
+  <!-- Glowing Canvas Thread Connecting Hovered Card to Stage Model -->
+  <canvas id="threadCanvas" class="connecting-thread-canvas"></canvas>
 
-      <p class="text-sm sm:text-base text-[#6E6458] font-light max-w-xl mx-auto leading-relaxed">
-        A Sri Lanka-focused fashion platform presenting fashion as art, designers as artists, and garments as individual collectible works.
-      </p>
+  <!-- =========================================================================
+       MAIN PINNED RUNWAY STAGE
+       Total scroll track height is driven by (Looks count × 100vh)
+       ========================================================================= -->
+  <div id="unusualScrollTrack" class="unusual-scroll-track">
+    <div id="unusualStageFixed" class="unusual-stage-fixed">
 
-      <!-- Status Card -->
-      <div class="p-8 rounded-2xl bg-[#FFFDFA] border border-[#292824]/10 shadow-sm max-w-lg mx-auto text-left space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-[#292824]/10">
-          <span class="font-mono text-[11px] tracking-wider uppercase text-[#82796E]">Repository Setup</span>
-          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-medium">Ready for New UI</span>
-        </div>
+      <!-- Dynamic Ambient Spotlight Behind Runway -->
+      <div id="stageSpotlight" class="stage-spotlight"></div>
 
-        <p class="text-xs text-[#524B43] leading-relaxed">
-          The workspace has been initialized in your <strong>Client-Demo</strong> repository under <code class="bg-[#E9DDCA]/40 px-1.5 py-0.5 rounded font-mono text-[11px]">/a2w/</code>. Awaiting your new design specifications and dataset to build the complete experience.
-        </p>
-
-        <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
-          <a href="../index.html" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#292824] text-[#F7F2E9] hover:bg-[#3D3A34] text-xs font-mono uppercase tracking-wider text-center flex items-center justify-center gap-2 transition-all">
-            <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
-            <span>View All Client Demos</span>
+      <!-- ---------------------------------------------------------------------
+           ZONE 1: LEFT COLUMN (~22%)
+           Editorial look numbers, masked typography, vertical progress track
+           --------------------------------------------------------------------- -->
+      <aside class="left-col">
+        <!-- Top Metadata -->
+        <div class="left-top">
+          <div class="brand-badge">
+            <span class="pill"></span>
+            <span>THE UNUSUAL · A TO W</span>
+          </div>
+          <div id="seasonLabel" class="season-label">
+            Autumn Winter 2026
+          </div>
+          <a href="../index.html" class="season-label" style="text-decoration: underline; text-underline-offset: 3px; opacity: 0.6; font-size: 9px;">
+            ← Client Demo Hub
           </a>
         </div>
+
+        <!-- Middle: Masked Text Reveal & Counter -->
+        <div class="left-middle">
+          <!-- Look Counter -->
+          <div class="look-counter-split" aria-live="polite">
+            <span style="font-size: 11px;">Look</span>
+            <span id="lookCounterCurrent" class="current-num">01</span>
+            <span class="total-num">/ <span id="lookCounterTotal">06</span></span>
+          </div>
+
+          <!-- Look Title with line mask -->
+          <div class="masked-text-line">
+            <h1 id="lookTitle" class="look-title-main masked-text-inner">
+              The Obsidian Cocoon
+            </h1>
+          </div>
+
+          <!-- Designer Credit -->
+          <div class="masked-text-line">
+            <h3 id="lookDesigner" class="look-designer-sub masked-text-inner">
+              Maya Senanayake
+            </h3>
+          </div>
+
+          <!-- Editorial Description -->
+          <div class="masked-text-line">
+            <p id="lookDesc" class="look-desc-para masked-text-inner">
+              Sculpted from 16 metres of heat-compressed wild raw silk. Structural bone corsetry anchors an asymmetric pleated cowl.
+            </p>
+          </div>
+
+          <!-- Fabrication Spec -->
+          <div id="lookMaterials" class="look-spec-chip">
+            Materials: 100% Wild Raw Silk & Internal Steel Boning
+          </div>
+        </div>
+
+        <!-- Bottom: Thin Vertical Scroll Progress Bar -->
+        <div class="left-bottom">
+          <div class="progress-track-v">
+            <div id="progressFill" class="progress-fill-v"></div>
+          </div>
+          <span class="progress-label-text">RUNWAY SCRUB PROGRESS</span>
+        </div>
+      </aside>
+
+      <!-- ---------------------------------------------------------------------
+           ZONE 2: CENTER STAGE (~50%)
+           Current model, floor reflection, ghost models, creative transition layer
+           --------------------------------------------------------------------- -->
+      <main class="center-stage">
+        <!-- Stage Model & Ghosts Wrapper -->
+        <div class="stage-models-wrapper">
+
+          <!-- Left Ghost Model (Previous look, heavy blur & low opacity) -->
+          <div id="ghostLeft" class="ghost-model left">
+            <img src="" alt="Previous look silhouette">
+          </div>
+
+          <!-- Right Ghost Model (Incoming look, drifts toward center on scrub) -->
+          <div id="ghostRight" class="ghost-model right">
+            <img src="" alt="Incoming look silhouette">
+          </div>
+
+          <!-- Main Center Model Viewport -->
+          <div class="main-model-viewport">
+            <div id="mainModelFigure" class="main-model-figure">
+              <!-- Current Active Model Image -->
+              <img
+                id="mainModelImg"
+                class="main-model-image"
+                src=""
+                alt="Active Runway Design"
+              >
+
+              <!-- Incoming Model Image for Scrubbed Transitions -->
+              <img
+                id="incomingModelImg"
+                class="main-model-image"
+                src=""
+                alt="Incoming Transition Silhouette"
+                style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); display: none; z-index: 5;"
+              >
+
+              <!-- Floor Mirror Reflection -->
+              <div id="floorReflection" class="model-floor-reflection">
+                <img src="" alt="Runway Floor Reflection">
+              </div>
+            </div>
+          </div>
+
+          <!-- Creative Transition Canvas (thread particles, ripples, etc.) -->
+          <canvas id="transitionCanvas" class="transition-canvas-overlay"></canvas>
+
+          <!-- Fabric Wipe Strip Overlay -->
+          <div id="fabricWipeCurtain" class="fabric-wipe-curtain"></div>
+
+          <!-- Color Flood Circle Overlay -->
+          <div id="colorFloodDisc" class="color-flood-disc"></div>
+
+        </div>
+
+        <!-- Runway Floor Surface Reflection Base -->
+        <div class="runway-floor-surface"></div>
+
+        <!-- Interactive Idle Animation Play/Pause Toggle -->
+        <div id="idleToggleBtn" class="stage-idle-controls" title="Toggle model idle breathing">
+          <i data-lucide="sparkles" style="width: 12px; height: 12px; color: var(--accent-color);"></i>
+          <span id="idleToggleText">Pause Idle</span>
+        </div>
+      </main>
+
+      <!-- ---------------------------------------------------------------------
+           ZONE 3: RIGHT RAIL (~28%)
+           Vertical list of garment cards moving upward, 40% focus line alignment
+           --------------------------------------------------------------------- -->
+      <section class="right-rail-col">
+        <!-- Rail Header -->
+        <div class="rail-header-label">
+          <span>Runway Archive</span>
+          <span>Focus 40%</span>
+        </div>
+
+        <!-- Upward-Scrolling Card Lane -->
+        <div id="railScrollLane" class="rail-scroll-lane">
+          <!-- Dynamically populated from RUNWAY_LOOKS in data.js -->
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       CLOSING SECTION (AFTER RUNWAY PIN RELEASES)
+       ========================================================================= -->
+  <section class="unusual-closing-section">
+    <div class="closing-content-box">
+      <div class="brand-badge">
+        <span class="pill"></span>
+        <span>Runway Finale</span>
       </div>
 
-    </div>
-  </main>
+      <h2 style="font-family: var(--font-serif); font-size: 42px; font-weight: 300; letter-spacing: -0.01em;">
+        Where Art Transcends Wear
+      </h2>
 
-  <!-- Footer -->
-  <footer class="border-t border-[#292824]/10 py-6 px-6 text-center text-xs font-mono text-[#82796E]">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div>A TO W — The Living Atelier · Designed for Independent Sri Lankan Makers</div>
-      <a href="../index.html" class="hover:text-[#292824] transition-colors">Client Demo Lab</a>
-    </div>
-  </footer>
+      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.8; max-width: 480px;">
+        Experimental runway pieces represent pure architectural innovation — the radical ideas that inspire the next generation of couture.
+      </p>
 
+      <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 12px;">
+        <button
+          onclick="window.scrollTo({ top: 0, behavior: 'smooth' });"
+          class="btn-editorial-outline"
+        >
+          <span>Return to Look 01</span>
+          <i data-lucide="arrow-up" style="width: 14px; height: 14px;"></i>
+        </button>
+
+        <a
+          href="../index.html"
+          class="btn-editorial-outline"
+          style="border-color: var(--accent-color); color: var(--accent-color);"
+        >
+          <span>Client Demo Hub</span>
+          <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Data & Application Scripts -->
+  <script src="./data.js"></script>
+  <script src="./app.js"></script>
   <script>
+    // Initialize Lucide Icons
     lucide.createIcons();
   </script>
 </body>

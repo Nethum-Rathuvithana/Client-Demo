@@ -1,0 +1,847 @@
+/* ==========================================================================
+   THE UNUSUAL — EXPERIMENTAL RUNWAY SHOWCASE
+   Theatrical · Cinematic · Editorial · Precision Pin-Scrub
+   ========================================================================== */
+
+:root {
+  --bg-dark: #0A0908;
+  --bg-stage: #0E0D0C;
+  --accent-glow: rgba(231, 180, 154, 0.25);
+  --accent-color: #E7B49A;
+  --text-main: #F7F2EA;
+  --text-muted: #8E8880;
+  --text-dim: #54504A;
+  --border-line: rgba(255, 255, 255, 0.12);
+  --border-accent: rgba(231, 180, 154, 0.5);
+
+  --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  /* Focus line position */
+  --focus-line-y: 40vh;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Minimalist Runway Cursor */
+.custom-cursor {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #F7F2EA;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.3s ease,
+              border-color 0.3s ease;
+  mix-blend-mode: difference;
+}
+
+.custom-cursor.hovered {
+  width: 58px;
+  height: 58px;
+  background-color: rgba(247, 242, 234, 0.15);
+  border: 1px solid rgba(247, 242, 234, 0.8);
+  mix-blend-mode: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-cursor .cursor-text {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #F7F2EA;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.custom-cursor.hovered .cursor-text {
+  opacity: 1;
+}
+
+/* Film Grain Texture (4–6% Opacity) */
+.film-grain {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9000;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Dynamic Ambient Spotlight Behind Runway */
+.stage-spotlight {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--accent-glow) 0%,
+    rgba(14, 13, 12, 0.8) 55%,
+    rgba(10, 9, 8, 0) 75%
+  );
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.8s ease-out;
+  filter: blur(40px);
+}
+
+/* Fixed Invisible Focus Line Indicator (Debug/Visual accent at 40vh) */
+.focus-line-marker {
+  position: fixed;
+  top: var(--focus-line-y);
+  right: 28%;
+  width: 20px;
+  height: 1px;
+  background: var(--accent-color);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 25;
+}
+
+/* Pinned Scroll Container Layout */
+.unusual-scroll-track {
+  position: relative;
+  width: 100%;
+  /* Height is dynamically set in JS: (looks.length * 100vh) */
+  background-color: var(--bg-dark);
+}
+
+.unusual-stage-fixed {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 22% 50% 28%;
+  z-index: 10;
+  background-color: var(--bg-dark);
+}
+
+/* --------------------------------------------------------------------------
+   LEFT COLUMN (~22%)
+   -------------------------------------------------------------------------- */
+.left-col {
+  position: relative;
+  z-index: 20;
+  padding: 48px 36px;
+  display: flex;
+  flex-col: column;
+  justify-content: space-between;
+  border-right: 1px solid var(--border-line);
+  background: linear-gradient(to right, rgba(10,9,8,0.9), rgba(10,9,8,0.4));
+  user-select: none;
+}
+
+.left-top {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+}
+
+.brand-badge .pill {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent-color);
+}
+
+.season-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.left-middle {
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.look-counter-split {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.look-counter-split .current-num {
+  font-size: 32px;
+  font-family: var(--font-serif);
+  color: var(--text-main);
+  line-height: 1;
+  font-weight: 400;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.look-counter-split .total-num {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+/* Masked lines for smooth text transitions */
+.masked-text-line {
+  overflow: hidden;
+  display: block;
+}
+
+.masked-text-inner {
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+}
+
+.look-title-main {
+  font-family: var(--font-serif);
+  font-size: 38px;
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text-main);
+}
+
+.look-designer-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+}
+
+.look-desc-para {
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--text-muted);
+  max-width: 260px;
+}
+
+.look-spec-chip {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border-line);
+  padding-top: 12px;
+}
+
+/* Thin vertical scroll progress line */
+.left-bottom {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.progress-track-v {
+  position: relative;
+  width: 1.5px;
+  height: 140px;
+  background-color: var(--border-line);
+}
+
+.progress-fill-v {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background-color: var(--accent-color);
+  transition: height 0.15s ease-out, background-color 0.6s ease;
+}
+
+.progress-label-text {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+/* --------------------------------------------------------------------------
+   CENTER STAGE (~50%)
+   -------------------------------------------------------------------------- */
+.center-stage {
+  position: relative;
+  z-index: 10;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Floor Reflection Runway Surface */
+.runway-floor-surface {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 25%;
+  background: linear-gradient(to top, rgba(10,9,8,0.95) 0%, rgba(14,13,12,0.4) 60%, transparent 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* Runway center stage model container */
+.stage-models-wrapper {
+  position: relative;
+  width: 100%;
+  height: 85%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ghost Models (Left and Right) */
+.ghost-model {
+  position: absolute;
+  top: 50%;
+  height: 88%;
+  max-width: 38%;
+  transform: translateY(-50%);
+  opacity: 0.16;
+  filter: blur(14px) grayscale(100%);
+  pointer-events: none;
+  z-index: 2;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity, filter;
+}
+
+.ghost-model.left {
+  left: -2%;
+}
+
+.ghost-model.right {
+  right: -2%;
+}
+
+.ghost-model img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+/* Active Main Center Model */
+.main-model-viewport {
+  position: relative;
+  height: 94%;
+  width: 60%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 10;
+}
+
+.main-model-figure {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.main-model-image {
+  max-width: 100%;
+  max-height: 88%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 18px 35px rgba(0, 0, 0, 0.7));
+  will-change: transform, opacity, clip-path;
+}
+
+/* Subtle Idle Breathing Animation */
+@keyframes runwayIdleBreathing {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.006);
+  }
+}
+
+.model-idle-loop {
+  animation: runwayIdleBreathing 6s ease-in-out infinite;
+}
+
+/* Soft Floor Mirror Reflection */
+.model-floor-reflection {
+  position: absolute;
+  bottom: -24%;
+  left: 50%;
+  transform: translateX(-50%) scaleY(-1);
+  width: 90%;
+  height: 38%;
+  opacity: 0.18;
+  filter: blur(6px) grayscale(40%);
+  pointer-events: none;
+  mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+  z-index: 1;
+}
+
+.model-floor-reflection img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center top;
+}
+
+/* Interactive Play/Pause Idle Button */
+.stage-idle-controls {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(18, 17, 16, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-line);
+  padding: 6px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stage-idle-controls:hover {
+  border-color: var(--accent-color);
+  background: rgba(26, 24, 22, 0.95);
+}
+
+.stage-idle-controls span {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-main);
+}
+
+/* Creative Transition Canvas / Effect Overlays */
+.transition-canvas-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 12;
+}
+
+/* Fabric Wipe Strip */
+.fabric-wipe-curtain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  background-size: cover;
+  background-position: center;
+  z-index: 13;
+  pointer-events: none;
+  box-shadow: 12px 0 35px rgba(0, 0, 0, 0.8);
+}
+
+/* Color Flood Circle */
+.color-flood-disc {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 14;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   RIGHT RAIL (~28%)
+   -------------------------------------------------------------------------- */
+.right-rail-col {
+  position: relative;
+  z-index: 20;
+  height: 100vh;
+  overflow: hidden;
+  border-left: 1px solid var(--border-line);
+  background: linear-gradient(to left, rgba(10,9,8,0.95), rgba(10,9,8,0.5));
+}
+
+.rail-header-label {
+  position: absolute;
+  top: 36px;
+  left: 36px;
+  right: 36px;
+  z-index: 30;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-line);
+  padding-bottom: 12px;
+}
+
+.rail-scroll-lane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 100px 32px 240px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+}
+
+/* Garment Card */
+.runway-card {
+  position: relative;
+  width: 100%;
+  background-color: #121110;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  cursor: pointer;
+  opacity: 0.5;
+  transform: scale(0.96);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.runway-card:hover {
+  opacity: 0.85;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.runway-card.active {
+  opacity: 1;
+  transform: scale(1.04);
+  border-color: var(--card-accent, var(--accent-color));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 16px var(--card-glow, var(--accent-glow));
+  background-color: #171615;
+}
+
+.runway-card .card-thumb-wrap {
+  width: 68px;
+  height: 90px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background-color: #000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.runway-card .card-thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.runway-card:hover .card-thumb-wrap img {
+  transform: scale(1.08);
+}
+
+.runway-card .card-meta-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.card-num-season {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.card-title-text {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-designer-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.card-action-row {
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.card-status-badge {
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+.card-link-view {
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.card-link-view:hover {
+  color: var(--text-main);
+}
+
+/* Glowing Connecting Thread on Card Hover */
+.connecting-thread-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 35;
+}
+
+/* --------------------------------------------------------------------------
+   END OF SHOWCASE CLOSING SECTION
+   -------------------------------------------------------------------------- */
+.unusual-closing-section {
+  position: relative;
+  z-index: 30;
+  min-height: 80vh;
+  background-color: var(--bg-dark);
+  border-top: 1px solid var(--border-line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.closing-content-box {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.btn-editorial-outline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border-line);
+  cursor: pointer;
+  transition: all 0.4s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-editorial-outline:hover {
+  border-color: var(--accent-color);
+  background-color: #171615;
+  color: var(--accent-color);
+}
+
+/* --------------------------------------------------------------------------
+   CURTAIN-OPEN INTRO LOADER
+   -------------------------------------------------------------------------- */
+.intro-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  pointer-events: none;
+}
+
+.intro-curtain .curtain-panel {
+  width: 50%;
+  height: 100%;
+  background-color: #050505;
+  transition: transform 1.2s cubic-bezier(0.85, 0, 0.15, 1);
+}
+
+.intro-curtain.opened .curtain-left {
+  transform: translateX(-100%);
+}
+
+.intro-curtain.opened .curtain-right {
+  transform: translateX(100%);
+}
+
+.intro-curtain-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-serif);
+  font-size: 28px;
+  letter-spacing: 0.3em;
+  color: #F7F2EA;
+  text-transform: uppercase;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.intro-curtain.opened .intro-curtain-title {
+  opacity: 0;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE / MOBILE (<768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .unusual-stage-fixed {
+    grid-template-columns: 1fr;
+    grid-template-rows: 62% 38%;
+  }
+
+  .left-col {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    padding: 20px;
+    background: linear-gradient(to bottom, rgba(10,9,8,0.9), transparent);
+    border-right: none;
+    border-bottom: 1px solid var(--border-line);
+    z-index: 30;
+  }
+
+  .left-middle, .left-bottom, .ghost-model {
+    display: none;
+  }
+
+  .center-stage {
+    grid-row: 1;
+    height: 100%;
+  }
+
+  .main-model-viewport {
+    width: 85%;
+    max-width: none;
+  }
+
+  .right-rail-col {
+    grid-row: 2;
+    height: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border-line);
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .rail-header-label {
+    display: none;
+  }
+
+  .rail-scroll-lane {
+    position: relative;
+    padding: 16px;
+    flex-direction: row;
+    width: max-content;
+    height: 100%;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .runway-card {
+    width: 260px;
+    height: 80%;
+  }
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  .unusual-scroll-track {
+    height: auto !important;
+  }
+  .unusual-stage-fixed {
+    position: relative !important;
+    height: auto !important;
+  }
+  .model-idle-loop {
+    animation: none !important;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
