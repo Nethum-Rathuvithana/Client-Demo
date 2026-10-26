@@ -57,140 +57,162 @@
 </head>
 <body class="bg-white text-stone-900 min-h-screen selection:bg-[#FFB800] selection:text-black font-sans">
 
-  <!-- ==============================================================
-       "MOST LOVED DISH" FOOD HERO SLIDER — PIXEL-FAITHFUL RECREATION (§4)
-  ============================================================== -->
-  
-
-
-  <!-- CUSTOMER ACTIVE OFFER URGENCY BAR -->
-  <div id="customerOfferAlertBar" class="hidden bg-gradient-to-r from-red-950 via-rose-900 to-amber-950 border-b border-red-500/40 py-2.5 px-4 text-xs text-white sticky top-0 z-40 shadow-xl backdrop-blur-md">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2.5">
-        <span class="w-2.5 h-2.5 rounded-full bg-red-400 animate-ping shrink-0"></span>
-        <span class="font-bold text-amber-300">🔥 FLASH PROMO:</span>
-        <span id="offerAlertDishName" class="font-semibold text-white"></span>
-        <span class="bg-red-500 text-white font-mono text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Limited Time</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <span id="offerAlertTimer" class="font-mono font-bold text-amber-300 bg-black/40 px-3 py-1 rounded-lg border border-amber-500/30"></span>
-        <a href="#offersSectionContainer" class="px-3 py-1 bg-amber-400 hover:bg-amber-300 text-black font-bold text-[11px] uppercase rounded-lg transition-colors">
-          Claim Deal
-        </a>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- TOP BAR: RESTAURANT & REPO INFO -->
-  <div class="bg-[#111116] border-b border-stone-200 py-2 px-4 sm:px-8 text-xs text-stone-300">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <a href="../index.html" class="flex items-center gap-1.5 text-stone-400 hover:text-amber-400 font-mono transition-colors">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-          <span>Client Demo Hub</span>
-        </a>
-        <span class="text-stone-700">|</span>
-        <span class="flex items-center gap-1.5 text-stone-300">
-          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-500"></i>
+  <!-- 1. SLIM EXECUTIVE TOP TICKER (CONTACT & HOURS) -->
+  <div class="bg-stone-900 text-stone-300 py-1.5 px-4 sm:px-8 text-[11px] border-b border-white/10 font-sans">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <!-- Left: Location & Hotline -->
+      <div class="flex items-center gap-3 overflow-hidden text-ellipsis whitespace-nowrap">
+        <span class="inline-flex items-center gap-1.5 text-amber-400 font-medium font-mono text-[10px]">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          OPEN TODAY 11:00 AM – 11:30 PM
+        </span>
+        <span class="text-stone-700 hidden sm:inline">|</span>
+        <span class="text-stone-400 hidden sm:flex items-center gap-1">
+          <i data-lucide="map-pin" class="w-3 h-3 text-amber-500"></i>
           Nagoda Junction, Kalutara South
         </span>
       </div>
 
-      <div class="flex items-center gap-4 text-[11px] font-mono">
-        <a href="tel:0772775132" class="text-amber-400 hover:underline flex items-center gap-1">
-          <i data-lucide="phone" class="w-3 h-3"></i>
+      <!-- Right: Direct Phone & Staff Link -->
+      <div class="flex items-center gap-4 shrink-0 font-mono text-[11px]">
+        <a href="tel:0772775132" class="text-stone-300 hover:text-amber-400 flex items-center gap-1 transition-colors">
+          <i data-lucide="phone" class="w-3 h-3 text-amber-400"></i>
           <span>077 277 5132</span>
         </a>
-        <span class="text-stone-700 hidden sm:inline">|</span>
-        <button onclick="window.OwitaApp.toggleRoleSwitch()" id="viewModeToggleBtn" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all font-semibold">
-          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span>Restaurant Admin Portal</span>
-          <span id="adminPendingOrdersBadge" class="w-5 h-5 rounded-full bg-amber-500 text-black text-[10px] font-bold flex items-center justify-center hidden">0</span>
+        <span class="text-stone-700">|</span>
+        <button onclick="window.OwitaApp.toggleRoleSwitch()" id="viewModeToggleBtn" class="text-stone-400 hover:text-amber-300 flex items-center gap-1 transition-colors">
+          <i data-lucide="shield" class="w-3 h-3 text-amber-400"></i>
+          <span>Staff POS Portal</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- NAVIGATION BAR (WITH AUTHENTIC RE-CREATED OVITA LOGO) -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
+  <!-- 2. STREAMLINED LUXURY STICKY NAVBAR -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200/80 shadow-[0_4px_25px_-5px_rgba(0,0,0,0.04)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 h-18 py-3 flex items-center justify-between gap-4">
       
-      <!-- Authentic Logo Re-created from Signboard Photo -->
-      <a href="#top" class="flex items-center gap-3.5 group">
+      <!-- Brand Logo Lockup -->
+      <a href="#top" class="flex items-center gap-3 group shrink-0">
         <!-- 3-Container Logo Mark -->
-        <div class="flex items-center gap-1 p-1 rounded-xl bg-stone-100 border border-stone-200 shadow-sm">
-          <div class="w-3.5 h-8 rounded-sm bg-[#00D2D3] flex items-center justify-center">
-            <span class="text-[7px] text-black font-bold">●</span>
+        <div class="flex items-center gap-1 p-1 rounded-xl bg-stone-100 border border-stone-200 shadow-sm group-hover:border-amber-400 transition-colors">
+          <div class="w-3 h-7 rounded-sm bg-[#00D2D3] flex items-center justify-center">
+            <span class="text-[6px] text-black font-bold">●</span>
           </div>
-          <div class="w-3.5 h-9 rounded-sm bg-[#FFB800] flex items-center justify-center shadow-sm">
-            <span class="text-[7px] text-black font-bold">🍴</span>
+          <div class="w-3 h-8 rounded-sm bg-[#FFB800] flex items-center justify-center shadow-sm">
+            <span class="text-[6px] text-black font-bold">🍴</span>
           </div>
-          <div class="w-3.5 h-8 rounded-sm bg-[#FF4757] flex items-center justify-center">
-            <span class="text-[7px] text-black font-bold">●</span>
+          <div class="w-3 h-7 rounded-sm bg-[#FF4757] flex items-center justify-center">
+            <span class="text-[6px] text-black font-bold">●</span>
           </div>
         </div>
 
         <div>
-          <div class="flex items-baseline gap-2">
-            <span class="font-serif-luxury text-2xl font-bold tracking-tight text-[#FF7A00] group-hover:text-amber-500 transition-colors">
+          <div class="flex items-baseline gap-1.5">
+            <span class="font-serif-luxury text-xl font-bold tracking-tight text-[#FF7A00] group-hover:text-amber-500 transition-colors">
               ඕවිට
             </span>
-            <span class="font-serif text-xl font-bold tracking-wide text-stone-900">
-              Family Restaurant
+            <span class="font-sans text-base font-extrabold tracking-wide text-stone-900">
+              OVITA
             </span>
           </div>
-          <div class="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.2em] text-stone-500 -mt-1">
-            <span class="text-[#FF7A00] font-bold">OVITA</span>
-            <span>·</span>
-            <span>Nagoda Junction, Kalutara</span>
+          <div class="text-[9px] uppercase tracking-[0.16em] text-stone-500 font-semibold -mt-0.5">
+            Family Restaurant
           </div>
         </div>
       </a>
 
-      <!-- Center Navigation Links -->
-      <nav id="customerNavbar" class="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-widest text-stone-700">
-        <a href="#top" class="hover:text-[#FF7A00] transition-colors text-[#FF7A00]">Home</a>
-        <a href="#interactiveOrderShowcase" class="hover:text-[#FF7A00] transition-colors flex items-center gap-1.5">
+      <!-- Center Desktop Navigation Links -->
+      <nav id="customerNavbar" class="hidden lg:flex items-center gap-7 text-xs font-bold uppercase tracking-wider text-stone-700">
+        <a href="#top" class="hover:text-[#FF7A00] transition-colors text-stone-900">Home</a>
+        <a href="#interactiveOrderShowcase" class="hover:text-[#FF7A00] transition-colors flex items-center gap-1.5 text-[#FF7A00]">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#FF7A00] animate-pulse"></span>
           <span>Showcase</span>
-          <span class="px-1.5 py-0.2 rounded bg-amber-100 text-[#FF7A00] text-[9px] font-mono font-bold">INTERACTIVE</span>
         </a>
         <a href="#menu" class="hover:text-[#FF7A00] transition-colors">Menu</a>
         <a href="#track" class="hover:text-[#FF7A00] transition-colors flex items-center gap-1.5">
           <span>Order Status</span>
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
         </a>
         <a href="#story" class="hover:text-[#FF7A00] transition-colors">Rooftop Venue</a>
+        <a href="#gallery" class="hover:text-[#FF7A00] transition-colors">Gallery</a>
         <a href="#location" class="hover:text-[#FF7A00] transition-colors">Location</a>
       </nav>
 
-      <!-- Right Action Controls -->
-      <div class="flex items-center gap-2.5">
-        <!-- Role Switcher (Admin / POS vs Customer) -->
-        <button onclick="window.OwitaApp.toggleRoleSwitch()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-200 text-xs font-mono font-bold transition-colors">
+      <!-- Right Action Controls (Balanced & Symmetrical) -->
+      <div class="flex items-center gap-2.5 shrink-0">
+        <!-- Search Trigger Icon -->
+        <button onclick="const s = document.getElementById('menuSearchInput'); if(s) { s.scrollIntoView({behavior:'smooth'}); s.focus(); }" title="Search Menu Items" class="w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-[#FF7A00] flex items-center justify-center transition-colors">
+          <i data-lucide="search" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Role Switcher (Compact staff toggle) -->
+        <button onclick="window.OwitaApp.toggleRoleSwitch()" title="Toggle Kitchen / POS Admin View" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200/80 text-[11px] font-mono font-semibold transition-colors">
           <i data-lucide="shield" class="w-3.5 h-3.5 text-[#FF7A00]"></i>
-          <span id="headerRoleSwitcherText" class="hidden sm:inline">POS Admin</span>
+          <span id="headerRoleSwitcherText" class="hidden xl:inline">POS Admin</span>
+          <span id="adminPendingOrdersBadge" class="w-4 h-4 rounded-full bg-[#FF7A00] text-black text-[9px] font-bold flex items-center justify-center hidden">0</span>
         </button>
 
-        <!-- User Profile Area -->
+        <!-- User Authentication & Profile -->
         <div id="headerUserDisplay" class="flex items-center"></div>
-        <button id="headerAuthBtn" onclick="window.OwitaApp.openAuthModal()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-200 text-xs transition-colors">
-          <i data-lucide="user" class="w-4 h-4 text-[#FF7A00]"></i>
-          <span class="hidden sm:inline font-medium">Sign In</span>
+        <button id="headerAuthBtn" onclick="window.OwitaApp.openAuthModal()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold border border-stone-200/80 transition-colors">
+          <i data-lucide="user" class="w-3.5 h-3.5 text-stone-600"></i>
+          <span class="hidden sm:inline">Sign In</span>
         </button>
 
-        <!-- Cart Button with Dynamic Count & Prep Estimate -->
-        <button onclick="window.OwitaApp.openCartDrawer()" class="relative flex items-center gap-2 px-4 py-2 rounded-xl amber-btn-primary text-xs uppercase tracking-wider font-bold shadow-md">
-          <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">Cart</span>
-          <span class="cart-count-badge w-5 h-5 rounded-full bg-black text-[#FFB800] font-mono text-[11px] font-bold flex items-center justify-center">
+        <!-- Primary Cart Button (Highlighted & Accessible) -->
+        <button onclick="window.OwitaApp.openCartDrawer()" class="relative flex items-center gap-2 px-4 py-2 rounded-full amber-btn-primary text-xs uppercase tracking-wider font-bold shadow-md hover:shadow-lg transition-all">
+          <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+          <span>Cart</span>
+          <span class="cart-count-badge w-5 h-5 rounded-full bg-[#111116] text-[#FFB800] font-mono text-[11px] font-bold flex items-center justify-center">
             0
           </span>
+        </button>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button onclick="const m = document.getElementById('mobileNavDrawer'); if(m) m.classList.toggle('hidden');" class="lg:hidden w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-800 flex items-center justify-center transition-colors" aria-label="Toggle Mobile Menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
       </div>
 
     </div>
+
+    <!-- Responsive Mobile Navigation Sheet (Expandable) -->
+    <div id="mobileNavDrawer" class="hidden lg:hidden border-t border-stone-200 bg-white px-4 py-4 space-y-3 shadow-xl">
+      <div class="grid grid-cols-2 gap-2 text-xs font-bold uppercase tracking-wider text-stone-800">
+        <a href="#top" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
+          <i data-lucide="home" class="w-4 h-4 text-[#FF7A00]"></i>
+          <span>Home</span>
+        </a>
+        <a href="#interactiveOrderShowcase" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-amber-50 text-[#FF7A00] transition-colors flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4 text-[#FF7A00]"></i>
+          <span>Showcase</span>
+        </a>
+        <a href="#menu" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
+          <i data-lucide="utensils" class="w-4 h-4 text-[#FF7A00]"></i>
+          <span>Full Menu</span>
+        </a>
+        <a href="#track" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
+          <i data-lucide="clock" class="w-4 h-4 text-emerald-500"></i>
+          <span>Live Clock</span>
+        </a>
+        <a href="#story" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
+          <i data-lucide="box" class="w-4 h-4 text-[#FF7A00]"></i>
+          <span>Rooftop Deck</span>
+        </a>
+        <a href="#location" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
+          <i data-lucide="map" class="w-4 h-4 text-[#FF7A00]"></i>
+          <span>Location</span>
+        </a>
+      </div>
+
+      <div class="pt-2 border-t border-stone-100 flex items-center justify-between text-xs font-mono text-stone-500">
+        <span>Nagoda Junction, Kalutara</span>
+        <a href="tel:0772775132" class="text-[#FF7A00] font-bold">077 277 5132</a>
+      </div>
+    </div>
   </header>
+
 
   <!-- ==============================================================
        MAIN CONTAINER: SWITCHES BETWEEN CUSTOMER STORE & ADMIN PORTAL
