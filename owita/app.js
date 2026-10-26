@@ -897,7 +897,10 @@ function setGalleryCategory(cat) {
       prepTimeMins: prepMins,
       createdAt: new Date().toISOString(),
       confirmedAt: null,
-      estimatedReadyAt: null, // Timer will NOT start until confirmed by admin!
+      estimatedReadyAt: new Date(Date.now() + prepMins * 60 * 1000).toISOString(), // Starts immediately!
+      isConfirmed: true,
+      confirmedAt: new Date().toISOString(),
+      orderStatus: 'Preparing in Kitchen',
       notes,
       hasChangeRequest: false,
       changeDetails: '',
@@ -1068,151 +1071,187 @@ function setGalleryCategory(cat) {
     const container = document.getElementById('customerOrdersList');
     if (!container) return;
 
-    if (!currentUser || currentUser.role !== 'customer') {
-      container.innerHTML = `
-        <div class="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl">
-          <i data-lucide="user" class="w-10 h-10 mx-auto text-amber-400 mb-2"></i>
-          <p class="text-sm text-stone-300">Sign in to view your orders and track live preparation status.</p>
-          <button onclick="window.OwitaApp.openAuthModal('signin')" class="mt-4 px-5 py-2.5 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider">
-            Sign In / Register
-          </button>
-        </div>
-      `;
+    // Filter customer's real orders
+    const myOrders = (currentUser && currentUser.role === 'customer') 
+      ? orders.filter(o => o.userId === currentUser.id)
+      : [];
+
+    // If user has placed real orders, render them
+    if (myOrders.length > 0) {
+      container.innerHTML = myOrders.map(order => {
+        const isReady = order.orderStatus === 'Ready for Pickup';
+        const isCompleted = order.orderStatus === 'Completed';
+        const isCancelled = order.orderStatus === 'Cancelled';
+
+        return `
+          <div class="owita-card rounded-2xl p-6 sm:p-7 space-y-5 border border-amber-500/30" id="order-card-${order.orderId}">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <div class="flex items-center gap-2.5">
+                  <span class="text-amber-400 font-mono font-bold text-base">${order.orderId}</span>
+                  <span class="text-xs px-2.5 py-0.5 rounded-full font-bold uppercase ${isReady ? 'bg-emerald-500 text-black' : isCancelled ? 'bg-red-500/20 text-red-300' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">
+                    ${order.orderStatus}
+                  </span>
+                </div>
+                <div class="text-xs text-stone-400 mt-1 font-mono">
+                  Placed: ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · ${order.itemCount} items
+                </div>
+              </div>
+
+              <div class="text-right">
+                <div class="font-mono text-base font-bold text-white">LKR ${order.total.toLocaleString()}</div>
+                <div class="text-[11px] text-stone-400">${order.paymentMethod}</div>
+              </div>
+            </div>
+
+            <!-- LIVE COUNTDOWN TIMER & PROGRESS BAR -->
+            ${!isCancelled && !isCompleted ? `
+              <div class="p-4 sm:p-5 rounded-xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-transparent border border-amber-500/30 space-y-3">
+                <div class="flex items-center justify-between flex-wrap gap-2 text-xs">
+                  <div class="flex items-center gap-2 font-mono text-amber-400 font-bold">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>LIVE PICKUP PREPARATION CLOCK</span>
+                  </div>
+                  <div class="font-mono font-bold text-lg text-white live-timer-text" data-ready-at="${order.estimatedReadyAt}">
+                    Calculating...
+                  </div>
+                </div>
+
+                <div class="w-full bg-black/60 rounded-full h-3 p-0.5 border border-white/10 overflow-hidden">
+                  <div class="live-timer-bar h-full rounded-full bg-gradient-to-r from-amber-400 to-[#FF7A00] transition-all duration-1000" data-created-at="${order.confirmedAt || order.createdAt}" data-ready-at="${order.estimatedReadyAt}" style="width: 25%;"></div>
+                </div>
+
+                <div class="flex items-center justify-between text-[11px] font-mono text-stone-400">
+                  <span>Wok Station: High-Flame Cooking</span>
+                  <span>Pickup: Nagoda Junction Counter</span>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Items summary -->
+            <div class="space-y-2 pt-1 text-xs">
+              <div class="font-semibold text-stone-300">Ordered Items:</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-400 font-mono text-[11px]">
+                ${order.items.map(it => `
+                  <div class="flex justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+                    <span>${it.quantity}x ${it.name}</span>
+                    <span class="text-white">LKR ${(it.price * it.quantity).toLocaleString()}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
       if (window.lucide) lucide.createIcons();
+      updateLiveTimers();
       return;
     }
 
-    const myOrders = orders.filter(o => o.userId === currentUser.id);
+    // IF NO REAL ORDERS YET: Render the Live Interactive Demo Kitchen Tracker!
+    // So the Live Pickup Timer is ALWAYS visible and functional!
+    const demoReadyAt = new Date(Date.now() + 14 * 60 * 1000 + 35 * 1000).toISOString();
+    const demoCreatedAt = new Date(Date.now() - 5 * 60 * 1000).toISOString();
 
-    if (myOrders.length === 0) {
-      container.innerHTML = `
-        <div class="p-8 text-center bg-white/[0.02] border border-white/5 rounded-2xl text-stone-400">
-          <i data-lucide="receipt" class="w-10 h-10 mx-auto mb-2 opacity-30"></i>
-          <p class="text-sm">You haven't placed any orders yet.</p>
-          <a href="#menu" class="inline-block mt-4 px-5 py-2.5 rounded-xl amber-btn-primary text-xs font-bold uppercase tracking-wider">
-            Explore Menu & Order
-          </a>
-        </div>
-      `;
-      if (window.lucide) lucide.createIcons();
-      return;
-    }
-
-    container.innerHTML = myOrders.map(order => {
-      const isUnderReview = order.orderStatus === 'Under Review' || !order.isConfirmed;
-      const isReady = order.orderStatus === 'Ready for Pickup';
-      const isCompleted = order.orderStatus === 'Completed';
-      const isCancelled = order.orderStatus === 'Cancelled';
-      const isChangeRequested = order.orderStatus === 'Change Requested' || order.orderStatus === 'Cancellation Requested';
-
-      return `
-        <div class="owita-card rounded-2xl p-6 space-y-5" id="orderCard-${order.orderId}">
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/5">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-mono text-stone-400">ORDER:</span>
-                <span class="font-mono font-bold text-amber-400 text-lg">${order.orderId}</span>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                  isUnderReview ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' :
-                  isReady ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                  isCompleted ? 'bg-stone-800 text-stone-400 border border-stone-700' :
-                  isCancelled ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                  isChangeRequested ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse' :
-                  'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                }">
-                  ${isUnderReview ? '⏳ Under Review' : order.orderStatus}
-                </span>
-              </div>
-              <div class="text-[11px] text-stone-500 mt-1">
-                Placed ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · Payment: ${order.paymentStatus}
-              </div>
+    container.innerHTML = `
+      <div class="owita-card rounded-3xl p-6 sm:p-8 space-y-6 border border-amber-500/40 relative overflow-hidden">
+        
+        <!-- Top Status Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <span class="text-amber-400 font-mono font-bold text-lg">SAMPLE LIVE KITCHEN ORDER #OV-7842</span>
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Wok Sizzling</span>
+              </span>
             </div>
-
-            <div class="flex items-center gap-2">
-              <button onclick="window.OwitaApp.openReceiptModal('${order.orderId}')" class="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-medium text-stone-200 flex items-center gap-1.5 border border-white/10">
-                <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
-                <span>View Receipt</span>
-              </button>
+            <div class="text-xs text-stone-400 mt-1 font-mono">
+              Live Interactive Demonstration · Watch the pickup clock tick down every second!
             </div>
           </div>
 
-          <!-- Live Timer Progress or Under Review Banner -->
-          ${isUnderReview ? `
-            <div class="p-4 rounded-xl bg-amber-500/[0.04] border border-amber-500/30 space-y-2">
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-amber-300 font-semibold flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-                  <span>Order Placed · Awaiting Kitchen Confirmation</span>
-                </span>
-                <span class="font-mono font-bold text-amber-400">Standby</span>
-              </div>
-              <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                <div class="h-full bg-amber-500/50 rounded-full animate-pulse" style="width: 30%;"></div>
-              </div>
-              <div class="text-[11px] text-stone-400 flex justify-between">
-                <span>The preparation clock will start as soon as kitchen confirms your order.</span>
-                <span>Window: ~${order.prepTimeMins} mins</span>
-              </div>
+          <div class="text-right">
+            <span class="text-[10px] font-mono text-stone-400 uppercase tracking-wider block">Estimated Total</span>
+            <span class="font-mono text-lg font-bold text-[#FFD166]">LKR 3,500</span>
+          </div>
+        </div>
+
+        <!-- THE LIVE COUNTDOWN CLOCK -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-transparent border border-amber-500/40 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-xs font-mono text-amber-300 font-bold">
+              <i data-lucide="timer" class="w-4 h-4 text-amber-400 animate-spin"></i>
+              <span>LIVE PICKUP PREPARATION CLOCK</span>
             </div>
-          ` : (!isCompleted && !isCancelled) ? `
-            <div class="p-4 rounded-xl bg-black/40 border border-amber-500/20 space-y-2">
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-stone-300 font-semibold flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full ${isReady ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}"></span>
-                  ${isReady ? 'READY FOR PICKUP AT NAGODA COUNTER!' : 'Kitchen Preparation Status:'}
-                </span>
-                <span class="font-mono font-bold text-amber-400 live-timer-text" data-ready-at="${order.estimatedReadyAt}">
-                  Calculating...
-                </span>
-              </div>
-
-              <div class="kitchen-timer-meter">
-                <div class="kitchen-timer-fill live-timer-bar" data-created-at="${order.confirmedAt || order.createdAt}" data-ready-at="${order.estimatedReadyAt}" style="width: 50%;"></div>
-              </div>
-
-              <div class="text-[11px] text-stone-400 flex justify-between">
-                <span>Total Prep Time: ${order.prepTimeMins} mins (${order.itemCount} items)</span>
-                <span>Counter: Nagoda Junction</span>
-              </div>
-            </div>
-          ` : ''}
-
-          <!-- Order Items Breakdown -->
-          <div class="space-y-1.5 text-xs">
-            ${order.items.map(item => `
-              <div class="flex justify-between text-stone-300">
-                <span>${item.quantity}x ${item.name}</span>
-                <span class="font-mono text-stone-400">LKR ${(item.price * item.quantity).toLocaleString()}</span>
-              </div>
-            `).join('')}
-            <div class="flex justify-between font-bold text-white pt-2 border-t border-white/5">
-              <span>Total Paid / Payable:</span>
-              <span class="font-mono text-amber-400">LKR ${order.total.toLocaleString()}</span>
+            <div class="font-mono font-black text-2xl text-white flex items-baseline gap-2 live-timer-text" data-ready-at="${demoReadyAt}">
+              14:35 Remaining
             </div>
           </div>
 
-          <!-- Change / Cancel Request Workflow -->
-          ${(!isCompleted && !isCancelled) ? `
-            <div class="pt-2 border-t border-white/5 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div class="text-[11px] text-stone-500">
-                Need to add items or cancel? Once confirmed, changes require kitchen approval.
-              </div>
+          <!-- Animated Progress Bar -->
+          <div class="w-full bg-black/70 rounded-full h-3.5 p-0.5 border border-white/15 overflow-hidden">
+            <div class="live-timer-bar h-full rounded-full bg-gradient-to-r from-amber-400 via-[#FFB800] to-[#FF7A00] transition-all duration-1000 shadow-[0_0_15px_rgba(255,184,0,0.6)]" data-created-at="${demoCreatedAt}" data-ready-at="${demoReadyAt}" style="width: 35%;"></div>
+          </div>
 
-              <div class="flex gap-2">
-                <button onclick="window.OwitaApp.requestOrderCancellation('${order.orderId}')"" ${isChangeRequested ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-semibold ${isChangeRequested ? 'opacity-40 cursor-not-allowed' : ''}">
-                  Cancel Order (Request Refund)
-                </button>
-              </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-mono text-stone-300 pt-1">
+            <div class="flex items-center gap-1.5">
+              <span class="text-amber-400 font-bold">✓</span>
+              <span>Order Received: 5 mins ago</span>
             </div>
-          ` : ''}
+            <div class="flex items-center gap-1.5 text-amber-300 font-bold">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+              <span>Current Stage: Wok High-Flame</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-stone-400 sm:justify-end">
+              <span>Pickup Counter: Nagoda Junction</span>
+            </div>
+          </div>
         </div>
-      `;
-    }).join('');
+
+        <!-- Sample Items -->
+        <div class="space-y-3 pt-1">
+          <div class="text-xs font-bold text-stone-300 uppercase tracking-wider">Dishes in this batch:</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+              <div>
+                <div class="text-white font-bold">1x Ovita Special Mixed Fried Rice</div>
+                <div class="text-[10px] text-stone-400">Serves 2–3 Persons · 3 Drumsticks, 3 Eggs</div>
+              </div>
+              <span class="text-amber-400 font-bold">LKR 1,850</span>
+            </div>
+            <div class="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+              <div>
+                <div class="text-white font-bold">1x Cheese Chicken Kottu Royale</div>
+                <div class="text-[10px] text-stone-400">Double Mozzarella Pull · 2 Quarters Chicken</div>
+              </div>
+              <span class="text-amber-400 font-bold">LKR 1,650</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Callout -->
+        <div class="p-4 rounded-xl bg-stone-900/80 border border-white/10 flex flex-wrap items-center justify-between gap-4">
+          <div class="text-xs text-stone-300">
+            Want to start your own real-time kitchen preparation countdown?
+          </div>
+          <div class="flex items-center gap-3">
+            <a href="#menu" class="px-5 py-2.5 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider">
+              Order Now & Start Timer
+            </a>
+            <button onclick="window.OwitaApp.openAuthModal('signin')" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-stone-200 text-xs font-semibold border border-white/10">
+              Sign In
+            </button>
+          </div>
+        </div>
+
+      </div>
+    `;
 
     if (window.lucide) lucide.createIcons();
     updateLiveTimers();
-    initScrollObserver();
-  }
+  };
 
     function requestOrderCancellation(orderId) {
     const order = orders.find(o => o.orderId === orderId);
@@ -2006,7 +2045,12 @@ function adminAdjustOrderTime(orderId, additionalMins) {
     }
   }
 
-  setInterval(updateLiveTimers, 1000);
+  setInterval(() => {
+    updateLiveTimers();
+    if (window.OwitaApp && window.OwitaApp.updateCalculatorDisplay) {
+      window.OwitaApp.updateCalculatorDisplay();
+    }
+  }, 1000);
 
   function updateAdminAnalytics() {
     const todayStr = new Date().toISOString().slice(0, 10);
@@ -2314,7 +2358,35 @@ function openCartDrawer() {
   }
 
   // Expose public API to window for inline onclick handlers
+  let calcItemsCount = 2;
   window.OwitaApp = {
+
+    adjustCalcItems: function(delta) {
+      calcItemsCount = Math.max(1, Math.min(20, (calcItemsCount || 2) + delta));
+      window.OwitaApp.updateCalculatorDisplay();
+    },
+    updateCalculatorDisplay: function() {
+      const countEl = document.getElementById('calcItemCountDisplay');
+      const timeEl = document.getElementById('calcPrepTimeMinutes');
+      const readyEl = document.getElementById('calcReadyAtTime');
+      const nowEl = document.getElementById('liveClockCurrentTime');
+      if (!countEl || !timeEl) return;
+
+      const mins = calculatePrepTimeMins(calcItemsCount || 2);
+      countEl.textContent = calcItemsCount || 2;
+      timeEl.textContent = mins;
+
+      const now = new Date();
+      if (nowEl) {
+        nowEl.textContent = 'Current: ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+
+      if (readyEl) {
+        const readyDate = new Date(now.getTime() + mins * 60 * 1000);
+        readyEl.textContent = readyDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+    },
+
     onMenuCardClick: function(dishId, event) {
       if (window.OwitaSlider && window.OwitaSlider.goToDishId) {
         window.OwitaSlider.goToDishId(dishId);
