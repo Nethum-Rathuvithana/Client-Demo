@@ -55,7 +55,7 @@
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-white text-stone-900 min-h-screen selection:bg-[#FFB800] selection:text-black font-sans">
+<body class="bg-[#0B0C10] text-[#FDFBF7] min-h-screen selection:bg-[#FF7A00] selection:text-black font-sans">
 
   <!-- 1. SLIM EXECUTIVE TOP TICKER (CONTACT & HOURS) -->
   <div class="bg-stone-900 text-stone-300 py-1.5 px-4 sm:px-8 text-[11px] border-b border-white/10 font-sans">
@@ -66,7 +66,7 @@
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
           OPEN TODAY 11:00 AM – 11:30 PM
         </span>
-        <span class="text-stone-700 hidden sm:inline">|</span>
+        <span class="text-stone-300 hidden sm:inline">|</span>
         <span class="text-stone-400 hidden sm:flex items-center gap-1">
           <i data-lucide="map-pin" class="w-3 h-3 text-amber-500"></i>
           Nagoda Junction, Kalutara South
@@ -89,13 +89,13 @@
   </div>
 
   <!-- 2. STREAMLINED LUXURY STICKY NAVBAR -->
-  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200/80 shadow-[0_4px_25px_-5px_rgba(0,0,0,0.04)]">
+  <header class="sticky top-0 z-50 bg-[#0B0C11]/92 backdrop-blur-md border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
     <div class="max-w-7xl mx-auto px-4 sm:px-8 h-18 py-3 flex items-center justify-between gap-4">
       
       <!-- Brand Logo Lockup -->
       <a href="#top" class="flex items-center gap-3 group shrink-0">
         <!-- 3-Container Logo Mark -->
-        <div class="flex items-center gap-1 p-1 rounded-xl bg-stone-100 border border-stone-200 shadow-sm group-hover:border-amber-400 transition-colors">
+        <div class="flex items-center gap-1 p-1 rounded-xl bg-stone-100 border border-white/10 shadow-sm group-hover:border-amber-400 transition-colors">
           <div class="w-3 h-7 rounded-sm bg-[#00D2D3] flex items-center justify-center">
             <span class="text-[6px] text-black font-bold">●</span>
           </div>
@@ -112,7 +112,7 @@
             <span class="font-serif-luxury text-xl font-bold tracking-tight text-[#FF7A00] group-hover:text-amber-500 transition-colors">
               ඕවිට
             </span>
-            <span class="font-sans text-base font-extrabold tracking-wide text-stone-900">
+            <span class="font-sans text-base font-extrabold tracking-wide text-[#FDFBF7]">
               OVITA
             </span>
           </div>
@@ -124,7 +124,7 @@
 
       <!-- Center Desktop Navigation Links -->
       <nav id="customerNavbar" class="hidden lg:flex items-center gap-7 text-xs font-bold uppercase tracking-wider text-stone-700">
-        <a href="#top" class="hover:text-[#FF7A00] transition-colors text-stone-900">Home</a>
+        <a href="#top" class="hover:text-[#FF7A00] transition-colors text-[#FDFBF7]">Home</a>
         <a href="#interactiveOrderShowcase" class="hover:text-[#FF7A00] transition-colors flex items-center gap-1.5 text-[#FF7A00]">
           <span class="w-1.5 h-1.5 rounded-full bg-[#FF7A00] animate-pulse"></span>
           <span>Showcase</span>
@@ -142,12 +142,12 @@
       <!-- Right Action Controls (Balanced & Symmetrical) -->
       <div class="flex items-center gap-2.5 shrink-0">
         <!-- Search Trigger Icon -->
-        <button onclick="const s = document.getElementById('menuSearchInput'); if(s) { s.scrollIntoView({behavior:'smooth'}); s.focus(); }" title="Search Menu Items" class="w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-[#FF7A00] flex items-center justify-center transition-colors">
+        <button onclick="const s = document.getElementById('menuSearchInput'); if(s) { s.scrollIntoView({behavior:'smooth'}); s.focus(); }" title="Search Menu Items" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 text-stone-200 hover:text-[#FF7A00] flex items-center justify-center transition-colors">
           <i data-lucide="search" class="w-4 h-4"></i>
         </button>
 
         <!-- Role Switcher (Compact staff toggle) -->
-        <button onclick="window.OwitaApp.toggleRoleSwitch()" title="Toggle Kitchen / POS Admin View" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 border border-stone-200/80 text-[11px] font-mono font-semibold transition-colors">
+        <button onclick="window.OwitaApp.toggleRoleSwitch()" title="Toggle Kitchen / POS Admin View" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-stone-200 border border-white/10 text-[11px] font-mono font-semibold transition-colors">
           <i data-lucide="shield" class="w-3.5 h-3.5 text-[#FF7A00]"></i>
           <span id="headerRoleSwitcherText" class="hidden xl:inline">POS Admin</span>
           <span id="adminPendingOrdersBadge" class="w-4 h-4 rounded-full bg-[#FF7A00] text-black text-[9px] font-bold flex items-center justify-center hidden">0</span>
@@ -155,7 +155,7 @@
 
         <!-- User Authentication & Profile -->
         <div id="headerUserDisplay" class="flex items-center"></div>
-        <button id="headerAuthBtn" onclick="window.OwitaApp.openAuthModal()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold border border-stone-200/80 transition-colors">
+        <button id="headerAuthBtn" onclick="window.OwitaApp.openAuthModal()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-stone-200 text-xs font-semibold border border-white/10 transition-colors">
           <i data-lucide="user" class="w-3.5 h-3.5 text-stone-600"></i>
           <span class="hidden sm:inline">Sign In</span>
         </button>
@@ -170,7 +170,7 @@
         </button>
 
         <!-- Mobile Menu Toggle Button -->
-        <button onclick="const m = document.getElementById('mobileNavDrawer'); if(m) m.classList.toggle('hidden');" class="lg:hidden w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-800 flex items-center justify-center transition-colors" aria-label="Toggle Mobile Menu">
+        <button onclick="const m = document.getElementById('mobileNavDrawer'); if(m) m.classList.toggle('hidden');" class="lg:hidden w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 text-stone-200 flex items-center justify-center transition-colors" aria-label="Toggle Mobile Menu">
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
       </div>
@@ -178,9 +178,9 @@
     </div>
 
     <!-- Responsive Mobile Navigation Sheet (Expandable) -->
-    <div id="mobileNavDrawer" class="hidden lg:hidden border-t border-stone-200 bg-white px-4 py-4 space-y-3 shadow-xl">
-      <div class="grid grid-cols-2 gap-2 text-xs font-bold uppercase tracking-wider text-stone-800">
-        <a href="#top" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
+    <div id="mobileNavDrawer" class="hidden lg:hidden border-t border-white/10 bg-white px-4 py-4 space-y-3 shadow-xl">
+      <div class="grid grid-cols-2 gap-2 text-xs font-bold uppercase tracking-wider text-stone-100">
+        <a href="#top" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
           <i data-lucide="home" class="w-4 h-4 text-[#FF7A00]"></i>
           <span>Home</span>
         </a>
@@ -188,19 +188,19 @@
           <i data-lucide="sparkles" class="w-4 h-4 text-[#FF7A00]"></i>
           <span>Showcase</span>
         </a>
-        <a href="#menu" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
+        <a href="#menu" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
           <i data-lucide="utensils" class="w-4 h-4 text-[#FF7A00]"></i>
           <span>Full Menu</span>
         </a>
-        <a href="#track" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
+        <a href="#track" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
           <i data-lucide="clock" class="w-4 h-4 text-emerald-500"></i>
           <span>Live Clock</span>
         </a>
-        <a href="#story" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
+        <a href="#story" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
           <i data-lucide="box" class="w-4 h-4 text-[#FF7A00]"></i>
           <span>Rooftop Deck</span>
         </a>
-        <a href="#location" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-stone-50 hover:bg-amber-50 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
+        <a href="#location" onclick="document.getElementById('mobileNavDrawer').classList.add('hidden')" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 hover:text-[#FF7A00] transition-colors flex items-center gap-2">
           <i data-lucide="map" class="w-4 h-4 text-[#FF7A00]"></i>
           <span>Location</span>
         </a>
@@ -226,18 +226,18 @@
         
         <!-- Left Hero Copy -->
         <div class="lg:col-span-7 space-y-7 z-10">
-          <div class="inline-flex items-center gap-2 text-xs font-mono tracking-widest text-[#FF7A00] uppercase bg-amber-50 px-3.5 py-1.5 rounded-full border border-amber-200/60 font-semibold">
+          <div class="inline-flex items-center gap-2 text-xs font-mono tracking-widest text-[#FF7A00] uppercase bg-amber-500/10 px-3.5 py-1.5 rounded-full border border-amber-500/30 font-semibold">
             <span class="w-2 h-2 rounded-full bg-[#FF7A00] animate-pulse"></span>
             <span>NAGODA JUNCTION, KALUTARA SOUTH · EST. 2018</span>
           </div>
 
-          <h1 class="font-serif-luxury text-5xl sm:text-6xl font-bold tracking-tight text-stone-900 leading-[1.08]">
+          <h1 class="font-serif-luxury text-5xl sm:text-6xl font-bold tracking-tight text-[#FDFBF7] leading-[1.08]">
             Taste Crafted<br>
             <span class="amber-glow-text">to Pure Perfection</span>
           </h1>
 
-          <p class="text-stone-600 text-sm sm:text-base leading-relaxed max-w-xl font-light">
-            Welcome to <strong class="text-stone-900 font-semibold">ඕවිට (Ovita) Family Restaurant</strong>. Kalutara's favorite container rooftop culinary landmark. Experience wok-tossed fried rice, cheese kottu royale, and crispy hot butter cuttlefish prepared fresh to order.
+          <p class="text-stone-300 text-sm sm:text-base leading-relaxed max-w-xl font-light">
+            Welcome to <strong class="text-amber-400 font-semibold">ඕවිට (Ovita) Family Restaurant</strong>. Kalutara's favorite container rooftop culinary landmark. Experience wok-tossed fried rice, cheese kottu royale, and crispy hot butter cuttlefish prepared fresh to order.
           </p>
 
           <!-- CTAs -->
@@ -246,26 +246,26 @@
               <span>Interactive Showcase & Order</span>
               <i data-lucide="arrow-down" class="w-4 h-4"></i>
             </a>
-            <a href="#menu" class="px-6 py-3.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-200 flex items-center gap-2 text-xs uppercase tracking-wider font-semibold transition-colors">
+            <a href="#menu" class="px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-stone-200 border border-white/10 flex items-center gap-2 text-xs uppercase tracking-wider font-semibold transition-colors">
               <span>View Full Menu</span>
             </a>
           </div>
 
           <!-- Feature Highlights Strip -->
-          <div class="grid grid-cols-3 gap-6 pt-6 border-t border-stone-200 text-stone-600">
+          <div class="grid grid-cols-3 gap-6 pt-6 border-t border-white/10 text-stone-600">
             <div class="space-y-1">
               <i data-lucide="sparkles" class="w-5 h-5 text-[#FF7A00] mb-1"></i>
-              <div class="text-xs font-bold text-stone-900 uppercase tracking-wider">Rooftop Deck</div>
+              <div class="text-xs font-bold text-[#FDFBF7] uppercase tracking-wider">Rooftop Deck</div>
               <div class="text-[11px] text-stone-500">Open-Air Seating & Lights</div>
             </div>
             <div class="space-y-1">
               <i data-lucide="flame" class="w-5 h-5 text-[#FF7A00] mb-1"></i>
-              <div class="text-xs font-bold text-stone-900 uppercase tracking-wider">High Flame Wok</div>
+              <div class="text-xs font-bold text-[#FDFBF7] uppercase tracking-wider">High Flame Wok</div>
               <div class="text-[11px] text-stone-500">Sizzling Fresh Flavors</div>
             </div>
             <div class="space-y-1">
               <i data-lucide="timer" class="w-5 h-5 text-[#FF7A00] mb-1"></i>
-              <div class="text-xs font-bold text-stone-900 uppercase tracking-wider">10-Min Clock</div>
+              <div class="text-xs font-bold text-[#FDFBF7] uppercase tracking-wider">10-Min Clock</div>
               <div class="text-[11px] text-stone-500">Live Kitchen Prep Timer</div>
             </div>
           </div>
@@ -276,16 +276,16 @@
           <div class="relative w-[320px] sm:w-[400px] h-[320px] sm:h-[400px]">
             <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/20 to-orange-400/20 filter blur-2xl"></div>
             
-            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85" alt="Ovita Sizzler Specialty" class="w-full h-full object-cover rounded-full border-4 border-white shadow-2xl relative z-10">
+            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85" alt="Ovita Sizzler Specialty" class="w-full h-full object-cover rounded-full border-4 border-stone-800 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative z-10">
 
             <!-- Circular Seal Stamp -->
-            <div class="absolute -bottom-4 -right-4 sm:bottom-0 sm:right-0 z-20 w-32 h-32 rounded-full border border-[#FF7A00]/40 bg-white/95 backdrop-blur-md p-2 flex items-center justify-center shadow-xl">
+            <div class="absolute -bottom-4 -right-4 sm:bottom-0 sm:right-0 z-20 w-32 h-32 rounded-full border border-[#FF7A00]/40 bg-[#12131C]/95 backdrop-blur-md p-2 flex items-center justify-center shadow-xl">
               <div class="circular-stamp text-center text-[8px] font-mono tracking-widest uppercase text-[#FF7A00] font-bold">
                 ★ EST. 2018 · OVITA RESTAURANT · NAGODA ★
               </div>
               <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
                 <span class="text-[9px] uppercase tracking-widest text-[#FF7A00] font-bold">ඕවිට</span>
-                <span class="font-serif-luxury font-bold text-stone-900 text-sm">OVITA</span>
+                <span class="font-serif-luxury font-bold text-[#FDFBF7] text-sm">OVITA</span>
                 <span class="text-[7px] text-stone-500">Kalutara</span>
               </div>
             </div>
@@ -297,14 +297,14 @@
 
     <!-- 2. KITCHEN PREPARATION TIMER GUARANTEE BANNER -->
     <div class="max-w-7xl mx-auto px-4 sm:px-8 mb-16 reveal-init reveal-bottom">
-      <div class="p-6 rounded-2xl bg-gradient-to-r from-amber-50 via-orange-50/50 to-white border border-amber-300/80 shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div class="p-6 rounded-2xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-transparent border border-amber-500/30 shadow-xl flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-4">
           <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
             <i data-lucide="timer" class="w-6 h-6"></i>
           </div>
           <div>
-            <h3 class="font-serif-luxury text-lg font-bold text-stone-900">Live Kitchen Preparation Clock Guarantee</h3>
-            <p class="text-xs text-stone-600 font-medium">
+            <h3 class="font-serif-luxury text-lg font-bold text-[#FDFBF7]">Live Kitchen Preparation Clock Guarantee</h3>
+            <p class="text-xs text-stone-300">
               ⚡ 10 mins for 1 item · 20 mins for 2 items · +5 mins for each extra dish. Pickup hot at Nagoda Junction!
             </p>
           </div>
@@ -320,7 +320,7 @@
     <!-- 3. SIGNATURE COLLECTION (DIRECTLY FROM REFERENCE UI) -->
     
     <!-- LIMITED-TIME OFFERS SECTION -->
-    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-stone-200 reveal-init reveal-bottom hidden" id="offersSectionContainer">
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/10 reveal-init reveal-bottom hidden" id="offersSectionContainer">
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div class="space-y-2 reveal-init reveal-left">
           <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-mono text-xs uppercase tracking-wider">
@@ -353,11 +353,11 @@
     <!-- Section Header with Explanatory Cue -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
       <div>
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-[#FF7A00] font-mono text-xs uppercase tracking-wider border border-amber-200/60 font-semibold mb-2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 font-mono text-xs uppercase tracking-wider border border-amber-500/30 font-semibold mb-2">
           <span class="w-2 h-2 rounded-full bg-[#FF7A00] animate-ping"></span>
           <span>Horizontal Interactive Showcase</span>
         </div>
-        <h2 class="font-serif-luxury text-3xl sm:text-4xl font-bold text-stone-900 tracking-tight">
+        <h2 class="font-serif-luxury text-3xl sm:text-4xl font-bold text-[#FDFBF7] tracking-tight">
           Most Loved <span class="amber-glow-text">Culinary Creations</span>
         </h2>
         <p class="text-xs sm:text-sm text-stone-500 mt-1 max-w-xl">
@@ -616,7 +616,7 @@
     </div>
   </section>
 
-    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-stone-200" id="menu">
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/10" id="menu">
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div class="reveal-init reveal-left">
           <span class="text-xs font-mono text-amber-500 uppercase tracking-widest block mb-2">COMPLETE KITCHEN SELECTION</span>
@@ -636,7 +636,7 @@
     </section>
 
     <!-- 5. LIVE ORDER STATUS & CUSTOMER DASHBOARD -->
-    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-stone-200" id="track">
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/10" id="track">
       <div class="flex items-center justify-between gap-4 mb-8">
         <div class="reveal-init reveal-left">
           <div class="flex items-center gap-2 text-xs font-mono text-amber-500 uppercase tracking-widest mb-1">
@@ -646,7 +646,7 @@
           <h2 class="font-serif-luxury text-3xl font-bold text-white">My Orders & Live Pickup Timer</h2>
         </div>
 
-        <button onclick="window.OwitaApp.renderCustomerOrders()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-300 text-xs font-mono flex items-center gap-1.5 border border-stone-200">
+        <button onclick="window.OwitaApp.renderCustomerOrders()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-stone-300 text-xs font-mono flex items-center gap-1.5 border border-white/10">
           <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
           <span>Refresh Status</span>
         </button>
@@ -658,7 +658,7 @@
     </section>
 
     <!-- 6. OUR STORY & ROOFTOP CONTAINER EXPERIENCE -->
-    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-stone-200" id="story">
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/10" id="story">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         
         <div class="lg:col-span-5 space-y-6 reveal-init reveal-left">
@@ -685,7 +685,7 @@
           </div>
           <div class="font-serif-luxury text-xl italic text-amber-400">ඕවිට (OVITA) Family Restaurant</div>
 
-          <div class="grid grid-cols-3 gap-6 pt-4 border-t border-stone-200">
+          <div class="grid grid-cols-3 gap-6 pt-4 border-t border-white/10">
             <div>
               <div class="text-3xl font-bold font-serif-luxury text-white">8+</div>
               <div class="text-[11px] text-stone-400 uppercase tracking-wider mt-1">Years of Craft</div>
@@ -722,7 +722,7 @@
     </section>
 
     <!-- 7. GUEST REVIEWS SECTION -->
-    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-stone-200">
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/10">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12">
         <div class="reveal-init reveal-left">
           <div class="text-xs font-mono tracking-widest text-amber-500 uppercase mb-2">WHAT OUR GUESTS SAY</div>
@@ -730,7 +730,7 @@
             Unforgettable <span class="amber-glow-text">Experiences</span>
           </h2>
         </div>
-        <div class="flex items-center gap-3 bg-white/[0.03] px-4 py-2 rounded-xl border border-stone-200 reveal-init reveal-right">
+        <div class="flex items-center gap-3 bg-white/[0.03] px-4 py-2 rounded-xl border border-white/10 reveal-init reveal-right">
           <div class="text-amber-400 font-bold text-sm">★★★★★ 4.9</div>
           <span class="text-stone-400 text-xs">From 1,200+ Kalutara food lovers</span>
         </div>
@@ -745,7 +745,7 @@
           <p class="text-xs text-stone-300 leading-relaxed font-light">
             The Cheese Chicken Kottu is legendary! It was hot, loaded with mozzarella and the portion was generous enough for two. Order was ready on the counter exactly as the timer promised.
           </p>
-          <div class="pt-4 border-t border-stone-200">
+          <div class="pt-4 border-t border-white/10">
             <div class="text-xs font-bold text-white">Supun Madushanka</div>
             <div class="text-[10px] text-stone-500">Nagoda, Kalutara</div>
           </div>
@@ -759,7 +759,7 @@
           <p class="text-xs text-stone-300 leading-relaxed font-light">
             Best Hot Butter Cuttlefish on the Matugama road corridor! Crisp batter, genuine fresh cuttlefish, and the special chili paste kicks it to another level. We order every Friday.
           </p>
-          <div class="pt-4 border-t border-stone-200">
+          <div class="pt-4 border-t border-white/10">
             <div class="text-xs font-bold text-white">Dr. H. Jayawardena</div>
             <div class="text-[10px] text-stone-500">Kalutara South</div>
           </div>
@@ -773,7 +773,7 @@
           <p class="text-xs text-stone-300 leading-relaxed font-light">
             Sitting on the rooftop terrace under the warm lights while having the mixed grill platter is such a great vibe. Online ordering and pickup works seamlessly!
           </p>
-          <div class="pt-4 border-t border-stone-200">
+          <div class="pt-4 border-t border-white/10">
             <div class="text-xs font-bold text-white">Anuki Fernando</div>
             <div class="text-[10px] text-stone-500">Payagala</div>
           </div>
@@ -787,7 +787,7 @@
     <!-- ==============================================================
          ROOFTOP & CULINARY GALLERY SECTION
     ============================================================== -->
-    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-stone-200" id="gallery">
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/10" id="gallery">
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div class="reveal-init reveal-left">
           <div class="flex items-center gap-2 text-xs font-mono text-amber-500 uppercase tracking-widest mb-1">
@@ -813,7 +813,7 @@
     <!-- ==============================================================
          INTERACTIVE MAP & LIVE DISTANCE CALCULATOR SECTION
     ============================================================== -->
-    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-stone-200" id="location">
+    <section class="py-16 px-4 sm:px-8 max-w-7xl mx-auto border-t border-white/10" id="location">
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div class="reveal-init reveal-left">
           <div class="flex items-center gap-2 text-xs font-mono text-amber-500 uppercase tracking-widest mb-1">
@@ -828,7 +828,7 @@
           </p>
         </div>
 
-        <div class="text-xs text-stone-400 font-mono bg-white/[0.02] p-3 rounded-xl border border-stone-200 reveal-init reveal-right">
+        <div class="text-xs text-stone-400 font-mono bg-white/[0.02] p-3 rounded-xl border border-white/10 reveal-init reveal-right">
           <div class="text-white font-bold">📍 Nagoda Junction, Kalutara South</div>
           <div class="text-amber-400 mt-0.5">📞 077 277 5132 · Open Daily 11:00 AM – 11:30 PM</div>
         </div>
@@ -841,7 +841,7 @@
           
           <!-- Live Distance Card -->
           <div class="owita-card rounded-2xl p-6 border border-amber-500/20 space-y-4">
-            <div class="flex items-center justify-between pb-3 border-b border-stone-200">
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
               <span class="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
                 Live Road Distance Calculator
@@ -859,7 +859,7 @@
             </div>
 
             <div class="pt-2 flex flex-col gap-2.5">
-              <button onclick="window.OwitaApp.detectCustomerLocation()" class="w-full py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 border border-stone-200 transition-all">
+              <button onclick="window.OwitaApp.detectCustomerLocation()" class="w-full py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 border border-white/10 transition-all">
                 <i data-lucide="crosshair" class="w-4 h-4 text-amber-400"></i>
                 <span>Detect My Live GPS Distance</span>
               </button>
@@ -873,25 +873,25 @@
 
           <!-- Quick Landmark Corridor Estimates -->
           <div class="owita-card rounded-2xl p-5 space-y-3">
-            <div class="text-xs font-mono font-semibold text-stone-300 uppercase tracking-wider border-b border-stone-200 pb-2 flex items-center justify-between">
+            <div class="text-xs font-mono font-semibold text-stone-300 uppercase tracking-wider border-b border-white/10 pb-2 flex items-center justify-between">
               <span>Drive Times from Key Towns</span>
               <span class="text-[10px] text-amber-400 font-normal">Approx.</span>
             </div>
             
             <div class="grid grid-cols-2 gap-2.5 text-xs text-stone-300">
-              <div class="p-2.5 rounded-xl bg-white/[0.02] border border-stone-200">
+              <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/10">
                 <div class="text-white font-semibold">Katukurunda</div>
                 <div class="text-[11px] text-amber-400 font-mono mt-0.5">~2.1 km (5 mins)</div>
               </div>
-              <div class="p-2.5 rounded-xl bg-white/[0.02] border border-stone-200">
+              <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/10">
                 <div class="text-white font-semibold">Kalutara North</div>
                 <div class="text-[11px] text-amber-400 font-mono mt-0.5">~3.2 km (7 mins)</div>
               </div>
-              <div class="p-2.5 rounded-xl bg-white/[0.02] border border-stone-200">
+              <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/10">
                 <div class="text-white font-semibold">Wadduwa</div>
                 <div class="text-[11px] text-amber-400 font-mono mt-0.5">~8.5 km (15 mins)</div>
               </div>
-              <div class="p-2.5 rounded-xl bg-white/[0.02] border border-stone-200">
+              <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/10">
                 <div class="text-white font-semibold">Beruwala</div>
                 <div class="text-[11px] text-amber-400 font-mono mt-0.5">~13.0 km (22 mins)</div>
               </div>
@@ -902,7 +902,7 @@
 
         <!-- Right: Interactive Google Map -->
         <div class="lg:col-span-7 reveal-init reveal-right">
-          <div class="rounded-3xl overflow-hidden border border-stone-200 relative h-[420px] sm:h-[480px] shadow-2xl bg-[#0B0B0E]">
+          <div class="rounded-3xl overflow-hidden border border-white/10 relative h-[420px] sm:h-[480px] shadow-2xl bg-[#0B0B0E]">
             <iframe 
               src="https://maps.google.com/maps?q=Ovita+Family+Restaurant,+Nagoda+Junction,+Kalutara,+Sri+Lanka&hl=en&z=16&output=embed" 
               width="100%" 
@@ -924,7 +924,7 @@
               </div>
             </div>
 
-            <div class="absolute bottom-4 right-4 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-stone-200 text-[10px] font-mono text-stone-300">
+            <div class="absolute bottom-4 right-4 bg-black/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-[10px] font-mono text-stone-300">
               Coordinates: 6.5684° N, 79.9806° E
             </div>
           </div>
@@ -934,8 +934,8 @@
     </section>
 
     <!-- FOOTER -->
-  <footer class="border-t border-stone-200 bg-[#060608] pt-16 pb-12 px-4 sm:px-8" id="contact">
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-stone-200 reveal-init reveal-bottom">
+  <footer class="border-t border-white/10 bg-[#060608] pt-16 pb-12 px-4 sm:px-8" id="contact">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-white/10 reveal-init reveal-bottom">
       
       <!-- Brand Info -->
       <div class="space-y-4">
@@ -988,7 +988,7 @@
         <div class="font-mono text-amber-400 uppercase tracking-widest text-[11px] font-bold">Ovita Newsletter</div>
         <p class="text-stone-400">Get weekend family combo updates and special kottu offers.</p>
         <form onsubmit="event.preventDefault(); window.OwitaApp.showToast ? window.OwitaApp.showToast('Subscribed to Ovita food notes!') : alert('Subscribed!'); this.reset();" class="flex gap-2">
-          <input type="email" placeholder="Enter your email" required class="flex-1 bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-xs text-white placeholder-stone-500 focus:outline-none focus:border-amber-500">
+          <input type="email" placeholder="Enter your email" required class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-stone-500 focus:outline-none focus:border-amber-500">
           <button type="submit" class="px-4 py-2 rounded-xl amber-btn-primary text-xs font-bold uppercase">Join</button>
         </form>
       </div>
@@ -1038,7 +1038,7 @@
       </div>
 
       <!-- Navigation Tabs for Admin & POS -->
-      <div class="flex flex-wrap gap-2 mb-8 border-b border-stone-200 pb-4">
+      <div class="flex flex-wrap gap-2 mb-8 border-b border-white/10 pb-4">
         <button class="admin-nav-tab px-5 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider border border-amber-500 text-amber-400 bg-white/[0.04] transition-all flex items-center gap-2" data-admin-tab="orders" onclick="window.OwitaApp.setAdminTab('orders')">
           <i data-lucide="chef-hat" class="w-4 h-4"></i>
           <span>Live Kitchen Orders</span>
@@ -1084,12 +1084,12 @@
 
         <!-- Orders Table -->
         <div class="owita-card rounded-2xl overflow-hidden">
-          <div class="p-6 border-b border-stone-200 flex flex-wrap items-center justify-between gap-4">
+          <div class="p-6 border-b border-white/10 flex flex-wrap items-center justify-between gap-4">
             <div>
               <h3 class="font-serif-luxury text-2xl font-bold text-white">Live Kitchen Orders</h3>
               <p class="text-xs text-stone-400">Real-time orders visible to restaurant. Confirm orders to start the live customer preparation timer!</p>
             </div>
-            <button onclick="window.OwitaApp.renderAdminOrders()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-stone-300 flex items-center gap-1.5 border border-stone-200">
+            <button onclick="window.OwitaApp.renderAdminOrders()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-stone-300 flex items-center gap-1.5 border border-white/10">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
               <span>Refresh Orders</span>
             </button>
@@ -1098,7 +1098,7 @@
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
-                <tr class="border-b border-stone-200 text-[10px] font-mono uppercase tracking-widest text-stone-400 bg-white/[0.01]">
+                <tr class="border-b border-white/10 text-[10px] font-mono uppercase tracking-widest text-stone-400 bg-white/[0.01]">
                   <th class="p-4">Order ID</th>
                   <th class="p-4">Customer</th>
                   <th class="p-4">Ordered Dishes</th>
@@ -1137,7 +1137,7 @@
           <!-- Active Bill Summary (1 Col) -->
           <div class="owita-card rounded-2xl p-6 flex flex-col justify-between space-y-6 border-amber-500/20">
             <div>
-              <div class="flex items-center justify-between pb-4 border-b border-stone-200">
+              <div class="flex items-center justify-between pb-4 border-b border-white/10">
                 <div class="flex items-center gap-2">
                   <i data-lucide="receipt" class="w-5 h-5 text-amber-400"></i>
                   <h4 class="font-bold text-white">Counter Ticket</h4>
@@ -1149,11 +1149,11 @@
               <div class="pt-4 space-y-3">
                 <div>
                   <label class="block text-[11px] text-stone-400 mb-1">Customer Name / Table #</label>
-                  <input type="text" id="posCustomerNameInput" value="Walk-in Guest" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500">
+                  <input type="text" id="posCustomerNameInput" value="Walk-in Guest" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500">
                 </div>
                 <div>
                   <label class="block text-[11px] text-stone-400 mb-1">Payment Method</label>
-                  <select id="posPaymentMethodSelect" class="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500">
+                  <select id="posPaymentMethodSelect" class="w-full bg-white border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500">
                     <option value="Cash Counter">Cash at Counter</option>
                     <option value="Credit/Debit Card (POS Machine)">Credit/Debit Card Machine</option>
                     <option value="LankaQR / Direct Bank">LankaQR Transfer</option>
@@ -1162,7 +1162,7 @@
               </div>
 
               <!-- Item List -->
-              <div class="mt-4 pt-4 border-t border-stone-200">
+              <div class="mt-4 pt-4 border-t border-white/10">
                 <div class="text-[11px] font-mono text-stone-400 uppercase tracking-wider mb-2">Ticket Items</div>
                 <div id="posCurrentBillItems" class="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scroll">
                   <!-- Injected by JS -->
@@ -1170,7 +1170,7 @@
               </div>
 
               <!-- Checkboxes -->
-              <div class="mt-4 pt-4 border-t border-stone-200 space-y-2 text-xs text-stone-300">
+              <div class="mt-4 pt-4 border-t border-white/10 space-y-2 text-xs text-stone-300">
                 <label class="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" id="posPackagingCheck" class="rounded accent-amber-500" onchange="window.OwitaApp.renderPosBill()">
                   <span>Include Packaging Container (LKR 100)</span>
@@ -1183,7 +1183,7 @@
             </div>
 
             <!-- Totals & Checkout Button -->
-            <div class="pt-4 border-t border-stone-200 space-y-3">
+            <div class="pt-4 border-t border-white/10 space-y-3">
               <div class="flex justify-between text-xs text-stone-400">
                 <span>Subtotal:</span>
                 <span id="posSubtotalDisplay" class="font-mono text-white">LKR 0</span>
@@ -1249,7 +1249,7 @@
       <!-- TAB 4: MENU & INVENTORY MANAGEMENT -->
       <div id="adminTabMenu" class="hidden space-y-6">
         <div class="owita-card rounded-2xl p-6">
-          <div class="flex flex-wrap items-center justify-between pb-4 border-b border-stone-200 mb-6 gap-3">
+          <div class="flex flex-wrap items-center justify-between pb-4 border-b border-white/10 mb-6 gap-3">
             <div>
               <h3 class="font-serif-luxury text-2xl font-bold text-white">Menu Pricing & Inventory</h3>
               <p class="text-xs text-stone-400">Edit descriptions, change prices, toggle stock availability, and manage your dishes.</p>
@@ -1272,7 +1272,7 @@
           
           <!-- Create New Offer Form -->
           <div class="owita-card rounded-2xl p-6 border-red-500/30">
-            <div class="flex items-center gap-2 pb-4 border-b border-stone-200 mb-4">
+            <div class="flex items-center gap-2 pb-4 border-b border-white/10 mb-4">
               <i data-lucide="flame" class="w-5 h-5 text-red-400"></i>
               <h4 class="font-bold text-white">Create Limited-Time Offer</h4>
             </div>
@@ -1280,33 +1280,33 @@
             <form id="adminOfferForm" onsubmit="window.OwitaApp.adminCreateNewOffer(event)" class="space-y-4 text-xs">
               <div>
                 <label class="block text-stone-400 mb-1">Select Target Dish</label>
-                <select id="offerDishSelect" required class="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+                <select id="offerDishSelect" required class="w-full bg-white border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
                   <!-- Populated by JS -->
                 </select>
               </div>
 
               <div>
                 <label class="block text-stone-400 mb-1">Offer Title</label>
-                <input type="text" id="offerTitleInput" required placeholder="e.g. Flash 15% Off Wok Special" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+                <input type="text" id="offerTitleInput" required placeholder="e.g. Flash 15% Off Wok Special" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
               </div>
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="block text-stone-400 mb-1">Discount Type</label>
-                  <select id="offerTypeSelect" class="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+                  <select id="offerTypeSelect" class="w-full bg-white border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
                     <option value="percent">Percentage (%)</option>
                     <option value="fixed">Fixed Price OFF (LKR)</option>
                   </select>
                 </div>
                 <div>
                   <label class="block text-stone-400 mb-1">Discount Value</label>
-                  <input type="number" id="offerValueInput" required placeholder="15" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono">
+                  <input type="number" id="offerValueInput" required placeholder="15" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono">
                 </div>
               </div>
 
               <div>
                 <label class="block text-stone-400 mb-1">Offer Expiration Duration</label>
-                <select id="offerDurationSelect" class="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+                <select id="offerDurationSelect" class="w-full bg-white border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
                   <option value="2h">2 Hours (Flash Deal)</option>
                   <option value="6h">6 Hours (Today Only)</option>
                   <option value="24h">24 Hours (1 Day)</option>
@@ -1324,7 +1324,7 @@
 
           <!-- Active Offers List -->
           <div class="lg:col-span-2 owita-card rounded-2xl p-6">
-            <div class="flex items-center justify-between pb-4 border-b border-stone-200 mb-6">
+            <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
               <div>
                 <h4 class="font-serif-luxury text-2xl font-bold text-white">Active Promotional Offers</h4>
                 <p class="text-xs text-stone-400">Items currently displayed with red ribbons and live countdown timers on the homepage.</p>
@@ -1352,14 +1352,14 @@
   ============================================================== -->
   <div id="owitaCartDrawerBackdrop" onclick="window.OwitaApp.closeCartDrawer()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden transition-opacity"></div>
   
-  <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-[#0F0F14] border-l border-stone-200 z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between shadow-2xl">
+  <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-[#0F0F14] border-l border-white/10 z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between shadow-2xl">
     
     <!-- Drawer Header -->
-    <div class="p-5 border-b border-stone-200 flex items-center justify-between bg-black/40">
+    <div class="p-5 border-b border-white/10 flex items-center justify-between bg-black/40">
       <div class="flex items-center gap-2.5">
         <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-500"></i>
         <h3 class="font-serif-luxury text-xl font-bold text-white">Your Order</h3>
-        <span class="cart-count-badge px-2 py-0.5 rounded-full bg-amber-500 text-black text-xs font-mono font-bold">0</span>
+        <span class="cart-count-badge px-2 py-0.5 rounded-full bg-gradient-to-r from-[#FFB800] to-[#FF7A00] text-black text-xs font-mono font-bold">0</span>
       </div>
       <button onclick="window.OwitaApp.closeCartDrawer()" class="p-1 text-stone-400 hover:text-white">
         <i data-lucide="x" class="w-5 h-5"></i>
@@ -1390,7 +1390,7 @@
     </div>
 
     <!-- Drawer Summary & Checkout -->
-    <div id="cartSummaryBox" class="p-5 bg-black/60 border-t border-stone-200 space-y-3 hidden">
+    <div id="cartSummaryBox" class="p-5 bg-black/60 border-t border-white/10 space-y-3 hidden">
       <div class="space-y-1.5 text-xs text-stone-400">
         <div class="flex justify-between">
           <span>Subtotal:</span>
@@ -1407,7 +1407,7 @@
         <div class="text-[11px] text-amber-400/90 pt-1" id="cartTimerExplanation">
           10 mins 1st item + 10 mins 2nd + 5 mins each after
         </div>
-        <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-stone-200">
+        <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
           <span class="text-amber-400">Total:</span>
           <span class="font-mono text-amber-400" id="cartTotalText">LKR 0</span>
         </div>
@@ -1427,7 +1427,7 @@
   <div id="checkoutPaymentModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="owita-card rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6">
       
-      <div class="flex items-center justify-between pb-4 border-b border-stone-200">
+      <div class="flex items-center justify-between pb-4 border-b border-white/10">
         <div>
           <span class="text-[10px] font-mono text-amber-500 uppercase tracking-widest">ORDER REVIEW & PAYMENT</span>
           <h3 class="font-serif-luxury text-2xl font-bold text-white">Confirm Your Nagoda Pickup</h3>
@@ -1443,11 +1443,11 @@
           <span>Items Ordered (<span id="checkoutTotalItems">0</span>)</span>
           <span class="text-amber-400" id="checkoutPrepDisplay">0 Mins</span>
         </div>
-        <div class="p-3.5 rounded-xl bg-black/40 border border-stone-200 space-y-1.5" id="checkoutOrderReviewItems">
+        <div class="p-3.5 rounded-xl bg-black/40 border border-white/10 space-y-1.5" id="checkoutOrderReviewItems">
           <!-- Injected dynamically -->
         </div>
 
-        <div class="p-3.5 rounded-xl bg-white/[0.02] border border-stone-200 space-y-1.5 text-xs">
+        <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 space-y-1.5 text-xs">
           <div class="flex justify-between text-stone-400">
             <span>Subtotal:</span>
             <span class="font-mono text-white" id="checkoutSubtotal">LKR 0</span>
@@ -1460,7 +1460,7 @@
             <span>Service Fee:</span>
             <span class="font-mono text-white" id="checkoutServiceFee">LKR 0</span>
           </div>
-          <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-stone-200">
+          <div class="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
             <span class="text-amber-400">Total Payable:</span>
             <span class="font-mono text-amber-400 text-lg" id="checkoutTotalDisplay">LKR 0</span>
           </div>
@@ -1472,19 +1472,19 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div>
             <label class="block text-stone-400 mb-1">Your Name</label>
-            <input type="text" id="checkoutCustomerName" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+            <input type="text" id="checkoutCustomerName" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
           </div>
           <div>
             <label class="block text-stone-400 mb-1">Contact Phone (for pickup alert)</label>
-            <input type="tel" id="checkoutCustomerPhone" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+            <input type="tel" id="checkoutCustomerPhone" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
           </div>
           <div class="sm:col-span-2">
             <label class="block text-stone-400 mb-1">Email (for digital receipt)</label>
-            <input type="email" id="checkoutCustomerEmail" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+            <input type="email" id="checkoutCustomerEmail" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
           </div>
           <div class="sm:col-span-2">
             <label class="block text-stone-400 mb-1">Kitchen / Spice Special Requests</label>
-            <input type="text" id="checkoutSpecialNotes" placeholder="e.g. Extra spicy, separate chili paste container" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+            <input type="text" id="checkoutSpecialNotes" placeholder="e.g. Extra spicy, separate chili paste container" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
           </div>
         </div>
 
@@ -1492,15 +1492,15 @@
         <div class="space-y-2 pt-2">
           <label class="block text-xs font-bold uppercase tracking-wider text-stone-300">Choose Payment Method</label>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-            <label class="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-stone-200 hover:border-amber-500 cursor-pointer">
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500 cursor-pointer">
               <input type="radio" name="paymentMethod" value="Credit / Debit Card (Online)" checked class="accent-amber-500">
               <span class="font-medium text-white">Card (PayHere)</span>
             </label>
-            <label class="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-stone-200 hover:border-amber-500 cursor-pointer">
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500 cursor-pointer">
               <input type="radio" name="paymentMethod" value="Online Banking / LankaQR" class="accent-amber-500">
               <span class="font-medium text-white">LankaQR / Transfer</span>
             </label>
-            <label class="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-stone-200 hover:border-amber-500 cursor-pointer">
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-amber-500 cursor-pointer">
               <input type="radio" name="paymentMethod" value="Pay at Counter" class="accent-amber-500">
               <span class="font-medium text-white">Cash at Counter</span>
             </label>
@@ -1520,8 +1520,8 @@
   <div id="digitalReceiptModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 hidden" onclick="if(event.target === this) window.OwitaApp.closeReceiptModal()">
     <div class="owita-card rounded-2xl w-full max-w-lg max-h-[92vh] flex flex-col p-5 sm:p-7 relative shadow-2xl border border-amber-500/20 modal-animate-in" onclick="event.stopPropagation()">
       <!-- Prominent Sticky Header with Clear Back Button -->
-      <div class="flex items-center justify-between pb-3 border-b border-stone-200 shrink-0">
-        <button onclick="window.OwitaApp.closeReceiptModal()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-amber-500/20 hover:border-amber-500/40 text-stone-200 hover:text-amber-300 text-xs font-semibold flex items-center gap-2 border border-stone-200 transition-all group">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
+        <button onclick="window.OwitaApp.closeReceiptModal()" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-amber-500/20 hover:border-amber-500/40 text-stone-200 hover:text-amber-300 text-xs font-semibold flex items-center gap-2 border border-white/10 transition-all group">
           <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"></i>
           <span>Back to Menu / Orders</span>
         </button>
@@ -1534,17 +1534,17 @@
       </div>
 
       <!-- Scrollable Receipt Body -->
-      <div id="digitalReceiptContent" class="space-y-3 bg-[#0B0B0E] p-4 sm:p-5 rounded-xl border border-stone-200 overflow-y-auto my-3 flex-1 custom-scroll">
+      <div id="digitalReceiptContent" class="space-y-3 bg-[#0B0B0E] p-4 sm:p-5 rounded-xl border border-white/10 overflow-y-auto my-3 flex-1 custom-scroll">
         <!-- Injected dynamically -->
       </div>
 
       <!-- Action Footer with Back, Print, and Track options -->
-      <div class="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-stone-200 shrink-0">
+      <div class="flex flex-col sm:flex-row gap-2.5 pt-2 border-t border-white/10 shrink-0">
         <button onclick="window.OwitaApp.closeReceiptModal()" class="py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-stone-300 hover:text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all">
           <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
           <span>Back</span>
         </button>
-        <button onclick="window.print()" class="py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 border border-stone-200">
+        <button onclick="window.print()" class="py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 border border-white/10">
           <i data-lucide="printer" class="w-3.5 h-3.5"></i>
           <span>Print Receipt</span>
         </button>
@@ -1568,7 +1568,7 @@
       </div>
 
       <!-- Tabs -->
-      <div class="flex border-b border-stone-200">
+      <div class="flex border-b border-white/10">
         <button onclick="window.OwitaApp.switchAuthTab('signin')" id="authTabSignIn" class="flex-1 py-2 font-bold text-xs uppercase tracking-wider border-b-2 border-amber-500 text-amber-400">
           Sign In
         </button>
@@ -1581,11 +1581,11 @@
       <form id="authSignInForm" class="space-y-4">
         <div>
           <label class="block text-xs text-stone-400 mb-1">Email Address</label>
-          <input type="email" id="signInEmail" value="customer@ovita.lk" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2.5 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="email" id="signInEmail" value="customer@ovita.lk" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <div>
           <label class="block text-xs text-stone-400 mb-1">Password</label>
-          <input type="password" id="signInPassword" value="password123" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2.5 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="password" id="signInPassword" value="password123" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <div class="text-[11px] text-stone-500">
           Demo Customer Account: <span class="text-amber-400">customer@ovita.lk</span> / <span class="text-amber-400">password123</span>
@@ -1599,19 +1599,19 @@
       <form id="authRegisterForm" class="space-y-3 hidden">
         <div>
           <label class="block text-xs text-stone-400 mb-1">Full Name</label>
-          <input type="text" id="regName" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="text" id="regName" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <div>
           <label class="block text-xs text-stone-400 mb-1">Mobile Phone Number</label>
-          <input type="tel" id="regPhone" placeholder="077 123 4567" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="tel" id="regPhone" placeholder="077 123 4567" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <div>
           <label class="block text-xs text-stone-400 mb-1">Email Address</label>
-          <input type="email" id="regEmail" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="email" id="regEmail" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <div>
           <label class="block text-xs text-stone-400 mb-1">Password</label>
-          <input type="password" id="regPassword" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
+          <input type="password" id="regPassword" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 outline-none">
         </div>
         <button type="submit" class="w-full py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider mt-2">
           Create Customer Account
@@ -1625,7 +1625,7 @@
   <!-- ADMIN ADD NEW DISH MODAL -->
   <div id="adminNewDishModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="owita-card rounded-2xl w-full max-w-lg p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll">
-      <div class="flex justify-between items-center pb-3 border-b border-stone-200">
+      <div class="flex justify-between items-center pb-3 border-b border-white/10">
         <h3 class="font-serif-luxury text-xl font-bold text-white">Add New Dish to Ovita Menu</h3>
         <button onclick="document.getElementById('adminNewDishModal').classList.add('hidden')" class="text-stone-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -1635,16 +1635,16 @@
       <form id="newDishForm" class="space-y-3 text-xs">
         <div>
           <label class="block text-stone-400 mb-1">Dish Name (English)</label>
-          <input type="text" id="newDishName" required placeholder="e.g. Jaffna Crab Kottu Special" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+          <input type="text" id="newDishName" required placeholder="e.g. Jaffna Crab Kottu Special" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-stone-400 mb-1">Sinhala Name</label>
-            <input type="text" id="newDishSinhala" placeholder="යාපනයේ කකුළු කොත්තු" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+            <input type="text" id="newDishSinhala" placeholder="යාපනයේ කකුළු කොත්තු" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
           </div>
           <div>
             <label class="block text-stone-400 mb-1">Category</label>
-            <select id="newDishCategory" class="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+            <select id="newDishCategory" class="w-full bg-white border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
               <option value="rice">Rice & Biryani</option>
               <option value="kottu">Kottu Royale</option>
               <option value="seafood">Seafood & Devilled</option>
@@ -1657,24 +1657,24 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-stone-400 mb-1">Price (LKR)</label>
-            <input type="number" id="newDishPrice" required placeholder="1850" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono">
+            <input type="number" id="newDishPrice" required placeholder="1850" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono">
           </div>
           <div>
             <label class="block text-stone-400 mb-1">Serves Count</label>
-            <input type="text" id="newDishServes" placeholder="e.g. 2 - 3 Persons" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+            <input type="text" id="newDishServes" placeholder="e.g. 2 - 3 Persons" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
           </div>
         </div>
         <div>
           <label class="block text-stone-400 mb-1">Image URL</label>
-          <input type="url" id="newDishImg" placeholder="https://images.unsplash.com/photo-..." class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+          <input type="url" id="newDishImg" placeholder="https://images.unsplash.com/photo-..." class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
         </div>
         <div>
           <label class="block text-stone-400 mb-1">Description</label>
-          <textarea id="newDishDescription" rows="2" required placeholder="Fresh ingredients, spices, and flavors description..." class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500"></textarea>
+          <textarea id="newDishDescription" rows="2" required placeholder="Fresh ingredients, spices, and flavors description..." class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500"></textarea>
         </div>
         <div>
           <label class="block text-stone-400 mb-1">Portion Inclusions (One per line)</label>
-          <textarea id="newDishInclusions" rows="2" placeholder="3 Chicken portions&#10;3 Fried Eggs&#10;Spicy Gravy & Chili Paste" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono"></textarea>
+          <textarea id="newDishInclusions" rows="2" placeholder="3 Chicken portions&#10;3 Fried Eggs&#10;Spicy Gravy & Chili Paste" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono"></textarea>
         </div>
         <button type="submit" class="w-full py-3 rounded-xl amber-btn-primary text-xs uppercase font-bold tracking-wider mt-3 shadow-lg">
           Publish Dish to Menu
@@ -1688,7 +1688,7 @@
   <!-- ADMIN EDIT DISH & DESCRIPTION MODAL -->
   <div id="adminEditDishModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="owita-card rounded-2xl w-full max-w-lg p-6 sm:p-8 space-y-4">
-      <div class="flex justify-between items-center pb-3 border-b border-stone-200">
+      <div class="flex justify-between items-center pb-3 border-b border-white/10">
         <h3 class="font-serif-luxury text-xl font-bold text-white">Edit Dish & Description</h3>
         <button onclick="window.OwitaApp.adminCloseEditDishModal()" class="text-stone-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -1700,17 +1700,17 @@
         
         <div>
           <label class="block text-stone-400 mb-1">Dish Name (English)</label>
-          <input type="text" id="editDishName" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+          <input type="text" id="editDishName" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-stone-400 mb-1">Sinhala Name</label>
-            <input type="text" id="editDishSinhala" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+            <input type="text" id="editDishSinhala" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
           </div>
           <div>
             <label class="block text-stone-400 mb-1">Category</label>
-            <select id="editDishCategory" class="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+            <select id="editDishCategory" class="w-full bg-white border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
               <option value="rice">Rice & Biryani</option>
               <option value="kottu">Kottu Royale</option>
               <option value="seafood">Seafood & Devilled</option>
@@ -1724,22 +1724,22 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-stone-400 mb-1">Price (LKR)</label>
-            <input type="number" id="editDishPrice" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono">
+            <input type="number" id="editDishPrice" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono">
           </div>
           <div>
             <label class="block text-stone-400 mb-1">Serves Count</label>
-            <input type="text" id="editDishServes" placeholder="e.g. 2 - 3 Persons" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
+            <input type="text" id="editDishServes" placeholder="e.g. 2 - 3 Persons" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500">
           </div>
         </div>
 
         <div>
           <label class="block text-stone-400 mb-1">Description</label>
-          <textarea id="editDishDescription" rows="3" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500"></textarea>
+          <textarea id="editDishDescription" rows="3" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500"></textarea>
         </div>
 
         <div>
           <label class="block text-stone-400 mb-1">What's Included in Portion (One bullet item per line)</label>
-          <textarea id="editDishInclusions" rows="3" placeholder="3 Crispy Chicken Drumsticks&#10;3 Fried Eggs&#10;Chili Paste & Tomato Sauce" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono"></textarea>
+          <textarea id="editDishInclusions" rows="3" placeholder="3 Crispy Chicken Drumsticks&#10;3 Fried Eggs&#10;Chili Paste & Tomato Sauce" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white outline-none focus:border-amber-500 font-mono"></textarea>
         </div>
 
         <div class="flex gap-3 pt-2">
@@ -1758,7 +1758,7 @@
   <!-- TABLE RESERVATION MODAL -->
   <div id="tableReservationModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
     <div class="owita-card rounded-2xl w-full max-w-md p-6 sm:p-8 space-y-4">
-      <div class="flex justify-between items-center pb-3 border-b border-stone-200">
+      <div class="flex justify-between items-center pb-3 border-b border-white/10">
         <div>
           <div class="text-[10px] font-mono text-amber-500 uppercase">Two-Story Container Rooftop</div>
           <h3 class="font-serif-luxury text-2xl font-bold text-white">Reserve a Table</h3>
@@ -1771,20 +1771,20 @@
       <form onsubmit="event.preventDefault(); document.getElementById('tableReservationModal').classList.add('hidden'); window.OwitaApp.showToast ? window.OwitaApp.showToast('Table reservation submitted! Our manager will call you.') : alert('Reserved!');" class="space-y-3 text-xs">
         <div>
           <label class="block text-stone-400 mb-1">Your Name</label>
-          <input type="text" required class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+          <input type="text" required class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
         </div>
         <div>
           <label class="block text-stone-400 mb-1">Phone Number</label>
-          <input type="tel" required placeholder="077 277 5132" class="w-full bg-white/5 border border-stone-200 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+          <input type="tel" required placeholder="077 277 5132" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-stone-400 mb-1">Date</label>
-            <input type="date" required class="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+            <input type="date" required class="w-full bg-white border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
           </div>
           <div>
             <label class="block text-stone-400 mb-1">Seating Area</label>
-            <select class="w-full bg-white border border-stone-200 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
+            <select class="w-full bg-white border border-white/10 rounded-xl px-3 py-2 text-white focus:border-amber-500 outline-none">
               <option>Upper Rooftop Deck (Open-Air)</option>
               <option>Ground Floor (AC Dining)</option>
               <option>Outdoor Garden Table</option>
@@ -1815,7 +1815,7 @@
   <!-- GALLERY LIGHTBOX MODAL -->
   <div id="galleryLightboxModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 hidden" onclick="if(event.target === this) window.OwitaApp.closeGalleryLightbox()">
     <div class="owita-card rounded-2xl max-w-3xl w-full overflow-hidden border border-amber-500/30 modal-animate-in relative" onclick="event.stopPropagation()">
-      <button onclick="window.OwitaApp.closeGalleryLightbox()" class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/80 hover:bg-black text-white flex items-center justify-center transition-all border border-stone-200">
+      <button onclick="window.OwitaApp.closeGalleryLightbox()" class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/80 hover:bg-black text-white flex items-center justify-center transition-all border border-white/10">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
       <div class="relative h-[380px] sm:h-[480px]">
