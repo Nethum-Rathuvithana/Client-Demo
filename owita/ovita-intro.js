@@ -461,10 +461,16 @@
     masterTimeline.to(".hero-intro-text", { yPercent: -110, opacity: 0, duration: 0.25, ease: "power2.in" }, 0.00);
     masterTimeline.to(".hero-scroll-cue", { opacity: 0, duration: 0.20, ease: "power2.in" }, 0.00);
 
-    // Carousel Drifts Away (0.00 to 0.45)
+    // Carousel Drifts Away & Hero UI Exits (0.00 to 0.45)
     masterTimeline.to(".hero-carousel-container", {
       x: "-10vw",
       scale: 0.95,
+      opacity: 0,
+      duration: 0.45,
+      ease: "power2.inOut"
+    }, 0.00);
+
+    masterTimeline.to(".hero-ui", {
       opacity: 0,
       duration: 0.45,
       ease: "power2.inOut"
