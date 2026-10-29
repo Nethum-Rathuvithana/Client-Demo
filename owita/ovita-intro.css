@@ -243,16 +243,7 @@ body.ovita-experience {
   height: 20vh;
   background: linear-gradient(to bottom, transparent 0%, var(--ink) 100%);
 }
-.sweep-leading-hairline {
-  position: absolute;
-  top: -20vh;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--amber);
-  box-shadow: 0 0 15px var(--amber-glow);
-  opacity: 0.6;
-}
+/* .sweep-leading-hairline removed to keep hero floor seamless */
 
 /* Layer 5: Foliage Leaves Layer (Living Leaves Engine with GPU Acceleration) */
 .leaves-stage {
