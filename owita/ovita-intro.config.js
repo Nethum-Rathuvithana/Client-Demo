@@ -5,6 +5,11 @@
  * ============================================================================
  */
 window.OVITA_CONFIG = {
+  // Transition Mode:
+  // "smooth-luxury" -> (Recommended) 60fps zero-lag Atmospheric Dissolve, Parallax Sheet Glide & Lantern Bloom
+  // "classic-spec"   -> Original Split Curtain, Rising Sweep & Iris Circle Clip-Path
+  transitionMode: (typeof localStorage !== 'undefined' && localStorage.getItem('ovita_transition_mode')) || "smooth-luxury",
+
   // Carousel Geometry & Timing (Section 5.4)
   carousel: {
     holdDurationMs: 2600,       // Duration each dish holds at center before gliding (2.6s)

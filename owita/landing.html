@@ -42,6 +42,11 @@
 
     <!-- Nav Actions -->
     <div class="ovita-nav-actions">
+      <button id="transitionModeBtn" onclick="window.toggleTransitionMode()" class="transition-mode-pill" title="Click to toggle between Smooth Luxury and Classic Spec transitions">
+        <span class="mode-dot" id="modeDot"></span>
+        <span id="modeText">Smooth Luxury</span>
+      </button>
+
       <a href="index.html" class="ovita-nav-back-link" title="Switch to Full Restaurant Website">
         <span>← Main Site</span>
       </a>
@@ -71,6 +76,8 @@
 
     <!-- Layer 4: Four Story Panels (Section 7) -->
     <div class="panels-container" aria-label="Our Restaurant Story">
+      <!-- Lantern Bloom Flare for Zero-Lag Transition 3 -->
+      <div class="lantern-bloom-flare" id="lanternBloomFlare" aria-hidden="true"></div>
 
       <!-- Panel Meta: Counter & Chapter Rail -->
       <div class="story-panel-counter" aria-hidden="true">01 / 04</div>

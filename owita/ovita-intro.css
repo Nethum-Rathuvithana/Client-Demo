@@ -942,3 +942,52 @@ body.ovita-experience {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==========================================================================
+   SMOOTH LUXURY TRANSITIONS (REVERSIBLE MODE ENHANCEMENTS)
+   ========================================================================== */
+.lantern-bloom-flare {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 500px;
+  height: 500px;
+  margin-left: -250px;
+  margin-top: -250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 161, 58, 0.45) 0%, rgba(255, 122, 0, 0.22) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 15;
+  opacity: 0;
+  transform: translate3d(0, 0, 0) scale(0.4);
+  will-change: transform, opacity;
+}
+
+.transition-mode-pill {
+  font-size: 10px;
+  font-family: var(--font-ui);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--amber);
+  background: rgba(232, 161, 58, 0.08);
+  border: 1px solid rgba(232, 161, 58, 0.28);
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  transition: all 0.3s var(--ease-out);
+}
+.transition-mode-pill:hover {
+  background: rgba(232, 161, 58, 0.18);
+  border-color: var(--amber);
+  box-shadow: 0 0 16px var(--amber-glow);
+}
+.transition-mode-pill .mode-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+}
