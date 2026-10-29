@@ -6,9 +6,10 @@
  */
 window.OVITA_CONFIG = {
   // Transition Mode:
-  // "smooth-luxury" -> (Recommended) 60fps zero-lag Atmospheric Dissolve, Parallax Sheet Glide & Lantern Bloom
-  // "classic-spec"   -> Original Split Curtain, Rising Sweep & Iris Circle Clip-Path
-  transitionMode: (typeof localStorage !== 'undefined' && localStorage.getItem('ovita_transition_mode')) || "smooth-luxury",
+  // "normal-scroll"  -> (Recommended Default) Natural smooth vertical scroll down with per-panel word and image transitions (no pinned slide locking)
+  // "smooth-luxury"  -> 60fps zero-lag Atmospheric Dissolve, Parallax Sheet Glide & Lantern Bloom (pinned 500% timeline)
+  // "classic-spec"   -> Original Split Curtain, Rising Sweep & Iris Circle Clip-Path (pinned 500% timeline)
+  transitionMode: (typeof localStorage !== 'undefined' && localStorage.getItem('ovita_transition_mode')) || "normal-scroll",
 
   // Carousel Geometry & Timing (Section 5.4)
   carousel: {
@@ -40,7 +41,7 @@ window.OVITA_CONFIG = {
 
   // Master Scroll Timeline & Leaves Physics (Section 6)
   scroll: {
-    totalScreens: 5,             // 5 screens of scrubbed scroll (+500%)
+    totalScreens: 5,             // 5 screens of scrubbed scroll (+500%) for pinned modes
     scrubSmoothness: 1,          // GSAP scrub lag
     snapPoints: [0, 0.24, 0.44, 0.66, 0.88, 1], // Snap cleanly to Hero & Panels 1..4
     snapDuration: { min: 0.25, max: 0.7 },
@@ -55,8 +56,8 @@ window.OVITA_CONFIG = {
       scrollParallaxYPercent: 2,
       scrollParallaxScale: 1.04,
       desktopMouseParallaxPx: 8,
-      alignmentFadeStart: 0.8,   // leaves remain locked at identity until time 0.8
-      alignmentFadeEnd: 1.0      // ramp sway and parallax from 0 to 1 between 0.8 and 1.0
+      alignmentFadeStart: 0.8,
+      alignmentFadeEnd: 1.0
     }
   },
 

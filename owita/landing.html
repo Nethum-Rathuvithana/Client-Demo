@@ -42,7 +42,7 @@
 
     <!-- Nav Actions -->
     <div class="ovita-nav-actions">
-      <button id="transitionModeBtn" onclick="window.toggleTransitionMode()" class="transition-mode-pill" title="Click to toggle between Smooth Luxury and Classic Spec transitions">
+      <button id="transitionModeBtn" onclick="window.toggleTransitionMode()" class="transition-mode-pill" title="Click to toggle between Normal Scroll, Smooth Luxury and Classic Spec">
         <span class="mode-dot" id="modeDot"></span>
         <span id="modeText">Smooth Luxury</span>
       </button>
@@ -60,18 +60,100 @@
        MAIN PINNED STAGE (SECTION 4 & 5: 100vw x 100svh, 500% Scroll Timeline)
        ======================================================================== -->
   <main id="ovita-intro" aria-label="Ovita Restaurant Interactive Experience">
+    <!-- HERO STAGE (100svh Hero with Night Photo, Leaves, Dish Carousel & Intro Copy) -->
+    <section class="hero-stage-wrapper" id="heroStage">
+      <!-- Layer 1: Art Stage (Composite Night Photo: Logo + Restaurant + Leaf Frame) -->
+      <div class="art-stage" id="artStage" aria-hidden="true">
+        <img src="assets/ovita/hero/hero-composite.jpg" alt="Ovita Restaurant at night with ambient lighting and leaf frame" width="2576" height="1438" loading="eager" decoding="async">
+        <div class="hero-lights-pulse"></div>
+      </div>
 
-    <!-- Layer 1: Art Stage (Composite Night Photo: Logo + Restaurant + Leaf Frame) -->
-    <div class="art-stage" id="artStage" aria-hidden="true">
-      <img src="assets/ovita/hero/hero-composite.jpg" alt="Ovita Restaurant at night with ambient lighting and leaf frame" width="2576" height="1438" loading="eager" decoding="async">
-      <!-- Ambient String Lights Glow on Deck -->
-      <div class="hero-lights-pulse"></div>
+      <!-- Layer 3: Dark Sweep Curtain (for pinned classic mode) -->
+      <div class="sweep" id="darkSweep" aria-hidden="true">
+        <div class="sweep-feather"></div>
+      </div>
+
+      <!-- Layer 5: Foliage Leaves Layer (mix-blend-mode: lighten) -->
+    <div class="leaves-stage" id="leavesStage" aria-hidden="true">
+      <img src="assets/ovita/hero/hero-leaves.jpg" alt="Natural foreground leaves" width="2576" height="1438" loading="eager" decoding="async">
     </div>
 
-    <!-- Layer 3: Dark Sweep Curtain (Covering Artwork on Scroll) -->
-    <div class="sweep" id="darkSweep" aria-hidden="true">
-      <div class="sweep-feather"></div>
+      <!-- Layer 6: Hero UI (Copy, Dish Carousel, Scroll Cue) -->
+    <div class="hero-ui" id="heroUi">
+      
+      <!-- Accessibility H1 (Hidden visually, read by screen readers) -->
+      <h1 class="sr-only">Ovita — family restaurant</h1>
+
+      <!-- Intro Copy (x: 7.3%, width: 29.9%, top: 45.5%) -->
+      <div class="hero-intro-copy-box">
+        <div class="hero-copy-line-mask">
+          <p class="hero-intro-text">
+            Ovita is a family restaurant where every plate is cooked to order and every table is treated like our own.
+          </p>
+        </div>
+      </div>
+
+      <!-- Vertical Scroll Cue (Left 3.5%, y: 58 to 90%) -->
+      <button class="hero-scroll-cue" id="heroScrollCue" aria-label="Scroll down to begin story">
+        <span class="hero-scroll-text">SCROLL DOWN</span>
+        <div class="hero-scroll-line-track" aria-hidden="true">
+          <div class="hero-scroll-line-bar"></div>
+        </div>
+      </button>
+
+      <!-- Dish Carousel Zone (x: 2 to 35%, y: 58 to 97%) -->
+      <div class="hero-carousel-container" role="region" aria-roledescription="carousel" aria-label="Featured dishes">
+        
+        <!-- Soft dark scrim for text readability over foliage -->
+        <div class="carousel-scrim" aria-hidden="true"></div>
+
+        <div class="carousel-stage">
+          
+          <!-- Orbit Track with Plates -->
+          <div class="carousel-plates-track" id="carouselPlatesTrack">
+            <!-- Dynamic Plate Nodes Injected by JS -->
           </div>
+
+          <!-- Ambient Glow behind Active Plate -->
+          <div class="active-plate-glow" aria-hidden="true"></div>
+
+          <!-- Dish Details Block (Centered under active plate) -->
+          <div class="carousel-details-block">
+            <div class="carousel-dish-name-mask">
+              <h3 class="carousel-dish-name" id="carouselDishName">Chicken Kottu</h3>
+            </div>
+            
+            <div class="carousel-dish-desc-mask">
+              <p class="carousel-dish-desc" id="carouselDishDesc">Chopped roti, egg and vegetables tossed on the hot plate with rich curry sauce.</p>
+            </div>
+
+            <button class="carousel-order-link" onclick="window.OvitaScrollToOrder('featured');">
+              Order this dish
+            </button>
+
+            <!-- Pager Dots & Pause/Play Control -->
+            <div class="carousel-controls-bar">
+              <div class="carousel-pager-dots" id="carouselPagerDots">
+                <!-- Pager Dots Injected by JS -->
+              </div>
+
+              <button class="carousel-pause-btn" id="carouselPauseBtn" aria-label="Pause carousel autoplay">
+                <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Accessible polite live region for screen readers -->
+        <div class="sr-only" aria-live="polite" id="carouselAriaLive"></div>
+
+      </div>
+
+    </div>
+
+  
+    </section>
 
     <!-- Layer 4: Four Story Panels (Section 7) -->
     <div class="panels-container" aria-label="Our Restaurant Story">
@@ -220,10 +302,7 @@
 
     </div>
 
-    <!-- Layer 5: Foliage Leaves Layer (mix-blend-mode: lighten) -->
-    <div class="leaves-stage" id="leavesStage" aria-hidden="true">
-      <img src="assets/ovita/hero/hero-leaves.jpg" alt="Natural foreground leaves" width="2576" height="1438" loading="eager" decoding="async">
-    </div>
+    
 
     <!-- Layer 6: Hero UI (Copy, Dish Carousel, Scroll Cue) -->
     <div class="hero-ui" id="heroUi">
@@ -299,6 +378,7 @@
 
     </div>
 
+  
   </main>
 
   <!-- ========================================================================

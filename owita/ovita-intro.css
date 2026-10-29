@@ -982,3 +982,159 @@ body.ovita-experience {
   background: #10B981;
   box-shadow: 0 0 8px #10B981;
 }
+
+
+/* ==========================================================================
+   DUAL MODE ARCHITECTURE (NORMAL SCROLL DOWN vs PINNED TIMELINE)
+   ========================================================================== */
+
+/* 1. NORMAL SCROLL DOWN MODE (Active Default: Natural Vertical Scroll Flow) */
+body.mode-normal-scroll {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.mode-normal-scroll #ovita-intro {
+  position: relative;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  background-color: var(--ink);
+}
+
+body.mode-normal-scroll .hero-stage-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  background-color: var(--ink);
+  --stageW: max(100vw, calc(100svh * 1.7913));
+}
+
+body.mode-normal-scroll .panels-container {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: auto;
+  z-index: 4;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+body.mode-normal-scroll .story-panel {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  align-items: center;
+  padding: 8rem 8vw;
+  box-sizing: border-box;
+  opacity: 1;
+  pointer-events: auto;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(241, 231, 211, 0.05);
+  transform: none !important;
+}
+
+/* Luxury alternating editorial layout */
+body.mode-normal-scroll #storyPanel2 .story-text-col,
+body.mode-normal-scroll #storyPanel4 .story-text-col {
+  grid-column: 7 / span 5;
+  grid-row: 1;
+}
+body.mode-normal-scroll #storyPanel2 .story-image-col,
+body.mode-normal-scroll #storyPanel4 .story-image-col {
+  grid-column: 2 / span 4;
+  grid-row: 1;
+}
+
+@media (max-width: 900px) {
+  body.mode-normal-scroll .story-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 6rem 6vw;
+    gap: 2.5rem;
+  }
+  body.mode-normal-scroll .story-text-col,
+  body.mode-normal-scroll .story-image-col,
+  body.mode-normal-scroll #storyPanel2 .story-text-col,
+  body.mode-normal-scroll #storyPanel4 .story-text-col,
+  body.mode-normal-scroll #storyPanel2 .story-image-col,
+  body.mode-normal-scroll #storyPanel4 .story-image-col {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    width: 100%;
+    max-width: 100%;
+  }
+  body.mode-normal-scroll .story-image-window {
+    max-width: 360px;
+    margin: 0 auto;
+  }
+}
+
+/* Hide pinned-only transition artifacts in normal scroll */
+body.mode-normal-scroll .story-panel-counter,
+body.mode-normal-scroll .story-chapter-rail,
+body.mode-normal-scroll .lantern-bloom-flare,
+body.mode-normal-scroll .split-curtain-left,
+body.mode-normal-scroll .split-curtain-right,
+body.mode-normal-scroll .gold-travel-line,
+body.mode-normal-scroll .sweep {
+  display: none !important;
+}
+
+/* 2. PINNED TIMELINE MODE (Smooth Luxury & Classic Spec) */
+body.mode-pinned-timeline {
+  overflow-x: hidden;
+}
+
+body.mode-pinned-timeline #ovita-intro {
+  position: relative;
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  background-color: var(--ink);
+  --stageW: max(100vw, calc(100svh * 1.7913));
+  contain: paint layout size;
+}
+
+body.mode-pinned-timeline .hero-stage-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+}
+
+body.mode-pinned-timeline .panels-container {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100svh;
+  z-index: 4;
+  pointer-events: none;
+  contain: paint layout size;
+}
+
+body.mode-pinned-timeline .story-panel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--ink-2);
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  align-items: center;
+  padding: 0 8vw;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: opacity, transform, clip-path;
+}

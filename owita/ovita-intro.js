@@ -372,6 +372,7 @@
   // ==========================================================================
   // 3. MASTER SCROLL TIMELINE (ULTRA SMOOTH 0.45s SCRUB)
   // ==========================================================================
+  
   function initScrollArchitecture() {
     if (typeof Lenis !== "undefined") {
       lenisInstance = new Lenis({
@@ -387,6 +388,187 @@
     if (!window.gsap || !window.ScrollTrigger) return;
     gsap.registerPlugin(ScrollTrigger);
 
+    const mode = CONFIG.transitionMode || "normal-scroll";
+    document.body.classList.remove("mode-normal-scroll", "mode-pinned-timeline", "mode-smooth-luxury", "mode-classic-spec");
+
+    if (mode === "normal-scroll") {
+      document.body.classList.add("mode-normal-scroll");
+      leavesAmount = 1; // Full organic sway and mouse parallax in hero
+      buildNormalScrollExperience();
+    } else {
+      document.body.classList.add("mode-pinned-timeline", "mode-" + mode);
+      buildPinnedMasterTimeline(mode);
+    }
+  }
+
+  // ==========================================================================
+  // NORMAL SCROLL EXPERIENCE (Natural Vertical Scroll Down with Word & Image Transitions)
+  // ==========================================================================
+  function buildNormalScrollExperience() {
+    // 1. Hero Exit ScrollTrigger (subtle parallax & fade out when scrolling down)
+    ScrollTrigger.create({
+      trigger: "#heroStage",
+      start: "top top",
+      end: "bottom 30%",
+      onUpdate: (self) => {
+        const p = self.progress;
+        // Pause carousel autoplay when user scrolls down away from hero
+        if (p > 0.4) stopAutoplay();
+        else if (p <= 0.05 && !isAutoplayPaused) startAutoplay();
+
+        // Reveal Nav Brand when leaving hero
+        if (navBrand) {
+          navBrand.classList.toggle("visible", p >= 0.5);
+        }
+      }
+    });
+
+    gsap.to(".hero-intro-text, .hero-scroll-cue, .hero-carousel-container", {
+      y: -50,
+      opacity: 0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#heroStage",
+        start: "top top",
+        end: "bottom 60%",
+        scrub: 0.3
+      }
+    });
+
+    gsap.to(".art-stage img", {
+      yPercent: 12,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#heroStage",
+        start: "top top",
+        end: "bottom top",
+        scrub: 0.5
+      }
+    });
+
+    // 2. Per-Panel Word & Image Transitions
+    const panels = [
+      document.getElementById("storyPanel1"),
+      document.getElementById("storyPanel2"),
+      document.getElementById("storyPanel3"),
+      document.getElementById("storyPanel4")
+    ];
+
+    panels.forEach((panel) => {
+      if (!panel) return;
+
+      const hairline = panel.querySelector(".story-hairline-accent");
+      const eyebrow = panel.querySelector(".story-eyebrow");
+      const headline = panel.querySelector(".story-headline");
+      const body = panel.querySelector(".story-body");
+      const detail = panel.querySelector(".story-detail-line");
+      const btn = panel.querySelector(".story-order-now-btn");
+      const imgWindow = panel.querySelector(".story-image-window");
+      const img = panel.querySelector(".story-image-window img");
+
+      // Words & Image Entrance Timeline (reverses when scrolling back up)
+      const panelTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: panel,
+          start: "top 72%",
+          end: "bottom 18%",
+          toggleActions: "play reverse play reverse"
+        }
+      });
+
+      if (hairline) {
+        panelTl.fromTo(hairline, 
+          { scaleX: 0, transformOrigin: "left" }, 
+          { scaleX: 1, duration: 0.65, ease: "power3.out" }, 
+          0.00
+        );
+      }
+
+      if (eyebrow) {
+        panelTl.fromTo(eyebrow, 
+          { y: 22, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 0.55, ease: "power2.out" }, 
+          0.06
+        );
+      }
+
+      if (headline) {
+        panelTl.fromTo(headline, 
+          { yPercent: 100, opacity: 0 }, 
+          { yPercent: 0, opacity: 1, duration: 0.85, ease: "power3.out" }, 
+          0.12
+        );
+      }
+
+      if (body) {
+        panelTl.fromTo(body, 
+          { y: 26, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 0.75, ease: "power2.out" }, 
+          0.22
+        );
+      }
+
+      if (detail) {
+        panelTl.fromTo(detail, 
+          { y: 20, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 0.65, ease: "power2.out" }, 
+          0.32
+        );
+      }
+
+      if (btn) {
+        panelTl.fromTo(btn, 
+          { y: 20, opacity: 0 }, 
+          { y: 0, opacity: 1, duration: 0.65, ease: "power2.out" }, 
+          0.32
+        );
+      }
+
+      if (imgWindow) {
+        panelTl.fromTo(imgWindow, 
+          { opacity: 0, scale: 0.94, y: 35 }, 
+          { opacity: 1, scale: 1.0, y: 0, duration: 0.95, ease: "power3.out" }, 
+          0.14
+        );
+      }
+
+      // Parallax scroll on photograph inside window
+      if (img) {
+        gsap.fromTo(img, 
+          { yPercent: -8, scale: 1.08 },
+          {
+            yPercent: 8,
+            scale: 1.0,
+            ease: "none",
+            scrollTrigger: {
+              trigger: panel,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.5
+            }
+          }
+        );
+      }
+    });
+
+    // Scroll Cue Click Handler: scrolls smoothly down to Panel 1
+    const scrollCue = document.getElementById("heroScrollCue");
+    if (scrollCue) {
+      scrollCue.onclick = () => {
+        const p1 = document.getElementById("storyPanel1");
+        if (lenisInstance && p1) {
+          lenisInstance.scrollTo(p1, { duration: 1.2 });
+        } else if (p1) {
+          p1.scrollIntoView({ behavior: "smooth" });
+        }
+      };
+    }
+  }
+
+  // ==========================================================================
+  // PINNED MASTER TIMELINE (REVERSIBLE SMOOTH-LUXURY & CLASSIC-SPEC MODES)
+  // ==========================================================================
+  function buildPinnedMasterTimeline(mode) {
     const panels = [
       document.getElementById("storyPanel1"),
       document.getElementById("storyPanel2"),
@@ -408,7 +590,7 @@
         start: "top top",
         end: "+=500%",
         pin: true,
-        scrub: 0.45,         // Fast, fluid 0.45s scrub (eliminates lag on low-end systems)
+        scrub: 0.45,
         anticipatePin: 1,
         snap: {
           snapTo: [0, 0.24, 0.44, 0.66, 0.88, 1],
@@ -426,8 +608,6 @@
             navBrand.classList.toggle("visible", progress >= 0.16);
           }
 
-          // Leaves alignment factor (Section 6.2):
-          // 0 for timeline <= 0.8 (progress <= 0.16), ramps to 1 by time 1.0 (progress 0.20)
           if (progress <= 0.16) {
             leavesAmount = 0;
           } else if (progress <= 0.20) {
@@ -458,241 +638,215 @@
       ease: "power2.inOut"
     }, 0.00);
 
-    const isSmoothLuxury = (CONFIG.transitionMode !== "classic-spec");
-
-    if (isSmoothLuxury) {
-      /* ======================================================================
-         MODE 1: SMOOTH LUXURY (60FPS ZERO-LAG GPU TRANSFORMS)
-         ====================================================================== */
-
-      // 1. TRANSITION 1: Hero -> Our Story (Atmospheric Night Dissolve & Depth Lift)
-      // Artwork gently dissolves into deep velvet obsidian with subtle scale lift
+    if (mode === "smooth-luxury") {
+      // 1. Atmospheric Night Dissolve & Depth Lift (Hero -> Panel 1)
       masterTimeline.fromTo(".art-stage",
-        { opacity: 1, scale: 1.0 },
-        { opacity: 0, scale: 1.02, duration: 0.65, ease: "power2.inOut" },
-        0.15
-      );
-      // Dark sweep provides solid ink background
-      masterTimeline.fromTo(".sweep",
-        { y: "100vh" },
-        { y: "0vh", duration: 0.65, ease: "power2.inOut" },
-        0.15
+        { opacity: 1, scale: 1 },
+        { opacity: 0, scale: 0.96, duration: 0.70, ease: "power2.inOut" },
+        0.30
       );
 
-      // Panel 1 Enters from soft depth (0.50 to 0.95)
+      masterTimeline.fromTo(".sweep",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.50, ease: "power2.inOut" },
+        0.25
+      );
+
       if (panels[0]) {
         masterTimeline.set(panels[0], { opacity: 1, zIndex: 10 }, 0.50);
-        masterTimeline.fromTo("#panel1Hairline", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power3.out" }, 0.52);
-        masterTimeline.fromTo("#panel1Eyebrow", { letterSpacing: "0.5em", opacity: 0 }, { letterSpacing: "0.32em", opacity: 1, duration: 0.35, ease: "power2.out" }, 0.54);
-        masterTimeline.fromTo("#panel1Headline", { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.40, ease: "power3.out" }, 0.58);
-        masterTimeline.fromTo(["#panel1Body", "#panel1Detail"], { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.32, stagger: 0.06, ease: "power2.out" }, 0.64);
+        masterTimeline.fromTo("#panel1Hairline", { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power3.out" }, 0.70);
+        masterTimeline.fromTo("#panel1Eyebrow", { letterSpacing: "0.5em", opacity: 0 }, { letterSpacing: "0.32em", opacity: 1, duration: 0.35 }, 0.72);
+        masterTimeline.fromTo("#panel1Headline", { yPercent: 100, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.45, ease: "power3.out" }, 0.75);
+        masterTimeline.fromTo(["#panel1Body", "#panel1Detail"], { y: 24, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.06, duration: 0.40 }, 0.85);
         masterTimeline.fromTo("#panel1ImageWindow",
-          { y: 40, scale: 1.08, opacity: 0 },
-          { y: 0, scale: 1.0, opacity: 1, duration: 0.42, ease: "power3.out" },
-          0.54
+          { opacity: 0, scale: 0.92, y: 30 },
+          { opacity: 1, scale: 1.0, y: 0, duration: 0.55, ease: "power3.out" },
+          0.70
         );
       }
 
-      // 2. TRANSITION 2: Our Story -> The Craft (Parallax Sheet Glide / Film Overlap)
-      // Panel 1 softly recedes in 3D depth, Panel 2 glides up smoothly with zero jank
+      // 2. Parallax Sheet Glide (Panel 1 -> Panel 2)
       if (panels[0] && panels[1]) {
-        // Panel 1 recedes gently
         masterTimeline.to(panels[0], {
           scale: 0.94,
-          y: -30,
-          opacity: 0.25,
+          opacity: 0,
+          yPercent: -15,
           duration: 0.45,
           ease: "power2.inOut"
-        }, 1.35);
+        }, 1.40);
         masterTimeline.set(panels[0], { opacity: 0, zIndex: 0 }, 1.82);
 
-        // Panel 2 enters like a fresh sheet of luxury matte parchment
         masterTimeline.set(panels[1], { opacity: 1, zIndex: 10 }, 1.35);
         masterTimeline.fromTo(panels[1],
-          { y: "100vh" },
-          { y: "0vh", duration: 0.48, ease: "power3.inOut" },
+          { yPercent: 100, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 0.50, ease: "power3.out" },
           1.38
         );
         masterTimeline.fromTo("#panel2Headline",
-          { yPercent: 40, opacity: 0 },
-          { yPercent: 0, opacity: 1, duration: 0.38, ease: "power3.out" },
-          1.58
+          { yPercent: 60, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 0.40, ease: "power3.out" },
+          1.70
         );
         masterTimeline.fromTo("#panel2Body",
           { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.32, ease: "power2.out" },
-          1.64
+          { y: 0, opacity: 1, duration: 0.35 },
+          1.78
         );
       }
 
-      // 3. TRANSITION 3: The Craft -> The Table (Lantern Bloom & Optical Dissolve)
-      // Warm amber lantern glow expands from string lights center; panels smoothly cross-fade
+      // 3. Lantern Bloom Flare & Optical Dissolve (Panel 2 -> Panel 3)
       if (panels[1] && panels[2]) {
-        // Ambient lantern bloom flare
         masterTimeline.fromTo("#lanternBloomFlare",
-          { scale: 0.4, opacity: 0 },
-          { scale: 2.2, opacity: 0.35, duration: 0.30, ease: "power2.out" },
-          2.45
+          { opacity: 0, scale: 0.6 },
+          { opacity: 0.85, scale: 1.5, duration: 0.30, ease: "power2.in" },
+          2.35
         );
         masterTimeline.to("#lanternBloomFlare",
-          { opacity: 0, duration: 0.25, ease: "power2.in" },
-          2.75
+          { opacity: 0, scale: 2.2, duration: 0.35, ease: "power2.out" },
+          2.65
         );
 
-        // Panel 2 cross-dissolves out
         masterTimeline.to(panels[1], {
           opacity: 0,
-          scale: 0.96,
+          scale: 1.05,
           duration: 0.40,
           ease: "power2.inOut"
         }, 2.45);
         masterTimeline.set(panels[1], { zIndex: 0 }, 2.85);
 
-        // Panel 3 emerges with smooth counter-parallax
         masterTimeline.set(panels[2], { opacity: 1, zIndex: 10 }, 2.45);
         masterTimeline.fromTo(panels[2],
-          { opacity: 0, scale: 1.02 },
-          { opacity: 1, scale: 1.0, duration: 0.42, ease: "power2.out" },
-          2.48
+          { opacity: 0, scale: 0.95 },
+          { opacity: 1, scale: 1.0, duration: 0.45, ease: "power2.out" },
+          2.50
         );
         masterTimeline.fromTo("#panel3Image",
-          { y: 35 },
-          { y: 0, duration: 0.45, ease: "power3.out" },
-          2.48
+          { scale: 1.15 },
+          { scale: 1.0, duration: 0.50, ease: "power2.out" },
+          2.60
         );
         masterTimeline.fromTo("#panel3Headline",
           { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.35, ease: "power3.out" },
-          2.60
+          { y: 0, opacity: 1, duration: 0.40 },
+          2.70
         );
       }
 
-      // 4. TRANSITION 4: The Table -> The Invitation (Gold Line & Crisp Inset Sweep)
+      // 4. Gold Line & Crisp Inset Sweep (Panel 3 -> Panel 4)
       if (panels[2] && panels[3]) {
         masterTimeline.to(panels[2], { opacity: 0, duration: 0.35 }, 3.60);
         masterTimeline.set(panels[2], { zIndex: 0 }, 3.95);
 
         masterTimeline.set(panels[3], { opacity: 1, zIndex: 10 }, 3.60);
-
-        // Gold line travels across screen on GPU compositor
+        
         masterTimeline.fromTo(".gold-travel-line",
-          { x: "-2vw", opacity: 1 },
-          { x: "104vw", opacity: 1, duration: 0.45, ease: "power3.inOut" },
-          3.62
+          { scaleY: 0, opacity: 1 },
+          { scaleY: 1, duration: 0.35, ease: "power3.inOut" },
+          3.60
         );
+        masterTimeline.to(".gold-travel-line", { opacity: 0, duration: 0.20 }, 3.95);
 
         masterTimeline.fromTo(panels[3],
-          { clipPath: "inset(0% 100% 0% 0%)" },
-          { clipPath: "inset(0% 0% 0% 0%)", duration: 0.45, ease: "power3.inOut" },
-          3.62
+          { opacity: 0, yPercent: 40 },
+          { opacity: 1, yPercent: 0, duration: 0.45, ease: "power3.out" },
+          3.65
         );
-
         masterTimeline.fromTo("#panel4Headline",
-          { scale: 1.05, opacity: 0 },
-          { scale: 1.0, opacity: 1, duration: 0.38, ease: "power3.out" },
-          3.75
+          { y: 25, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.40 },
+          3.85
         );
         masterTimeline.fromTo("#panel4OrderBtn",
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" },
-          3.88
+          { scale: 0.85, opacity: 0 },
+          { scale: 1.0, opacity: 1, duration: 0.35, ease: "back.out(1.5)" },
+          3.95
         );
       }
 
     } else {
-      /* ======================================================================
-         MODE 2: CLASSIC SPEC (ORIGINAL SPLIT CURTAIN, SWEEP & IRIS)
-         ====================================================================== */
-
-      // Original Dark Sweep
+      // CLASSIC SPEC MODE (Curtains, Sweep & Iris Circle Clip)
       masterTimeline.fromTo(".sweep",
-        { y: "100vh" },
-        { y: "-20vh", duration: 0.65, ease: "power2.inOut" },
-        0.15
+        { yPercent: 100 },
+        { yPercent: 0, duration: 0.55, ease: "power2.inOut" },
+        0.20
       );
+      masterTimeline.to(".art-stage", { opacity: 0, duration: 0.40 }, 0.35);
 
-      // Original Panel 1 Rise
       if (panels[0]) {
         masterTimeline.set(panels[0], { opacity: 1, zIndex: 10 }, 0.55);
-        masterTimeline.fromTo("#panel1Hairline", { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power3.out" }, 0.58);
-        masterTimeline.fromTo("#panel1Eyebrow", { letterSpacing: "0.5em", opacity: 0 }, { letterSpacing: "0.32em", opacity: 1, duration: 0.35, ease: "power2.out" }, 0.60);
-        masterTimeline.fromTo("#panel1Headline", { yPercent: 110, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.38, ease: "power4.out" }, 0.65);
-        masterTimeline.fromTo(["#panel1Body", "#panel1Detail"], { y: 16, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, stagger: 0.06, ease: "power2.out" }, 0.72);
-        masterTimeline.fromTo("#panel1ImageWindow", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.42, ease: "power3.inOut" }, 0.58);
-        masterTimeline.fromTo("#panel1Image", { scale: 1.25 }, { scale: 1.0, duration: 0.42, ease: "power3.out" }, 0.58);
+        masterTimeline.fromTo("#panel1Hairline", { scaleX: 0 }, { scaleX: 1, duration: 0.3, ease: "power2.out" }, 0.70);
+        masterTimeline.fromTo("#panel1Eyebrow", { letterSpacing: "0.5em", opacity: 0 }, { letterSpacing: "0.32em", opacity: 1, duration: 0.3 }, 0.72);
+        masterTimeline.fromTo("#panel1Headline", { yPercent: 110, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 0.75);
+        masterTimeline.fromTo(["#panel1Body", "#panel1Detail"], { y: 16, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.05, duration: 0.35 }, 0.82);
+        masterTimeline.fromTo("#panel1ImageWindow", { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.42, ease: "power3.inOut" }, 0.70);
+        masterTimeline.fromTo("#panel1Image", { scale: 1.25 }, { scale: 1.0, duration: 0.42, ease: "power2.out" }, 0.70);
       }
 
-      // Original Panel 2 Split Curtain
       if (panels[0] && panels[1]) {
-        masterTimeline.to("#panel1Headline", { yPercent: -100, opacity: 0, duration: 0.3, ease: "power3.in" }, 1.40);
-        masterTimeline.to("#panel1ImageWindow", { clipPath: "inset(0% 0% 100% 0%)", duration: 0.35, ease: "power3.in" }, 1.40);
+        masterTimeline.to("#panel1Headline", { yPercent: -100, opacity: 0, duration: 0.3, ease: "power2.in" }, 1.45);
+        masterTimeline.to("#panel1ImageWindow", { clipPath: "inset(0% 0% 100% 0%)", duration: 0.35, ease: "power2.in" }, 1.45);
         masterTimeline.set(panels[0], { opacity: 0, zIndex: 0 }, 1.75);
 
         masterTimeline.set(panels[1], { opacity: 1, zIndex: 10 }, 1.45);
-        masterTimeline.fromTo(".split-curtain-left", { xPercent: -100 }, { xPercent: 0, duration: 0.22, ease: "power3.in" }, 1.42);
-        masterTimeline.fromTo(".split-curtain-right", { xPercent: 100 }, { xPercent: 0, duration: 0.22, ease: "power3.in" }, 1.42);
+        masterTimeline.fromTo(".split-curtain-left", { xPercent: -100 }, { xPercent: 0, duration: 0.26, ease: "power3.in" }, 1.45);
+        masterTimeline.fromTo(".split-curtain-right", { xPercent: 100 }, { xPercent: 0, duration: 0.26, ease: "power3.in" }, 1.45);
 
-        masterTimeline.to(".split-curtain-left", { xPercent: -100, duration: 0.26, ease: "power3.out" }, 1.64);
-        masterTimeline.to(".split-curtain-right", { xPercent: 100, duration: 0.26, ease: "power3.out" }, 1.64);
+        masterTimeline.to(".split-curtain-left", { xPercent: -100, duration: 0.26, ease: "power3.out" }, 1.71);
+        masterTimeline.to(".split-curtain-right", { xPercent: 100, duration: 0.26, ease: "power3.out" }, 1.71);
 
-        masterTimeline.fromTo("#panel2Headline", { yPercent: 50, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.35, ease: "power4.out" }, 1.66);
-        masterTimeline.fromTo("#panel2Body", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" }, 1.72);
+        masterTimeline.fromTo("#panel2Headline", { yPercent: 50, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.35, ease: "power2.out" }, 1.75);
+        masterTimeline.fromTo("#panel2Body", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35 }, 1.82);
       }
 
-      // Original Panel 3 Iris
       if (panels[1] && panels[2]) {
         masterTimeline.to(panels[1], { opacity: 0, duration: 0.3 }, 2.50);
         masterTimeline.set(panels[1], { zIndex: 0 }, 2.80);
 
         masterTimeline.set(panels[2], { opacity: 1, zIndex: 10 }, 2.50);
         masterTimeline.fromTo(panels[2],
-          { clipPath: "circle(0% at 50% 62%)" },
-          { clipPath: "circle(85% at 50% 62%)", duration: 0.45, ease: "power3.inOut" },
-          2.52
+          { clipPath: "circle(0% at 75% 50%)" },
+          { clipPath: "circle(150% at 75% 50%)", duration: 0.55, ease: "power2.inOut" },
+          2.50
         );
-        masterTimeline.fromTo("#panel3Image", { scale: 1.12 }, { scale: 1.0, duration: 0.48, ease: "none" }, 2.52);
-        masterTimeline.fromTo("#panel3Headline", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35, ease: "power3.out" }, 2.65);
+        masterTimeline.fromTo("#panel3Image", { scale: 1.12 }, { scale: 1.0, duration: 0.48, ease: "power2.out" }, 2.52);
+        masterTimeline.fromTo("#panel3Headline", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.35 }, 2.70);
       }
 
-      // Original Panel 4 Gold Line
       if (panels[2] && panels[3]) {
         masterTimeline.to(panels[2], { opacity: 0, duration: 0.3 }, 3.60);
         masterTimeline.set(panels[2], { zIndex: 0 }, 3.90);
 
         masterTimeline.set(panels[3], { opacity: 1, zIndex: 10 }, 3.60);
-
+        
         masterTimeline.fromTo(".gold-travel-line",
-          { x: "-2vw", opacity: 1 },
-          { x: "104vw", opacity: 1, duration: 0.45, ease: "power3.inOut" },
-          3.62
+          { scaleY: 0, opacity: 1 },
+          { scaleY: 1, duration: 0.32, ease: "power2.inOut" },
+          3.60
         );
+        masterTimeline.to(".gold-travel-line", { opacity: 0, duration: 0.15 }, 3.92);
 
         masterTimeline.fromTo(panels[3],
-          { clipPath: "inset(0% 100% 0% 0%)" },
+          { clipPath: "inset(0% 0% 0% 100%)" },
           { clipPath: "inset(0% 0% 0% 0%)", duration: 0.45, ease: "power3.inOut" },
-          3.62
+          3.65
         );
-
         masterTimeline.fromTo("#panel4Headline",
-          { scale: 1.05, opacity: 0 },
-          { scale: 1.0, opacity: 1, duration: 0.38, ease: "power3.out" },
-          3.75
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.35 },
+          3.80
         );
         masterTimeline.fromTo("#panel4OrderBtn",
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" },
+          { scale: 0.8, opacity: 0 },
+          { scale: 1.0, opacity: 1, duration: 0.35, ease: "back.out(1.7)" },
           3.88
         );
       }
     }
+
     // Timeline 4.70 to 5.00: Leaves Fade Out
     masterTimeline.to(".leaves-stage", { opacity: 0, duration: 0.30, ease: "power2.in" }, 4.70);
   }
 
-  // ==========================================================================
-  // 4. LIVING LEAVES SWAY & MOUSE PARALLAX (SECTION 6.2)
-  // Interactive organic wind sway + desktop mouse parallax + pixel-perfect alignment
-  // ==========================================================================
   function initLivingLeaves() {
     const leavesLayer = document.getElementById("leavesStage");
     if (!leavesLayer || prefersReducedMotion) return;
@@ -799,9 +953,17 @@
   // TRANSITION MODE ENGINE (REVERSIBLE TOGGLE)
   // "smooth-luxury" (Zero-Lag GPU Transforms) vs "classic-spec" (Original)
   // ==========================================================================
+  
   window.toggleTransitionMode = function () {
-    const currentMode = CONFIG.transitionMode || "smooth-luxury";
-    const newMode = currentMode === "smooth-luxury" ? "classic-spec" : "smooth-luxury";
+    const currentMode = CONFIG.transitionMode || "normal-scroll";
+    let newMode;
+    if (currentMode === "normal-scroll") {
+      newMode = "smooth-luxury";
+    } else if (currentMode === "smooth-luxury") {
+      newMode = "classic-spec";
+    } else {
+      newMode = "normal-scroll";
+    }
     localStorage.setItem("ovita_transition_mode", newMode);
     CONFIG.transitionMode = newMode;
     updateModePillUI();
@@ -809,15 +971,25 @@
   };
 
   function updateModePillUI() {
-    const mode = CONFIG.transitionMode || "smooth-luxury";
+    const mode = CONFIG.transitionMode || "normal-scroll";
     const textEl = document.getElementById("modeText");
     const dotEl = document.getElementById("modeDot");
     if (textEl) {
-      textEl.textContent = mode === "smooth-luxury" ? "Smooth Luxury" : "Classic Spec";
+      if (mode === "normal-scroll") textEl.textContent = "Normal Scroll";
+      else if (mode === "smooth-luxury") textEl.textContent = "Smooth Luxury (Pinned)";
+      else textEl.textContent = "Classic Spec (Pinned)";
     }
     if (dotEl) {
-      dotEl.style.background = mode === "smooth-luxury" ? "#10B981" : "#E8A13A";
-      dotEl.style.boxShadow = mode === "smooth-luxury" ? "0 0 8px #10B981" : "0 0 8px #E8A13A";
+      if (mode === "normal-scroll") {
+        dotEl.style.background = "#10B981";
+        dotEl.style.boxShadow = "0 0 8px #10B981";
+      } else if (mode === "smooth-luxury") {
+        dotEl.style.background = "#8B5CF6";
+        dotEl.style.boxShadow = "0 0 8px #8B5CF6";
+      } else {
+        dotEl.style.background = "#E8A13A";
+        dotEl.style.boxShadow = "0 0 8px #E8A13A";
+      }
     }
   }
 
