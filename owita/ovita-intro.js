@@ -24,6 +24,7 @@
   let isUserInteracting = false;
   let lenisInstance = null;
   let masterTimeline = null;
+  let leavesAmount = 0;
 
   // DOM Elements
   const platesTrack = document.getElementById("carouselPlatesTrack");
@@ -425,6 +426,16 @@
             navBrand.classList.toggle("visible", progress >= 0.16);
           }
 
+          // Leaves alignment factor (Section 6.2):
+          // 0 for timeline <= 0.8 (progress <= 0.16), ramps to 1 by time 1.0 (progress 0.20)
+          if (progress <= 0.16) {
+            leavesAmount = 0;
+          } else if (progress <= 0.20) {
+            leavesAmount = (progress - 0.16) / 0.04;
+          } else {
+            leavesAmount = 1;
+          }
+
           if (progress < 0.2) updateChapterRail(-1);
           else if (progress < 0.4) updateChapterRail(0);
           else if (progress < 0.62) updateChapterRail(1);
@@ -535,7 +546,45 @@
   }
 
   // ==========================================================================
-  // 4. CURSOR GLOW & MAGNETIC ORDER BUTTON (THROTTLED & ACCELERATED)
+  // 4. LIVING LEAVES SWAY & MOUSE PARALLAX (SECTION 6.2)
+  // Interactive organic wind sway + desktop mouse parallax + pixel-perfect alignment
+  // ==========================================================================
+  function initLivingLeaves() {
+    const leavesLayer = document.getElementById("leavesStage");
+    if (!leavesLayer || prefersReducedMotion) return;
+
+    let mouseX = 0;
+    let mouseY = 0;
+
+    window.addEventListener("mousemove", (e) => {
+      const normX = (e.clientX / window.innerWidth - 0.5) * 2;
+      const normY = (e.clientY / window.innerHeight - 0.5) * 2;
+      mouseX = normX * (CONFIG.scroll?.leaves?.desktopMouseParallaxPx || 8);
+      mouseY = normY * (CONFIG.scroll?.leaves?.desktopMouseParallaxPx || 8);
+    }, { passive: true });
+
+    let startTime = performance.now();
+    function tickLeaves() {
+      const elapsed = (performance.now() - startTime) / 1000;
+      // Gentle wind sway (9s sine loop)
+      const swayRot = Math.sin((elapsed / 9) * Math.PI * 2) * (CONFIG.scroll?.leaves?.swayRotateDeg || 0.6);
+      const swayTrans = Math.cos((elapsed / 9) * Math.PI * 2) * (CONFIG.scroll?.leaves?.swayTranslatePx || 4);
+
+      // Multiply by leavesAmount (0 while artwork is visible, ramps to 1 by time 1.0)
+      const curRot = swayRot * leavesAmount;
+      const curTrans = swayTrans * leavesAmount;
+      const curMouseX = mouseX * leavesAmount;
+      const curMouseY = mouseY * leavesAmount;
+
+      // GPU hardware accelerated 3D transform
+      leavesLayer.style.transform = `translate3d(${curTrans + curMouseX}px, ${curTrans + curMouseY}px, 0) rotate(${curRot}deg)`;
+      requestAnimationFrame(tickLeaves);
+    }
+    requestAnimationFrame(tickLeaves);
+  }
+
+  // ==========================================================================
+  // 5. CURSOR GLOW & MAGNETIC ORDER BUTTON (THROTTLED & ACCELERATED)
   // ==========================================================================
   function initCursorGlowAndMagnet() {
     if (!cursorGlow || prefersReducedMotion || window.innerWidth < 1024) return;
@@ -604,6 +653,7 @@
   window.addEventListener("DOMContentLoaded", () => {
     initCarouselDOM();
     initScrollArchitecture();
+    initLivingLeaves();
     initCursorGlowAndMagnet();
     runHeroEntrance();
   });
