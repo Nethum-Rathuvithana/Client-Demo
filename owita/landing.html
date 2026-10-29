@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ovita (ඔවිට) — Landing Hero & Luxury Scroll Story</title>
+  <meta name="description" content="Ovita family restaurant: cooked to order with open flame and passion. Experience our luxury story, kitchen heritage, and authentic dishes.">
+
+  <!-- Google Fonts: Cormorant Garamond (300, 500, italic) & Inter (400, 500) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Preload Critical Hero Assets -->
+  <link rel="preload" as="image" href="assets/ovita/hero/hero-composite.jpg">
+  <link rel="preload" as="image" href="assets/ovita/hero/hero-leaves.jpg">
+  <link rel="preload" as="image" href="assets/ovita/food/food-01.png">
+  <link rel="preload" as="image" href="assets/ovita/food/food-02.png">
+
+  <!-- Intro Engine Stylesheet -->
+  <link rel="stylesheet" href="ovita-intro.css">
+</head>
+<body class="ovita-experience">
+
+  <!-- ========================================================================
+       SVG FILM GRAIN OVERLAY (SECTION 3 & 4: feTurbulence 4-5% opacity)
+       ======================================================================== -->
+  <svg class="ovita-film-grain" aria-hidden="true">
+    <filter id="grainFilter">
+      <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" />
+    </filter>
+    <rect width="100%" height="100%" filter="url(#grainFilter)" />
+  </svg>
+
+  <!-- Amber Cursor Glow (Desktop Only, 320px, 12% opacity, 0.6s lag) -->
+  <div class="ovita-cursor-glow" id="ovitaCursorGlow" aria-hidden="true"></div>
+
+  <!-- ========================================================================
+       PERSISTENT LUXURY NAV BAR (SECTION 4 & 8)
+       ======================================================================== -->
+  <header class="ovita-intro-nav" role="banner">
+    <!-- Brand Wordmark (Fades in at timeline 0.8 once hero artwork dissolves) -->
+    <a href="#ovita-intro" class="ovita-nav-brand" id="ovitaNavBrand" aria-label="Ovita Family Restaurant">
+      <span class="ovita-nav-wordmark">OVITA</span>
+      <span class="ovita-nav-sub">FAMILY RESTAURANT</span>
+    </a>
+
+    <!-- Nav Actions -->
+    <div class="ovita-nav-actions">
+      <a href="index.html" class="ovita-nav-back-link" title="Switch to Full Restaurant Website">
+        <span>← Main Site</span>
+      </a>
+      <a href="#order" class="ovita-nav-order-btn" onclick="window.OvitaScrollToOrder(); return false;">
+        <span>Order Now</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN PINNED STAGE (SECTION 4 & 5: 100vw x 100svh, 500% Scroll Timeline)
+       ======================================================================== -->
+  <main id="ovita-intro" aria-label="Ovita Restaurant Interactive Experience">
+
+    <!-- Layer 1: Art Stage (Composite Night Photo: Logo + Restaurant + Leaf Frame) -->
+    <div class="art-stage" id="artStage" aria-hidden="true">
+      <img src="assets/ovita/hero/hero-composite.jpg" alt="Ovita Restaurant at night with ambient lighting and leaf frame" width="2576" height="1438" loading="eager" decoding="async">
+      <!-- Ambient String Lights Glow on Deck -->
+      <div class="hero-lights-pulse"></div>
+    </div>
+
+    <!-- Layer 3: Dark Sweep Curtain (Covering Artwork on Scroll) -->
+    <div class="sweep" id="darkSweep" aria-hidden="true">
+      <div class="sweep-feather"></div>
+      <div class="sweep-leading-hairline"></div>
+    </div>
+
+    <!-- Layer 4: Four Story Panels (Section 7) -->
+    <div class="panels-container" aria-label="Our Restaurant Story">
+
+      <!-- Panel Meta: Counter & Chapter Rail -->
+      <div class="story-panel-counter" aria-hidden="true">01 / 04</div>
+      <div class="story-chapter-rail" aria-hidden="true">
+        <div class="chapter-tick active"></div>
+        <div class="chapter-tick"></div>
+        <div class="chapter-tick"></div>
+        <div class="chapter-tick"></div>
+      </div>
+
+      <!-- Story Panel 1: Rise Transition -->
+      <section class="story-panel" id="storyPanel1" aria-labelledby="panel1Heading">
+        <div class="panel-vignette"></div>
+        
+        <div class="story-text-col">
+          <div class="story-hairline-accent" id="panel1Hairline"></div>
+          <span class="story-eyebrow" id="panel1Eyebrow">01 — OUR STORY</span>
+          
+          <div class="story-headline-mask">
+            <h2 class="story-headline" id="panel1Heading">
+              Food the way<br>family makes it.
+            </h2>
+          </div>
+          
+          <p class="story-body" id="panel1Body">
+            Ovita began around one long table, where recipes were passed down and there was always room for one more guest. We still cook that way: patiently, generously, and with respect for every ingredient.
+          </p>
+          
+          <div class="story-detail-line" id="panel1Detail">
+            Family recipes · Generous portions
+          </div>
+        </div>
+
+        <div class="story-image-col">
+          <div class="story-image-window" id="panel1ImageWindow">
+            <img src="assets/ovita/story/story-01.jpg" alt="Family sharing authentic food at the Ovita table" id="panel1Image" onerror="this.style.display='none'; document.getElementById('fbNum1').style.display='flex';">
+            <div class="story-fallback-numeral" id="fbNum1" style="display:none;">01</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Story Panel 2: Split Curtain Transition -->
+      <section class="story-panel" id="storyPanel2" aria-labelledby="panel2Heading">
+        <div class="panel-vignette"></div>
+        <div class="split-curtain-left"></div>
+        <div class="split-curtain-right"></div>
+
+        <div class="story-text-col">
+          <div class="story-hairline-accent"></div>
+          <span class="story-eyebrow">02 — THE CRAFT</span>
+          
+          <div class="story-headline-mask">
+            <h2 class="story-headline" id="panel2Headline">
+              Fire, spice<br>and patience.
+            </h2>
+          </div>
+          
+          <p class="story-body" id="panel2Body">
+            Our kitchen works with open flame and freshly ground spice. Curries simmer slowly, grills are watched closely, and nothing leaves the pass until it is right.
+          </p>
+          
+          <div class="story-detail-line">
+            Open flame · Fresh-ground spice · Cooked to order
+          </div>
+        </div>
+
+        <div class="story-image-col">
+          <div class="story-image-window">
+            <img src="assets/ovita/story/story-02.jpg" alt="Open flame wok tossing in the Ovita kitchen" id="panel2Image" onerror="this.style.display='none'; document.getElementById('fbNum2').style.display='flex';">
+            <div class="story-fallback-numeral" id="fbNum2" style="display:none;">02</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Story Panel 3: Iris Reveal Transition -->
+      <section class="story-panel" id="storyPanel3" aria-labelledby="panel3Heading">
+        <div class="panel-vignette"></div>
+
+        <div class="story-text-col">
+          <div class="story-hairline-accent"></div>
+          <span class="story-eyebrow">03 — THE TABLE</span>
+          
+          <div class="story-headline-mask">
+            <h2 class="story-headline" id="panel3Headline">
+              An evening that<br>slows down.
+            </h2>
+          </div>
+          
+          <p class="story-body">
+            Under strings of warm light, families gather on the upper deck and below. Come for dinner, stay for the conversation.
+          </p>
+          
+          <div class="story-detail-line">
+            Warm lights · Family tables · Relaxed evenings
+          </div>
+        </div>
+
+        <div class="story-image-col">
+          <div class="story-image-window">
+            <img src="assets/ovita/story/story-03.jpg" alt="Warm ambient string lights illuminating evening tables" id="panel3Image" onerror="this.style.display='none'; document.getElementById('fbNum3').style.display='flex';">
+            <div class="story-fallback-numeral" id="fbNum3" style="display:none;">03</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Story Panel 4: Gold Line Sweep Transition -->
+      <section class="story-panel" id="storyPanel4" aria-labelledby="panel4Heading">
+        <div class="panel-vignette"></div>
+        <div class="gold-travel-line"></div>
+
+        <div class="story-text-col">
+          <div class="story-hairline-accent"></div>
+          <span class="story-eyebrow">04 — THE INVITATION</span>
+          
+          <div class="story-headline-mask">
+            <h2 class="story-headline" id="panel4Headline">
+              Your table<br>is ready.
+            </h2>
+          </div>
+          
+          <p class="story-body">
+            Choose your favourites and we will have them on the fire.
+          </p>
+
+          <a href="#order" class="story-order-now-btn" id="panel4OrderBtn" onclick="window.OvitaScrollToOrder(); return false;">
+            <span>Order now</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <div class="story-image-col">
+          <div class="story-image-window">
+            <img src="assets/ovita/story/story-04.jpg" alt="Warm hospitality and welcome at Ovita" id="panel4Image" onerror="this.style.display='none'; document.getElementById('fbNum4').style.display='flex';">
+            <div class="story-fallback-numeral" id="fbNum4" style="display:none;">04</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Layer 5: Foliage Leaves Layer (mix-blend-mode: lighten) -->
+    <div class="leaves-stage" id="leavesStage" aria-hidden="true">
+      <img src="assets/ovita/hero/hero-leaves.jpg" alt="Natural foreground leaves" width="2576" height="1438" loading="eager" decoding="async">
+    </div>
+
+    <!-- Layer 6: Hero UI (Copy, Dish Carousel, Scroll Cue) -->
+    <div class="hero-ui" id="heroUi">
+      
+      <!-- Accessibility H1 (Hidden visually, read by screen readers) -->
+      <h1 class="sr-only">Ovita — family restaurant</h1>
+
+      <!-- Intro Copy (x: 7.3%, width: 29.9%, top: 45.5%) -->
+      <div class="hero-intro-copy-box">
+        <div class="hero-copy-line-mask">
+          <p class="hero-intro-text">
+            Ovita is a family restaurant where every plate is cooked to order and every table is treated like our own.
+          </p>
+        </div>
+      </div>
+
+      <!-- Vertical Scroll Cue (Left 3.5%, y: 58 to 90%) -->
+      <button class="hero-scroll-cue" id="heroScrollCue" aria-label="Scroll down to begin story">
+        <span class="hero-scroll-text">SCROLL DOWN</span>
+        <div class="hero-scroll-line-track" aria-hidden="true">
+          <div class="hero-scroll-line-bar"></div>
+        </div>
+      </button>
+
+      <!-- Dish Carousel Zone (x: 2 to 35%, y: 58 to 97%) -->
+      <div class="hero-carousel-container" role="region" aria-roledescription="carousel" aria-label="Featured dishes">
+        
+        <!-- Soft dark scrim for text readability over foliage -->
+        <div class="carousel-scrim" aria-hidden="true"></div>
+
+        <div class="carousel-stage">
+          
+          <!-- Orbit Track with Plates -->
+          <div class="carousel-plates-track" id="carouselPlatesTrack">
+            <!-- Dynamic Plate Nodes Injected by JS -->
+          </div>
+
+          <!-- Ambient Glow behind Active Plate -->
+          <div class="active-plate-glow" aria-hidden="true"></div>
+
+          <!-- Dish Details Block (Centered under active plate) -->
+          <div class="carousel-details-block">
+            <div class="carousel-dish-name-mask">
+              <h3 class="carousel-dish-name" id="carouselDishName">Chicken Kottu</h3>
+            </div>
+            
+            <div class="carousel-dish-desc-mask">
+              <p class="carousel-dish-desc" id="carouselDishDesc">Chopped roti, egg and vegetables tossed on the hot plate with rich curry sauce.</p>
+            </div>
+
+            <button class="carousel-order-link" onclick="window.OvitaScrollToOrder('featured');">
+              Order this dish
+            </button>
+
+            <!-- Pager Dots & Pause/Play Control -->
+            <div class="carousel-controls-bar">
+              <div class="carousel-pager-dots" id="carouselPagerDots">
+                <!-- Pager Dots Injected by JS -->
+              </div>
+
+              <button class="carousel-pause-btn" id="carouselPauseBtn" aria-label="Pause carousel autoplay">
+                <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Accessible polite live region for screen readers -->
+        <div class="sr-only" aria-live="polite" id="carouselAriaLive"></div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================
+       SECTION 8: STANDALONE HAND-OFF TEST ZONE (#order)
+       ======================================================================== -->
+  <section id="order" aria-label="Order Hand-off Test Station">
+    <div class="order-handoff-glow" aria-hidden="true"></div>
+    
+    <div style="max-width: 600px; margin: 0 auto; z-index: 10;">
+      <span style="font-size: 11px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--amber); display: block; margin-bottom: 1rem;">
+        HAND-OFF DESTINATION
+      </span>
+      <h2 style="font-family: var(--font-display); font-size: clamp(32px, 4vw, 54px); font-weight: 300; margin-bottom: 1.2rem; color: var(--cream);">
+        New Ordering Section Ready
+      </h2>
+      <p style="font-size: 15px; color: var(--cream-dim); line-height: 1.6; margin-bottom: 2rem;">
+        The Luxury Scroll Story gracefully transitions into this section. You can directly edit and test your new ordering components here without affecting the existing website.
+      </p>
+      
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="index.html#menu" style="padding: 0.8rem 1.8rem; background: var(--amber); color: var(--ink); border-radius: 9999px; text-decoration: none; font-size: 11px; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase;">
+          View Full Menu on Main Site →
+        </a>
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'});" style="padding: 0.8rem 1.8rem; background: transparent; border: 1px solid var(--hairline); color: var(--cream-dim); border-radius: 9999px; font-size: 11px; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase; cursor: pointer;">
+          ↑ Return to Hero
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       SCRIPTS: LENIS, GSAP, SCROLLTRIGGER, CONTENT, CONFIG, ENGINE
+       ======================================================================== -->
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Content & Config Files -->
+  <script src="ovita-intro.content.js"></script>
+  <script src="ovita-intro.config.js"></script>
+  
+  <!-- Engine -->
+  <script src="ovita-intro.js"></script>
+</body>
+</html>

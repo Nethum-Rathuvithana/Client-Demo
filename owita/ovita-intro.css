@@ -1,0 +1,941 @@
+/* ==========================================================================
+   OVITA — LANDING HERO, LUXURY SCROLL STORY & HAND-OFF (SECTION 3 TO 9)
+   Dark, warm, quiet luxury.
+   ========================================================================== */
+
+:root {
+  --ink: #050505;            /* page background */
+  --ink-2: #0B0907;          /* panel background */
+  --cream: #F1E7D3;          /* text */
+  --cream-dim: rgba(241, 231, 211, 0.72);
+  --amber: #E8A13A;          /* only accent: hairlines, numerals, button fill */
+  --amber-glow: rgba(232, 161, 58, 0.35);
+  --hairline: rgba(241, 231, 211, 0.18);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Reset & Base */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+body.ovita-experience {
+  margin: 0;
+  padding: 0;
+  background-color: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   FILM GRAIN & AMBIENT CURSOR GLOW (SECTION 3 & 4)
+   ========================================================================== */
+.ovita-film-grain {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 70;
+  opacity: 0.045;
+  mix-blend-mode: overlay;
+}
+
+.ovita-cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 340px;
+  height: 340px;
+  margin-left: -170px;
+  margin-top: -170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 161, 58, 0.14) 0%, rgba(232, 161, 58, 0) 70%);
+  pointer-events: none;
+  z-index: 65;
+  will-change: transform;
+  display: none;
+}
+@media (min-width: 1024px) {
+  .ovita-cursor-glow {
+    display: block;
+  }
+}
+
+/* ==========================================================================
+   PERSISTENT LUXURY NAV BAR (SECTION 4 & 8)
+   ========================================================================== */
+.ovita-intro-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 2.2rem 4vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 80;
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+.ovita-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  opacity: 0; /* Fades in once hero has dissolved (time 0.8) */
+  transition: opacity 0.6s var(--ease-out);
+  text-decoration: none;
+}
+.ovita-nav-brand.visible {
+  opacity: 1;
+}
+
+.ovita-nav-wordmark {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 0.4em;
+  color: var(--cream);
+  text-transform: uppercase;
+}
+.ovita-nav-sub {
+  font-size: 10px;
+  font-family: var(--font-ui);
+  letter-spacing: 0.32em;
+  color: var(--amber);
+  text-transform: uppercase;
+  border-left: 1px solid var(--hairline);
+  padding-left: 1.2rem;
+}
+
+.ovita-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.ovita-nav-order-btn {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--amber);
+  text-decoration: none;
+  padding: 0.6rem 1.4rem;
+  border: 1px solid var(--amber);
+  border-radius: 9999px;
+  background: transparent;
+  transition: all 0.4s var(--ease-out);
+  cursor: pointer;
+}
+.ovita-nav-order-btn:hover {
+  background: var(--amber);
+  color: var(--ink);
+  box-shadow: 0 0 25px var(--amber-glow);
+}
+
+.ovita-nav-back-link {
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+.ovita-nav-back-link:hover {
+  opacity: 1;
+  color: var(--amber);
+}
+
+/* ==========================================================================
+   MASTER INTRO CONTAINER & STAGE GEOMETRY (SECTION 4 & 5.1)
+   ========================================================================== */
+#ovita-intro {
+  position: relative;
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  background-color: var(--ink);
+  --stageW: max(100vw, calc(100svh * 1.7913));
+}
+
+.art-stage, .leaves-stage, .hero-ui {
+  position: absolute;
+  width: var(--stageW);
+  aspect-ratio: 2576 / 1438;
+  left: calc((100vw - var(--stageW)) * 0.04);
+  top: calc((100svh - var(--stageW) / 1.7913) / 2);
+  pointer-events: none;
+}
+
+/* Layer 1: Art Stage with Composite Image */
+.art-stage {
+  z-index: 1;
+}
+.art-stage img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+}
+
+/* Subtle String Lights Glow (Section 5.5 Optional Life) */
+.hero-lights-pulse {
+  position: absolute;
+  left: 48%;
+  top: 32%;
+  width: 44%;
+  height: 12%;
+  background: radial-gradient(ellipse at center, rgba(232, 161, 58, 0.08) 0%, transparent 70%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: lightsFlicker 6s infinite alternate ease-in-out;
+}
+@keyframes lightsFlicker {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.5; }
+}
+
+/* Layer 3: Dark Sweep Curtain (Covering Artwork) */
+.sweep {
+  position: absolute;
+  left: 0;
+  width: 100vw;
+  height: 120vh;
+  top: 100vh; /* starts hidden below viewport */
+  z-index: 3;
+  pointer-events: none;
+  background: var(--ink);
+}
+.sweep-feather {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20vh;
+  background: linear-gradient(to bottom, transparent 0%, var(--ink) 100%);
+  transform: translateY(-100%);
+}
+.sweep-leading-hairline {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--amber);
+  box-shadow: 0 0 15px var(--amber-glow);
+  opacity: 0.6;
+}
+
+/* Layer 5: Foliage Leaves Layer */
+.leaves-stage {
+  z-index: 5;
+  mix-blend-mode: lighten;
+  will-change: transform, opacity;
+}
+.leaves-stage img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+}
+
+/* Layer 6: Hero UI (Copy, Dish Carousel, Scroll Cue) */
+.hero-ui {
+  z-index: 6;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   HERO UI ELEMENTS (SECTION 5.2 & 5.3)
+   ========================================================================== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Intro Copy (x: 7.3%, width: 29.9%, top: 45.5%) */
+.hero-intro-copy-box {
+  position: absolute;
+  left: 7.3%;
+  width: 29.9%;
+  top: 45.5%;
+  overflow: hidden;
+}
+.hero-copy-line-mask {
+  overflow: hidden;
+  display: block;
+}
+.hero-intro-text {
+  margin: 0;
+  font-size: clamp(14px, 1.05vw, 17px);
+  line-height: 1.6;
+  color: var(--cream-dim);
+  font-weight: 400;
+  max-width: 44ch;
+}
+
+/* Scroll Cue (left: 3.5%, top: 62%) */
+.hero-scroll-cue {
+  position: absolute;
+  left: 3.5%;
+  top: 62%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--cream-dim);
+  transition: opacity 0.3s;
+}
+.hero-scroll-cue:hover {
+  color: var(--cream);
+}
+.hero-scroll-text {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  opacity: 0.75;
+  margin-bottom: 12px;
+}
+.hero-scroll-line-track {
+  width: 1px;
+  height: 60px;
+  background: rgba(241, 231, 211, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+.hero-scroll-line-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--amber);
+  transform-origin: top;
+  animation: scrollPulse 2.4s var(--ease-io) infinite;
+}
+@keyframes scrollPulse {
+  0% { transform: scaleY(0); transform-origin: top; }
+  45% { transform: scaleY(1); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* ==========================================================================
+   DISH CAROUSEL (SECTION 5.2 & 5.4)
+   Zone: x 2 to 35%, y 58 to 97%
+   ========================================================================== */
+.hero-carousel-container {
+  position: absolute;
+  left: 2%;
+  width: 34%;
+  top: 57%;
+  height: 40%;
+  pointer-events: auto;
+}
+
+/* Soft dark scrim behind text & plates for foliage contrast */
+.carousel-scrim {
+  position: absolute;
+  left: 4%;
+  top: 10%;
+  width: 90%;
+  height: 85%;
+  background: radial-gradient(ellipse at center, rgba(5, 5, 5, 0.72) 0%, transparent 75%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.carousel-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+/* Plates Orbit Track (Center at 19% stage width, 71% stage height) */
+.carousel-plates-track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 60%;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+}
+.carousel-plates-track:active {
+  cursor: grabbing;
+}
+
+/* Ambient glow pulsing behind active plate */
+.active-plate-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 260px;
+  height: 260px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(232, 161, 58, 0.18) 0%, transparent 68%);
+  pointer-events: none;
+  z-index: 1;
+  animation: amberPulse 4s infinite alternate ease-in-out;
+}
+@keyframes amberPulse {
+  0% { opacity: 0.12; transform: translate(-50%, -50%) scale(0.95); }
+  100% { opacity: 0.22; transform: translate(-50%, -50%) scale(1.05); }
+}
+
+/* Plate Item */
+.carousel-plate-item {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 220px;
+  height: 220px;
+  margin-left: -110px;
+  margin-top: -110px;
+  cursor: pointer;
+  will-change: transform, opacity, filter;
+  transition: none; /* Controlled strictly by GSAP */
+}
+.carousel-plate-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 24px 30px rgba(0, 0, 0, 0.55));
+  display: block;
+  pointer-events: none;
+}
+
+/* Name & Description Block (Centered at x: 19% stage) */
+.carousel-details-block {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.carousel-dish-name-mask {
+  overflow: hidden;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.carousel-dish-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 1.9vw, 32px);
+  font-weight: 500;
+  color: var(--cream);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.carousel-dish-desc-mask {
+  overflow: hidden;
+  height: 1.6rem;
+  margin-top: 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.carousel-dish-desc {
+  margin: 0;
+  font-size: 12px;
+  color: var(--cream-dim);
+  font-style: italic;
+  max-width: 38ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carousel-order-link {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  margin-top: 0.6rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0.2rem;
+  transition: opacity 0.3s;
+}
+.carousel-order-link:hover {
+  opacity: 0.8;
+}
+
+/* Pager Controls & Pause Button (top: 95.5%) */
+.carousel-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-top: 0.8rem;
+}
+
+.carousel-pager-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hairline);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+}
+.carousel-dot.active {
+  background: var(--amber);
+  box-shadow: 0 0 10px var(--amber-glow);
+  transform: scale(1.3);
+}
+
+.carousel-pause-btn {
+  background: none;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--cream-dim);
+  padding: 0;
+  transition: all 0.3s;
+}
+.carousel-pause-btn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.carousel-pause-btn svg {
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
+
+/* ==========================================================================
+   STORY PANELS (SECTION 7)
+   4 Panels layered at z: 4 inside #ovita-intro
+   ========================================================================== */
+.panels-container {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100svh;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.story-panel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--ink-2);
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  align-items: center;
+  padding: 0 8vw;
+  box-sizing: border-box;
+  opacity: 0; /* Managed by GSAP timeline */
+  pointer-events: none;
+  overflow: hidden;
+}
+.story-panel.active-panel {
+  pointer-events: auto;
+}
+
+/* Warm Vignette inside Panel */
+.panel-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 65% 50%, rgba(232, 161, 58, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Panel Meta (Top-Right Counter & Chapter Rail) */
+.story-panel-counter {
+  position: absolute;
+  top: 2.5rem;
+  right: 4vw;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  color: var(--amber);
+  z-index: 10;
+}
+
+.story-chapter-rail {
+  position: absolute;
+  right: 2vw;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 10;
+}
+.chapter-tick {
+  width: 1px;
+  height: 24px;
+  background: var(--hairline);
+  transition: all 0.4s var(--ease-out);
+}
+.chapter-tick.active {
+  background: var(--amber);
+  box-shadow: 0 0 10px var(--amber-glow);
+  height: 40px;
+}
+
+/* Text Block (Columns 2 to 7) */
+.story-text-col {
+  grid-column: 2 / span 6;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.story-hairline-accent {
+  width: 48px;
+  height: 1px;
+  background: var(--amber);
+  margin-bottom: 1.5rem;
+  transform-origin: left;
+}
+
+.story-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 1.2rem;
+  display: block;
+}
+
+.story-headline-mask {
+  overflow: hidden;
+  margin-bottom: 1.8rem;
+}
+.story-headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(38px, 5.5vw, 84px);
+  font-weight: 300;
+  line-height: 1.05;
+  color: var(--cream);
+  letter-spacing: -0.01em;
+}
+
+.story-body {
+  font-size: clamp(15px, 1.15vw, 18px);
+  line-height: 1.7;
+  color: var(--cream-dim);
+  max-width: 46ch;
+  margin-bottom: 2rem;
+}
+
+.story-detail-line {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--amber);
+  border-left: 1px solid var(--amber);
+  padding-left: 1rem;
+}
+
+/* Panel 4: Magnetic "Order Now" Button */
+.story-order-now-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 2.4rem;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--cream);
+  text-decoration: none;
+  border: 1px solid var(--amber);
+  border-radius: 9999px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  align-self: flex-start;
+  transition: color 0.4s var(--ease-out), transform 0.2s var(--ease-out);
+}
+.story-order-now-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--amber);
+  transform: translateX(-101%);
+  transition: transform 0.4s var(--ease-out);
+  z-index: 0;
+}
+.story-order-now-btn:hover::before {
+  transform: translateX(0);
+}
+.story-order-now-btn:hover {
+  color: var(--ink);
+  box-shadow: 0 0 35px var(--amber-glow);
+}
+.story-order-now-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Image Window (Columns 8 to 11, 4:5 ratio, max-height 68vh) */
+.story-image-col {
+  grid-column: 8 / span 4;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.story-image-window {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 4 / 5;
+  max-height: 68vh;
+  border: 1px solid var(--hairline);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+  background: #110E0B;
+}
+.story-image-window img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.15);
+  will-change: transform;
+}
+
+/* Fallback Outlined Numeral */
+.story-fallback-numeral {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 140px;
+  font-weight: 300;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--amber);
+  text-shadow: 0 0 40px var(--amber-glow);
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   PANEL TRANSITIONS (SECTION 7 SPEC)
+   ========================================================================== */
+/* Panel 2: Split Curtain */
+.split-curtain-left, .split-curtain-right {
+  position: absolute;
+  top: 0;
+  width: 50vw;
+  height: 100vh;
+  background: var(--ink);
+  z-index: 20;
+  pointer-events: none;
+}
+.split-curtain-left {
+  left: 0;
+}
+.split-curtain-right {
+  right: 0;
+}
+
+/* Panel 4: Gold Vertical Line */
+.gold-travel-line {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 100vh;
+  background: var(--amber);
+  box-shadow: 0 0 20px var(--amber-glow), 0 0 40px var(--amber);
+  z-index: 25;
+  pointer-events: none;
+  left: -2vw;
+}
+
+/* ==========================================================================
+   ORDERING HAND-OFF SECTION PREVIEW (SECTION 8)
+   ========================================================================== */
+#order {
+  min-height: 80vh;
+  background-color: var(--ink);
+  padding: 6rem 4vw;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+.order-handoff-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 300px;
+  background: radial-gradient(ellipse at top, rgba(232, 161, 58, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   MOBILE & RESPONSIVE (SECTION 9)
+   @media (max-width: 767px), (max-aspect-ratio: 1/1)
+   ========================================================================== */
+@media (max-width: 767px), (max-aspect-ratio: 1/1) {
+  #ovita-intro {
+    height: auto;
+    min-height: 100svh;
+    overflow: visible;
+  }
+  
+  .art-stage {
+    position: relative;
+    width: 100vw;
+    height: 56vw;
+    left: 0;
+    top: 0;
+  }
+  
+  .hero-ui {
+    position: relative;
+    width: 100vw;
+    left: 0;
+    top: 0;
+    padding: 2rem 1.5rem 4rem;
+    box-sizing: border-box;
+  }
+  
+  .hero-intro-copy-box {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+  
+  .hero-carousel-container {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    height: 340px;
+  }
+  
+  .hero-scroll-cue {
+    position: relative;
+    left: auto;
+    top: auto;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .hero-scroll-text {
+    writing-mode: horizontal-tb;
+    transform: none;
+    margin-bottom: 0;
+  }
+  .hero-scroll-line-track {
+    width: 50px;
+    height: 1px;
+  }
+  
+  .story-panel {
+    display: flex;
+    flex-direction: column;
+    padding: 4rem 1.5rem;
+    height: auto;
+    min-height: 100svh;
+  }
+  .story-text-col {
+    order: 2;
+    width: 100%;
+  }
+  .story-image-col {
+    order: 1;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+  .story-image-window {
+    max-height: 42vh;
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION (SECTION 10)
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
